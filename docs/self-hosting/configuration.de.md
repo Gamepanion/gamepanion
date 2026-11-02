@@ -9,7 +9,7 @@ chmod 600 .env   # dann ausfüllen
 docker compose up -d
 ```
 
-Aktualisieren: `docker compose pull && docker compose up -d`. `:main` folgt dem main-Branch; ein Image-Watcher wie Watchtower kann das nach seinem Zeitplan erledigen.
+Aktualisieren: `docker compose pull && docker compose up -d`. `:main` folgt dem main-Branch; ein Image-Watcher wie Watchtower kann das nach seinem Zeitplan erledigen. Wer bei einem Release bleiben will, pinnt dessen Version (`:0.1.0`, oder `:0.1` für seine Fehlerbehebungen); jedes Release steht auf GitHub, mit den Pull Requests, die es enthält.
 
 ## Variablen
 

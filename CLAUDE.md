@@ -11,6 +11,7 @@ Gamepanion: a spoiler-free quest log, build tracker and item list for the games 
 - `npm test` (vitest), `npx vitest run <file>` for one file. `backend/auth/oauth.test.ts` runs the whole OAuth sign-in over HTTP.
 - `npm run generate` rewrites `openapi.json` from the route table (`backend/http/api.ts`); commit the result, CI fails on any difference.
 - `docker build -t gamepanion .`
+- Release: bump `version` in `package.json` on `main`, then `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`. CI checks the tag against `package.json`, publishes the image as `X.Y.Z`, `X.Y` and `latest`, and makes the GitHub release.
 - Docs: `uvx --with mkdocs-material==9.7.7 --with 'mkdocs<2' --with mkdocs-static-i18n==1.3.1 mkdocs serve` (`build --strict` in CI); published to GitHub Pages from `main` at questlog.marceltov.de. German pages sit next to the English ones (`values.de.md`) and fall back to English when missing. The roadmap is data: `docs/roadmap.yml`, rendered as a timeline by `docs_hooks/roadmap.py`. The pull request that finishes or changes a step updates it (`status: done`, a `date`, the PR link).
 
 ## Architecture
