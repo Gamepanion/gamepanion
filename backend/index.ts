@@ -12,6 +12,7 @@ export {
   openIdConfigRoute,
   passkeysOf,
   playerFromHeaders,
+  profileOf,
   refusedSignIn,
   signedInAs,
   signInMethods,

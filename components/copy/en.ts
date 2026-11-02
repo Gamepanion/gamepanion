@@ -24,6 +24,21 @@ export const en = {
   refused: (provider: string | null, code: string) => `${provider ?? "The sign-in provider"} refused the sign-in: ${code}`,
   signOut: "Sign out",
 
+  // The account page: profile and passkeys
+  account: "Account",
+  profile: "Profile",
+  displayName: "Name",
+  displayNameHint: "Shown when you connect an app to Gamepanion. Empty: your email address.",
+  saveName: "Save name",
+  nameSaved: "Saved.",
+  saveFailed: "That didn't save. Try again.",
+  signedInWith: (email: string) => `You sign in as ${email}. To use another address, a code goes to it first.`,
+  newEmail: "New email",
+  sendChangeCode: "Send a code to the new address",
+  changeCodeFailed: "No code could be sent to that address. Check it, or try again in a minute.",
+  changeEmail: "Change email",
+  changeEmailFailed: "That didn't work. Check the code, or ask for a new one.",
+
   // Passkeys, on the account page
   passkeys: "Passkeys",
   passkeysLead:

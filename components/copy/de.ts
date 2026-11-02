@@ -26,6 +26,21 @@ export const de: Copy = {
   refused: (provider: string | null, code: string) => `${provider ?? "Der Anmeldedienst"} hat die Anmeldung abgelehnt: ${code}`,
   signOut: "Abmelden",
 
+  // Die Kontoseite: Profil und Passkeys
+  account: "Konto",
+  profile: "Profil",
+  displayName: "Name",
+  displayNameHint: "Wird angezeigt, wenn du eine App mit Gamepanion verbindest. Leer: deine E-Mail-Adresse.",
+  saveName: "Name speichern",
+  nameSaved: "Gespeichert.",
+  saveFailed: "Das wurde nicht gespeichert. Versuch es noch einmal.",
+  signedInWith: (email: string) => `Du meldest dich als ${email} an. Für eine andere Adresse geht zuerst ein Code an sie.`,
+  newEmail: "Neue E-Mail-Adresse",
+  sendChangeCode: "Code an die neue Adresse schicken",
+  changeCodeFailed: "An diese Adresse ließ sich kein Code schicken. Prüf sie oder versuch es in einer Minute noch einmal.",
+  changeEmail: "E-Mail-Adresse ändern",
+  changeEmailFailed: "Das hat nicht geklappt. Prüf den Code oder fordere einen neuen an.",
+
   // Passkeys, auf der Kontoseite
   passkeys: "Passkeys",
   passkeysLead:

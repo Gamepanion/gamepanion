@@ -68,6 +68,12 @@ export async function passkeysOf(headers: Headers): Promise<PasskeyView[]> {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+/** The signed-in player's name ("" when none was set) and address, for the account page. */
+export async function profileOf(headers: Headers): Promise<{ name: string; email: string } | null> {
+  const s = await (await auth()).api.getSession({ headers });
+  return s ? { name: s.user.name ?? "", email: s.user.email } : null;
+}
+
 /** The signed-in user's display name or address, for the consent page. */
 export async function signedInAs(headers: Headers): Promise<string | null> {
   const s = await (await auth()).api.getSession({ headers });
