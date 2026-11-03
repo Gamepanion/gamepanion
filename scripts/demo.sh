@@ -20,5 +20,7 @@ if [ -z "$DEMO_KEEP" ]; then
   esac
 fi
 mkdir -p "$DATA_DIR"
-npx tsx scripts/demo-session.mts
+# Seeded as before payments: with a payment provider set (GAMEPANION_PAYMENT_PROVIDER=fake), the demo player is then one of the players
+# who had several games when payments were switched on (#48).
+GAMEPANION_PAYMENT_PROVIDER= npx tsx scripts/demo-session.mts
 exec npx next dev -p "$PORT"

@@ -9,6 +9,7 @@ import { seen } from "./spoilers";
 import { parseSources } from "./sources";
 import type { BackgroundLevel, ItemKind, Player, PlaythroughStatus, Source, SpoilerLevel, StatName } from "./types";
 import { playthroughPath } from "./urls";
+import { assertMayFile } from "./access";
 
 type Db = Kysely<Schema> | Transaction<Schema>;
 
@@ -158,13 +159,19 @@ export async function playthroughForRecord(
   p: Player,
   ref: { playthroughId?: string; game?: string; platform?: string; label?: string; language?: string },
 ): Promise<ResolvedPlaythrough> {
-  if (ref.playthroughId) return { ...(await getPlaythrough(p, ref.playthroughId, trx)), createdGame: false, createdPlaythrough: false };
+  // Every way in passes the access gate (#48): by id, by an existing game's title, or a new game.
+  if (ref.playthroughId) {
+    const t = await getPlaythrough(p, ref.playthroughId, trx);
+    await assertMayFile(trx, p, t.game, t.game.title);
+    return { ...t, createdGame: false, createdPlaythrough: false };
+  }
   const title = ref.game?.trim();
   if (!title) throw new InvalidInputError("Give playthroughId, or game with the game's title");
-  let game = await seen(trx.selectFrom("games"), p, "games").select(["id"]).where("norm", "=", norm(title)).executeTakeFirst();
+  let game = await seen(trx.selectFrom("games"), p, "games").select(["id", "title"]).where("norm", "=", norm(title)).executeTakeFirst();
+  await assertMayFile(trx, p, game ?? null, title);
   let createdGame = false;
   if (!game) {
-    game = { id: newId() };
+    game = { id: newId(), title };
     await trx
       .insertInto("games")
       .values({ id: game.id, player_id: p.id, title, norm: norm(title), platform: ref.platform?.trim() || null, created_at: now() })

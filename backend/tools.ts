@@ -39,6 +39,7 @@ import { BackgroundJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
+import { isFrozen } from "./access";
 import { accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
 export type Tool = {
@@ -697,7 +698,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "record",
     description:
-      "File one play session: the player's words verbatim as transcript, then what was learned from it, split into quests (with log entries, next steps and decisions), a stat snapshot, the build plan with its goals, the character, the codex (bosses, enemies, NPCs and places, with weaknesses and strategies), the inventory (items with counts, numbers and what they are good or bad against, in the game's inventory groups) and to-dos (errands that are neither quest nor goal, added and ticked off as the player says). Before filing, call briefing for the playthrough and reuse the ids of quests and items that are already there. Ask the player when you aren't sure which quest they mean, whether they finished something or only started it, or which choice they made: never file a guess.",
+      "File one play session: the player's words verbatim as transcript, then what was learned from it, split into quests (with log entries, next steps and decisions), a stat snapshot, the build plan with its goals, the character, the codex (bosses, enemies, NPCs and places, with weaknesses and strategies), the inventory (items with counts, numbers and what they are good or bad against, in the game's inventory groups) and to-dos (errands that are neither quest nor goal, added and ticked off as the player says). Before filing, call briefing for the playthrough and reuse the ids of quests and items that are already there. Ask the player when you aren't sure which quest they mean, whether they finished something or only started it, or which choice they made: never file a guess. Where the instance sells subscriptions, a free player files into one game; a second, or a frozen one, is refused with a link to subscribe for you to give them.",
     input: RecordInput,
     output: RecordedJson,
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
@@ -752,7 +753,12 @@ export const TOOLS: Tool[] = [
         bosses: b.bosses,
         tags: b.playthrough ? await tagsInPlaythrough(p, b.playthrough.id) : [],
       };
-      return ok(BriefingJson, body, briefingNext(b, more));
+      const next = briefingNext(b, more);
+      if (b.playthrough && (await isFrozen(p, b.playthrough.game.id)))
+        next.push(
+          "This game is frozen (the subscription ended); reading works, filing doesn't. Mention it once if the player starts telling you about a session.",
+        );
+      return ok(BriefingJson, body, next);
     },
   }),
   tool({

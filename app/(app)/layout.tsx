@@ -2,6 +2,7 @@ import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { chatEnabled, listPlaythroughs, voiceEnabled } from "@/backend";
 import { Follow } from "@/components/Follow";
+import { Footer } from "@/components/Footer";
 import { ChatProvider } from "@/components/chat/Chat";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -48,7 +49,10 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         runs={Object.fromEntries(runs.map((r) => [r.id, `${r.game} · ${r.label}`]))}
         homeRun={runs.find((r) => r.status === "playing")?.id ?? null}
       >
-        <Follow>{children}</Follow>
+        <Follow>
+          {children}
+          <Footer />
+        </Follow>
       </ChatProvider>
     </div>
   );

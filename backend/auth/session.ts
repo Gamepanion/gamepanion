@@ -20,6 +20,12 @@ export async function playerById(id: string): Promise<Player | null> {
   return (await ctx.internalAdapter.findUserById(id)) ? { id } : null;
 }
 
+/** A player's sign-in address, for the payment provider's checkout and the free-players list (#48); null for none. */
+export async function emailOf(id: string): Promise<string | null> {
+  const ctx = await (await auth()).$context;
+  return (await ctx.internalAdapter.findUserById(id))?.email ?? null;
+}
+
 /**
  * The player an /api/v1 request's access token stands for: a JWT from this instance (signature, issuer, expiry, DPoP when bound) whose
  * audience is /api/v1, for a user who still exists. Null for anything else, an /mcp token included.

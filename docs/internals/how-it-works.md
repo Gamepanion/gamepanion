@@ -1,6 +1,6 @@
 # How it works
 
-Gamepanion is one Next.js app in one container. Four kinds of callers reach one framework-free domain layer in `backend/`, which reads and writes two SQLite files.
+Gamepanion is one Next.js app in one container. Four kinds of callers reach one framework-free domain layer in `backend/`, which reads and writes two SQLite files, and a third where the instance sells subscriptions.
 
 ```mermaid
 flowchart LR
@@ -19,6 +19,8 @@ flowchart LR
 ```
 
 Follow a call from the left: whichever way it comes in, it ends in a domain function, and every read of the log passes the gate.
+
+Where the instance sells (ADR 0023), one more check sits before every filing: `assertMayFile` in `backend/access.ts`, called where `record` resolves its playthrough, decides from `billing.sqlite` (filled by the payment provider's signed webhook at `/api/payments/webhook`) whether the player may file into that game.
 
 ## Surfaces
 

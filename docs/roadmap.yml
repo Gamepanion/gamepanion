@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: subscription
+    status: done
+    date: 2026-11-03
+    icon: credit-card-outline
+    title: A subscription, one game free
+    title_de: Ein Abo, ein Spiel kostenlos
+    summary: Where the hosted instance sells, a free player keeps one game with all its playthroughs and a subscription opens every game; nothing filed is ever locked away. Self-hosted, nothing changes.
+    summary_de: Wo die gehostete Instanz verkauft, behält ein Spieler ohne Abo ein Spiel mit allen Durchläufen, und ein Abo öffnet jedes Spiel; nichts Abgelegtes wird je gesperrt. Selbst gehostet ändert sich nichts.
+    links:
+      - { label: "ADR 0023", url: "https://docs.gamepanion.app/adr/0023-a-subscription-one-game-free/" }
+      - { label: "#93", url: "https://github.com/gamepanion/gamepanion/pull/93" }
   - id: full-text-search
     status: done
     date: 2026-11-03

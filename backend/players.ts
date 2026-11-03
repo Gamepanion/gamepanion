@@ -2,6 +2,8 @@
 import { db } from "./db";
 import { seen } from "./spoilers";
 import type { Player } from "./types";
+import { billing } from "./billing/store";
+import { config } from "./config";
 
 /** Deletes everything the player recorded, and their stored key (ADR 0021). Games cascade to playthroughs, and playthroughs to sessions,
  * quests, builds and items. */
@@ -9,4 +11,6 @@ export async function deletePlayerLog(p: Player): Promise<void> {
   const d = await db();
   await seen(d.deleteFrom("games"), p, "games").execute();
   await seen(d.deleteFrom("player_keys"), p, "player_keys").execute();
+  // The billing rows (#48), where an instance sells; billing.sqlite isn't opened on one that doesn't.
+  if (config.paymentProvider()) await (await billing()).forgetPlayer(p.id);
 }

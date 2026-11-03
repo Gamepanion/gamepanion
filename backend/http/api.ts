@@ -41,6 +41,9 @@ const err = (description: string) => ({ description, schema: ErrorJson }) satisf
 const E400 = err("The request can't be read (`invalid_request`), or a value in it is not acceptable (`invalid_input`)");
 const E401 = err("No valid access token for this API (`unauthorized`); `WWW-Authenticate` points to how to get one");
 const E404 = err("No such thing, or one of another player's (`not_found`)");
+const E402 = err(
+  "Where the instance sells subscriptions: the game would be a free player's second, or it is frozen since the subscription ended (`subscription_required`)",
+);
 const E409 = err("The request could mean more than one thing: two playthroughs being played, a name another row has (`ambiguous`)");
 
 const Id = z.string().describe("The id");
@@ -212,7 +215,7 @@ const OPS: AnyOp[] = [
     tags: ["Sessions"],
     params: {},
     body: RecordInput,
-    responses: { 201: { description: "What was filed", schema: RecordedJson }, 400: E400, 401: E401, 404: E404, 409: E409 },
+    responses: { 201: { description: "What was filed", schema: RecordedJson }, 400: E400, 401: E401, 402: E402, 404: E404, 409: E409 },
   }).handle(async ({ player, body }) => ({ status: 201, body: await record(player, body) })),
   op({
     method: "POST",

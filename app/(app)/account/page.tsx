@@ -1,7 +1,9 @@
-import { Link2, ShieldCheck } from "lucide-react";
+import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { keyStatus, keyStorageEnabled, passkeysOf, profileOf, signInMethods } from "@/backend";
+import { accessOf, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
+import { ActiveGame } from "@/components/ActiveGame";
+import { portalAction } from "../subscribe/actions";
 import { KeySection } from "@/components/KeySection";
 import { AccountCard, EmailCode } from "@/components/Account";
 import { Passkeys } from "@/components/Passkeys";
@@ -19,6 +21,9 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const player = await pagePlayer();
   const key = await keyStatus(player);
+  const sub = await subscriptionOf(player);
+  const access = sub.sold ? await accessOf(player) : null;
+  const games = [...new Map((await listPlaythroughs(player)).map((t) => [t.game.id, { id: t.game.id, title: t.game.title }])).values()];
   const h = await headers();
   const copy = await serverCopy();
   const date = new Intl.DateTimeFormat(await serverLocale(), { dateStyle: "medium" });
@@ -58,6 +63,36 @@ export default async function AccountPage() {
               <Passkeys list={list} />
             </ul>
           </section>
+          {sub.sold && (
+            <section id="subscription" aria-labelledby="subscription-title" className="scroll-mt-6">
+              <h2 id="subscription-title" className="section-title">
+                <span className="seal">
+                  <CreditCard aria-hidden="true" />
+                </span>
+                {copy.subscriptionTitle}
+              </h2>
+              <div className="card space-y-4">
+                <p className="font-semibold">
+                  {sub.subscribed ? (sub.validUntil ? copy.subscribedUntil(date.format(new Date(sub.validUntil))) : copy.subscribed) : copy.freePlan}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {!sub.subscribed && (
+                    <a href="/subscribe" className="button-primary">
+                      {copy.seePlans}
+                    </a>
+                  )}
+                  {sub.portal && (
+                    <form action={portalAction}>
+                      <button type="submit" className="button-secondary">
+                        {copy.managePlan}
+                      </button>
+                    </form>
+                  )}
+                </div>
+                {access?.limited && games.length > 1 && <ActiveGame games={games} active={access.activeGameId} />}
+              </div>
+            </section>
+          )}
           <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} />
         </div>
       </div>
