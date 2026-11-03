@@ -1,5 +1,5 @@
 site_name: Gamepanion
-site_description: A spoiler-free quest log, build tracker and item list for the games you play. You tell Claude while you play; Gamepanion remembers, and never shows what you haven't found.
+site_description: A spoiler-free companion for the games you play. You tell Claude while you play; Gamepanion remembers, and never shows what you haven't found.
 site_url: https://docs.gamepanion.app/
 repo_url: https://github.com/gamepanion/gamepanion
 repo_name: gamepanion/gamepanion
@@ -30,7 +30,7 @@ plugins:
         - locale: de
           name: Deutsch
           build: true
-          site_description: Ein spoilerfreies Questlog, Build-Tracker und Inventar für die Spiele, die du spielst. Du erzählst es Claude beim Spielen; Gamepanion merkt es sich und zeigt nie, was du noch nicht gefunden hast.
+          site_description: Ein spoilerfreier Begleiter für die Spiele, die du spielst. Du erzählst es Claude beim Spielen; Gamepanion merkt es sich und zeigt nie, was du noch nicht gefunden hast.
           nav_translations:
             Home: Start
             What Gamepanion stands for: Wofür Gamepanion steht

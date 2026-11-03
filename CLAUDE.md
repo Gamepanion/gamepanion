@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Gamepanion: a spoiler-free quest log, build tracker and item list for the games you play, AI-first (capture happens through the built-in MCP endpoint). Next.js + SQLite, modelled on `Marceltov/freundebuch`.
+Gamepanion: a spoiler-free companion for the games you play (quest log, build, items), AI-first (capture happens through the built-in MCP endpoint). Next.js + SQLite, modelled on `Marceltov/freundebuch`.
 
 ## Commands
 
