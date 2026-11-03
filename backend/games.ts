@@ -6,8 +6,8 @@ import type { Schema } from "./db/schema";
 import { AmbiguousError, InvalidInputError, NotFoundError } from "./errors";
 import { norm } from "./names";
 import { seen } from "./spoilers";
-import { parseSources } from "./sources";
-import type { BackgroundLevel, ItemKind, Player, PlaythroughStatus, Source, SpoilerLevel, StatName } from "./types";
+import { parseReferences } from "./sources";
+import type { BackgroundLevel, ItemKind, Player, PlaythroughStatus, Reference, SpoilerLevel, StatName } from "./types";
 import { playthroughPath } from "./urls";
 import { assertMayFile } from "./access";
 
@@ -29,7 +29,7 @@ export type PlaythroughView = {
   /** How much Claude adds on its own, and what shows without asking (ADR 0016). */
   settings: { background: BackgroundLevel; spoilers: SpoilerLevel };
   /**
-   * `sources`: the pages the player trusts for this game (ADR 0008), for Claude to read when the player asks. `itemKinds`: its
+   * `references`: the sites kept for this game (ADR 0008, #95), by trust, where Claude looks things up when the player asks. `itemKinds`: its
    * inventory groups, in the player's order. `description`: what the game is; `notes`: the player's own (ADR 0011).
    */
   game: {
@@ -38,7 +38,7 @@ export type PlaythroughView = {
     platform: string | null;
     description: string | null;
     notes: string | null;
-    sources: Source[];
+    references: Reference[];
     itemKinds: ItemKind[];
   };
   url: string;
@@ -104,7 +104,7 @@ const view = (r: Row): PlaythroughView => ({
     platform: r.platform,
     description: r.description,
     notes: r.game_notes,
-    sources: parseSources(r.sources),
+    references: parseReferences(r.sources),
     itemKinds: JSON.parse(r.item_kinds) as ItemKind[],
   },
   url: playthroughPath(r.id),

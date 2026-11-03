@@ -112,9 +112,15 @@ const TodoJson = z.object({
 const SourceJson = z.object({
   url: z.string(),
   title: z.string().nullable(),
-  facts: z.string().nullable().describe("What was taken from the page, for an item"),
+  facts: z.string().nullable().describe("What was taken from the page"),
   on: Day.nullable().describe("When it was added"),
-  trust: z.enum(TRUST_LEVELS).describe("high (wikis, official pages), medium (guide sites), low (forums, single comments): weigh what it says by it"),
+});
+
+const ReferenceJson = SourceJson.extend({
+  facts: z.string().nullable().describe("What the site is good for"),
+  trust: z
+    .enum(TRUST_LEVELS)
+    .describe("high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"),
 });
 
 const PlaythroughJson = z.object({
@@ -140,7 +146,7 @@ const PlaythroughJson = z.object({
     platform: z.string().nullable(),
     description: z.string().nullable().describe("What it is, as the game describes it"),
     notes: z.string().nullable().describe("The player's own notes"),
-    sources: z.array(SourceJson).describe("The sites the player keeps for this game, by trust, high first: where you look things up when they ask"),
+    references: z.array(ReferenceJson).describe("The sites kept for this game, by trust, high first: where you look things up when the player asks"),
     itemKinds: z
       .array(z.object({ key: z.string().describe("What an item's kind holds"), name: z.string(), localName: z.string().nullable() }))
       .describe("The game's inventory groups, in the player's order: file an item's kind with one of these keys"),
@@ -334,7 +340,7 @@ function backgroundNext(r: Recorded): string | null {
     ...r.quests.map((x) => `quest ${x.name} (${x.id})`),
   ];
   if (!rows.length) return null;
-  return `The player's background setting for ${t.game.title} ${t.label} is ${level}: add ${DEPTH[level]} of what was filed just now: ${rows.join(", ")}. Look it up yourself on their sources for the game${t.game.sources.length ? ` (by trust: ${sourcesByTrust(t)})` : ""}, or say it is your own knowledge, then file it with correct (that what and id, addBackground): each line in your own words, with its source (a line from a low source says it is one person's claim), and an honest spoiler level (hint when it names what the player hasn't reached, full when it gives away an outcome, a fate or a story event). Lines a row has already are skipped. Tell the player in a line what you added, and read out nothing above their spoiler setting (${t.settings.spoilers}). They change how much you add on the playthrough's Settings tab: ${inText(tabPath(t.id, "settings"))}.`;
+  return `The player's background setting for ${t.game.title} ${t.label} is ${level}: add ${DEPTH[level]} of what was filed just now: ${rows.join(", ")}. Look it up yourself on the game's references${t.game.references.length ? ` (by trust: ${referencesByTrust(t)})` : ""}, or say it is your own knowledge, then file it with correct (that what and id, addBackground): each line in your own words, with the page it comes from as its source (${WEIGH_SHORT}), and an honest spoiler level (hint when it names what the player hasn't reached, full when it gives away an outcome, a fate or a story event). Lines a row has already are skipped. Tell the player in a line what you added, and read out nothing above their spoiler setting (${t.settings.spoilers}). They change how much you add on the playthrough's Settings tab: ${inText(tabPath(t.id, "settings"))}.`;
 }
 
 function recordNext(r: Recorded, similar: Map<string, Candidate[]> = new Map()): Next {
@@ -362,9 +368,9 @@ function recordNext(r: Recorded, similar: Map<string, Candidate[]> = new Map()):
     );
   for (const q of r.quests.filter((x) => x.status === "done" && x.statusBefore !== "done"))
     next.push(`${q.name} is now done: say so, and if the player only advanced it, set it back to open with record.`);
-  if (r.sources)
+  if (r.references)
     next.push(
-      `${t.game.title} has ${r.sources === 1 ? "a source" : `${r.sources} sources`} kept now, by trust: ${sourcesByTrust(t)}. Look things up there when they ask. ${WEIGH}`,
+      `${t.game.title} has ${r.references === 1 ? "a reference" : `${r.references} references`} kept now, by trust: ${referencesByTrust(t)}. Look things up there when they ask. ${WEIGH}`,
     );
   for (const c of r.codex.filter((x) => x.status === "beaten" && x.statusBefore !== "beaten"))
     next.push(`${c.name} is beaten: say so, and if the player only got further, set it back to met with correct.`);
@@ -538,16 +544,18 @@ const ItemLookupJson = z.object({
 
 // Where Claude looks things up (ADR 0008): Gamepanion never fetches a page; it says where the player wants Claude to look, and keeps what
 // Claude found with its link.
-// The game's sources by trust, high first, each with its level, and how to weigh them (#58).
-const sourcesByTrust = (t: PlaythroughView) => t.game.sources.map((x) => `${x.title ? `${x.title} (${x.url})` : x.url}, trust ${x.trust}`).join("; ");
+// The game's references by trust, high first, each with its level, and how to weigh what is found on them (#58, #95). A page found is a
+// source and has no trust of its own: it counts as much as the reference whose site it is on.
+const referencesByTrust = (t: PlaythroughView) => t.game.references.map((x) => `${x.title ? `${x.title} (${x.url})` : x.url}, trust ${x.trust}`).join("; ");
 const WEIGH =
-  "Prefer a higher source when two disagree, and present anything from a low source (a forum, a single comment, one person's video) as one person's claim, not as fact.";
+  "When pages you find disagree, the one on the site of the more trusted reference wins; present anything from a low reference (a forum, a Steam discussion, one person's video) as one person's claim, not as fact.";
+const WEIGH_SHORT = "a page on a low reference's site is one person's claim";
 
 function lookupNext(t: PlaythroughView): string {
-  const where = sourcesByTrust(t);
+  const where = referencesByTrust(t);
   return where
-    ? `If the player wants to know more than Gamepanion holds, look it up yourself with your web tools, on their sources for ${t.game.title}, by trust: ${where}. ${WEIGH} Only about what they have found. File the facts in your own words, never the page's text, with the link and the source's trust: correct (item, sources) or record (items with sources). If a source refuses you, say so and suggest another.`
-    : `Gamepanion has no sources for ${t.game.title} yet. If the player wants to know more than Gamepanion holds, suggest a site you know for this game (a wiki first), look it up there with your web tools, and ask whether to keep it as a source (record or correct with game sources, with its trust: high for a wiki or official page, medium for a guide site, low for a forum or single comment). Only about what they have found; file the facts in your own words with the link.`;
+    ? `If the player wants to know more than Gamepanion holds, look it up yourself with your web tools, on the references for ${t.game.title}, by trust: ${where}. ${WEIGH} Only about what they have found. File the facts in your own words, never the page's text, with the page as the item's or entry's source: correct (item, sources) or record (items with sources). If a reference refuses you, say so and suggest another.`
+    : `Gamepanion has no references for ${t.game.title} yet. If the player wants to know more than Gamepanion holds, suggest a site you know for this game (an official guide or wiki first), look it up there with your web tools, and ask whether to keep it as a reference (record references, or correct the game's references, with its trust: high for an official guide or wiki, medium for a guide site, low for a forum or Steam discussion). Only about what they have found; file the facts in your own words with the page as the item's or entry's source.`;
 }
 
 // Several entries the player's words could mean (ADR 0022): never a pick, a question.

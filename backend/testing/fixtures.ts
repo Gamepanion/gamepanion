@@ -74,7 +74,7 @@ export async function seed(): Promise<Seed> {
       ],
     },
     build: { summary: "Motivity build", mainStat: "motivity", targets: { motivity: 40 } },
-    sources: [{ url: SOURCE, title: "Lies Wiki" }],
+    references: [{ url: SOURCE, title: "Lies Wiki" }],
   });
   const liesOfP = first.playthrough.id;
   const [venigni, antonia, polendina] = first.quests.map((q) => q.id);

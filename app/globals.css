@@ -30,7 +30,7 @@
   --tab-notes: #009e73;
   --tab-settings: #7c7f93;
   --tab-todos: #8f6bd8;
-  --tab-sources: #b0875a;
+  --tab-references: #b0875a;
   color-scheme: light;
 }
 
@@ -57,7 +57,7 @@
     --tab-notes: #1fb487;
     --tab-settings: #a5a8bd;
     --tab-todos: #a98ae6;
-    --tab-sources: #c9a27a;
+    --tab-references: #c9a27a;
     color-scheme: dark;
   }
 }
@@ -367,8 +367,8 @@ h1 {
 .register[data-at="todos"] {
   --c: var(--tab-todos);
 }
-.register[data-at="sources"] {
-  --c: var(--tab-sources);
+.register[data-at="references"] {
+  --c: var(--tab-references);
 }
 .register-tabs {
   --edge: color-mix(in oklab, var(--c) 80%, var(--ink));
@@ -474,8 +474,8 @@ h1 {
 .register-tab[data-tab="todos"] {
   --t: var(--tab-todos);
 }
-.register-tab[data-tab="sources"] {
-  --t: var(--tab-sources);
+.register-tab[data-tab="references"] {
+  --t: var(--tab-references);
 }
 /* A to-do (ADR 0020): its checkbox, then the player's words and what it is about. A suggestion sits apart under a dotted rule. */
 .todo {

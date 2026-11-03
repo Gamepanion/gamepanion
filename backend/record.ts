@@ -14,9 +14,9 @@ import { addNote } from "./notes";
 import { seen } from "./spoilers";
 import { addBackground, type BackgroundInput } from "./background";
 import { setTags } from "./tags";
-import { mergeSources, parseSources } from "./sources";
+import { mergeReferences, mergeSources, parseReferences, parseSources } from "./sources";
 import { carryTodos, writeTodos, type FiledTodo, type TodoInput } from "./todos";
-import type { Attributes, EntryKind, GoalKind, ItemKind, Player, QuestStatus, SourceInput, SpoilerLevel, StatName } from "./types";
+import type { Attributes, EntryKind, GoalKind, ItemKind, Player, QuestStatus, ReferenceInput, SourceInput, SpoilerLevel, StatName } from "./types";
 import { itemPath, questPath, sessionPath } from "./urls";
 
 export type QuestInput = {
@@ -89,8 +89,8 @@ export type RecordInput = {
   items?: ItemInput[];
   /** To-dos (ADR 0020) the player added ("remind me to …"), closed ("I did the …") or changed; ones you propose marked suggested. */
   todos?: TodoInput[];
-  /** Pages the player trusts for this game; merged into the game's, by link. */
-  sources?: SourceInput[];
+  /** Sites kept for this game, with their trust (#95); merged into the game's references, by link. */
+  references?: ReferenceInput[];
   /** The player's own thoughts on the game, this run or this session, each added to its notes (ADR 0011). */
   notes?: { game?: string; playthrough?: string; session?: string };
   /** What the game is; replaces the one it has. */
@@ -132,8 +132,8 @@ export type Recorded = {
   todos: FiledTodo[];
   /** How many open to-dos came along from carryFrom; null when nothing was carried. */
   carriedTodos: number | null;
-  /** How many of the game's sources this call added or refreshed. */
-  sources: number;
+  /** How many of the game's references this call added or refreshed. */
+  references: number;
 };
 
 const clean = (s: string | undefined) => s?.trim() || null;
@@ -214,11 +214,11 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
     if (!t.lastPlayedOn || t.lastPlayedOn < playedOn)
       await seen(trx.updateTable("playthroughs"), p, "playthroughs").set({ last_played_on: playedOn }).where("id", "=", t.id).execute();
 
-    if (input.sources?.length || input.notes?.game?.trim() || input.gameDescription?.trim()) {
+    if (input.references?.length || input.notes?.game?.trim() || input.gameDescription?.trim()) {
       const game = await seen(trx.selectFrom("games"), p, "games").select(["sources", "notes"]).where("id", "=", t.game.id).executeTakeFirstOrThrow();
       await seen(trx.updateTable("games"), p, "games")
         .set({
-          ...(input.sources?.length ? { sources: JSON.stringify(mergeSources(parseSources(game.sources), input.sources, playedOn)) } : {}),
+          ...(input.references?.length ? { sources: JSON.stringify(mergeReferences(parseReferences(game.sources), input.references, playedOn)) } : {}),
           notes: addNote(game.notes, input.notes?.game),
           ...(input.gameDescription?.trim() ? { description: input.gameDescription.trim() } : {}),
         })
@@ -457,14 +457,14 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
     const todos = input.todos?.length ? await writeTodos(trx, p, t.id, sessionId, input.todos) : [];
 
     const itemKinds = await itemKindsOf(p, t.game.id, trx);
-    const sources = parseSources(
+    const references = parseReferences(
       (await seen(trx.selectFrom("games"), p, "games").select("sources").where("id", "=", t.game.id).executeTakeFirstOrThrow()).sources,
     );
     return {
       sessionId,
       url: sessionPath(sessionId),
       playedOn,
-      playthrough: { ...t, game: { ...t.game, itemKinds, sources }, ...(character || carried !== null ? await characterOf(trx, p, t.id) : {}) },
+      playthrough: { ...t, game: { ...t.game, itemKinds, references }, ...(character || carried !== null ? await characterOf(trx, p, t.id) : {}) },
       quests,
       items,
       newItemKinds: itemKinds.filter((k) => !kindsBefore.includes(k.key)),
@@ -478,7 +478,7 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
       carried,
       todos,
       carriedTodos,
-      sources: input.sources?.length ?? 0,
+      references: input.references?.length ?? 0,
     };
   });
 }

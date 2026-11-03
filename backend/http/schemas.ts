@@ -28,10 +28,7 @@ export const BackgroundJson = z
       id: z.string().describe("For correct (background)"),
       text: z.string(),
       spoiler: z.enum(SPOILER_LEVELS).describe("Each line has its own; only lines this read may show are here"),
-      source: z
-        .object({ url: z.string(), title: z.string(), trust: z.enum(TRUST_LEVELS).describe("The trust of the source it was filed from") })
-        .nullable()
-        .describe("The page it comes from; null for Claude's own knowledge"),
+      source: z.object({ url: z.string(), title: z.string() }).nullable().describe("The page it comes from; null for Claude's own knowledge"),
     }),
   )
   .describe("Background Claude added (ADR 0016), oldest first");
@@ -69,13 +66,19 @@ export const SourceJson = z
   .object({
     url: z.string(),
     title: z.string().nullable(),
-    facts: z.string().nullable().describe("What was taken from the page, for an item"),
+    facts: z.string().nullable().describe("What was taken from the page"),
     on: Day.nullable().describe("When it was added"),
-    trust: z
-      .enum(TRUST_LEVELS)
-      .describe("How far it can be trusted: high (wikis, official pages), medium (large guide sites), low (forums, single comments, one person's video)"),
   })
-  .meta({ id: "Source", description: "A page outside Gamepanion, which Gamepanion never fetches (ADR 0008)" });
+  .meta({ id: "Source", description: "A page an item's or codex entry's facts were taken from; Gamepanion never fetches it (ADR 0008)" });
+
+export const ReferenceJson = SourceJson.extend({
+  facts: z.string().nullable().describe("What the site is good for"),
+  trust: z
+    .enum(TRUST_LEVELS)
+    .describe(
+      "How far it can be trusted: high (official guides, wikis), medium (large guide sites), low (forums, Steam discussions, single comments, one person's video)",
+    ),
+}).meta({ id: "Reference", description: "A site kept for a game, where Claude looks things up, with its trust (#95)" });
 
 export const PlaythroughJson = z
   .object({
@@ -101,7 +104,7 @@ export const PlaythroughJson = z
       platform: z.string().nullable(),
       description: z.string().nullable().describe("What it is, as the game describes it"),
       notes: z.string().nullable().describe("The player's own notes"),
-      sources: z.array(SourceJson).describe("The sites the player trusts for this game"),
+      references: z.array(ReferenceJson).describe("The sites kept for this game, by trust, high first"),
       itemKinds: z
         .array(z.object({ key: z.string().describe("What an item's kind holds"), name: z.string(), localName: z.string().nullable() }))
         .describe("The game's inventory groups, in the player's order"),
@@ -359,6 +362,7 @@ export const TagListJson = z
 export const COMPONENTS = [
   ErrorJson,
   SourceJson,
+  ReferenceJson,
   PlaythroughJson,
   PlaythroughListJson,
   EntryJson,

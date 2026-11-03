@@ -232,7 +232,7 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
               </div>
             ),
             // The sites the player keeps for the game, by trust (#58), then the sources kept on items and codex entries.
-            sources: <Sources game={t.game} items={items} codex={codex} />,
+            references: <References game={t.game} />,
             // How much Claude adds on its own, and what shows without asking (ADR 0016).
             settings: (
               <div className="card">
@@ -387,7 +387,6 @@ async function Background({ lines }: { lines: BackgroundLine[] }) {
                 <a href={l.source.url} className="text-accent" target="_blank" rel="noopener noreferrer">
                   {l.source.title || siteOf(l.source.url)}
                 </a>
-                {l.source.trust === "low" && <span className="text-muted"> ({copy.trustLevel.low})</span>}
               </>
             )}
           </li>
@@ -460,7 +459,6 @@ async function Item({ item: i, run }: { item: ItemView; run: string }) {
                 {x.title ?? siteOf(x.url)}
               </a>
               {x.on && <span className="tabular-nums"> · {x.on}</span>}
-              <span> · {copy.trustLevel[x.trust]}</span>
             </li>
           ))}
         </ul>
@@ -535,8 +533,7 @@ async function CodexEntry({ entry: e, run }: { entry: CodexView; run: string }) 
               {n > 0 && " · "}
               <a href={x.url} className="text-accent" target="_blank" rel="noopener noreferrer">
                 {x.title ?? siteOf(x.url)}
-              </a>{" "}
-              ({copy.trustLevel[x.trust]})
+              </a>
             </span>
           ))}
         </p>
@@ -626,24 +623,21 @@ async function LinkedTodos({ todos, run }: { todos: { id: string; text: string; 
   );
 }
 
-// The Sources tab (#58): the game's sources grouped by trust, high first, each with its trust in words (never colour alone), its facts
-// and the day it was kept; below them the sources on items and codex entries, each naming what it belongs to.
-async function Sources({ game, items, codex }: { game: PlaythroughView["game"]; items: ItemView[]; codex: CodexView[] }) {
+// The References tab (#58, #95): the sites kept for the game, where Claude looks things up, grouped by trust, high first, each with its
+// trust in words (never colour alone), what it is good for and the day it was kept. The pages Claude found for an item or a codex entry
+// are that card's sources and stay on it.
+async function References({ game }: { game: PlaythroughView["game"] }) {
   const copy = await serverCopy();
-  const rows = [
-    ...items.flatMap((i) => i.sources.map((x) => ({ source: x, owner: { name: i.name, url: i.url } }))),
-    ...codex.flatMap((e) => e.sources.map((x) => ({ source: x, owner: { name: e.name, url: e.url } }))),
-  ].sort((a, b) => TRUST_LEVELS.indexOf(a.source.trust) - TRUST_LEVELS.indexOf(b.source.trust));
-  if (!game.sources.length && !rows.length) return <p className="card text-muted">{copy.noSources}</p>;
+  if (!game.references.length) return <p className="card text-muted">{copy.noReferences}</p>;
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted">{copy.sourcesLead}</p>
+      <p className="text-sm text-muted">{copy.referencesLead}</p>
       {TRUST_LEVELS.map((level) => {
-        const list = game.sources.filter((x) => x.trust === level);
+        const list = game.references.filter((x) => x.trust === level);
         return (
           list.length > 0 && (
             <section key={level}>
-              <Heading icon={PART_ICONS.sources}>{copy.trustLevel[level]}</Heading>
+              <Heading icon={PART_ICONS.references}>{copy.trustLevel[level]}</Heading>
               <p className="mb-2 text-sm text-muted">{copy.trustHint[level]}</p>
               <ul className="card divide-y divide-rule py-1">
                 {list.map((x) => (
@@ -664,30 +658,6 @@ async function Sources({ game, items, codex }: { game: PlaythroughView["game"]; 
           )
         );
       })}
-      {rows.length > 0 && (
-        <section>
-          <Heading icon={PART_ICONS.items}>{copy.rowSources}</Heading>
-          <ul className="card divide-y divide-rule py-1">
-            {rows.map(({ source: x, owner }) => (
-              <li key={`${owner.url} ${x.url}`} className="py-2 text-sm">
-                <Link href={owner.url} className="font-semibold hover:text-accent">
-                  {owner.name}
-                </Link>
-                {": "}
-                <a href={x.url} className="text-accent" target="_blank" rel="noopener noreferrer">
-                  {x.title ?? siteOf(x.url)}
-                </a>
-                <span className="text-muted">
-                  {" "}
-                  · {copy.trustLevel[x.trust]}
-                  {x.on && <span className="tabular-nums"> · {copy.keptSince(x.on)}</span>}
-                </span>
-                {x.facts && <p className="text-muted">{x.facts}</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

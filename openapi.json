@@ -1033,15 +1033,6 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
-                                  },
-                                  "trust": {
-                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
-                                    "type": "string",
-                                    "enum": [
-                                      "high",
-                                      "medium",
-                                      "low"
-                                    ]
                                   }
                                 },
                                 "required": [
@@ -1401,15 +1392,6 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
-                                  },
-                                  "trust": {
-                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
-                                    "type": "string",
-                                    "enum": [
-                                      "high",
-                                      "medium",
-                                      "low"
-                                    ]
                                   }
                                 },
                                 "required": [
@@ -1459,15 +1441,6 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
-                              },
-                              "trust": {
-                                "type": "string",
-                                "enum": [
-                                  "high",
-                                  "medium",
-                                  "low"
-                                ],
-                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -1679,15 +1652,6 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
-                              },
-                              "trust": {
-                                "type": "string",
-                                "enum": [
-                                  "high",
-                                  "medium",
-                                  "low"
-                                ],
-                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -1738,15 +1702,6 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
-                                  },
-                                  "trust": {
-                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
-                                    "type": "string",
-                                    "enum": [
-                                      "high",
-                                      "medium",
-                                      "low"
-                                    ]
                                   }
                                 },
                                 "required": [
@@ -1767,8 +1722,8 @@
                       ]
                     }
                   },
-                  "sources": {
-                    "description": "Sites the player trusts for this game (a wiki, a guide), where you look things up when they ask; merged by link",
+                  "references": {
+                    "description": "Sites kept for this game (an official guide or wiki, a guide site, a forum), where you look things up when they ask, each with its trust; merged by link. A page you took one item's facts from is that item's source, not a reference",
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -1779,11 +1734,11 @@
                           "description": "The page"
                         },
                         "title": {
-                          "description": "What it is: the site's name, or the page's title",
+                          "description": "The site's name, such as Fextralife: Lies of P wiki",
                           "type": "string"
                         },
                         "facts": {
-                          "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
+                          "description": "What the site is good for, or what you learned there about the game as a whole",
                           "type": "string",
                           "maxLength": 2000
                         },
@@ -1794,7 +1749,7 @@
                             "medium",
                             "low"
                           ],
-                          "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
+                          "description": "How far the reference can be trusted: high for official guides and wikis (Fextralife), medium for large guide sites, low for forums, Steam discussions, single comments and one person's video. Default medium; left out on a reference already kept, it keeps its own"
                         }
                       },
                       "required": [
@@ -2098,15 +2053,6 @@
                                   "type": "string",
                                   "minLength": 1,
                                   "maxLength": 200
-                                },
-                                "trust": {
-                                  "type": "string",
-                                  "enum": [
-                                    "high",
-                                    "medium",
-                                    "low"
-                                  ],
-                                  "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                                 }
                               },
                               "required": [
@@ -2153,15 +2099,6 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
-                                  },
-                                  "trust": {
-                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
-                                    "type": "string",
-                                    "enum": [
-                                      "high",
-                                      "medium",
-                                      "low"
-                                    ]
                                   }
                                 },
                                 "required": [
@@ -2229,7 +2166,7 @@
                           ]
                         },
                         "sources": {
-                          "description": "game: the sites the player trusts; item or codex: where its facts come from. The whole list: a link left out is dropped",
+                          "description": "item or codex: the pages its facts come from. The whole list: a link left out is dropped",
                           "type": "array",
                           "items": {
                             "type": "object",
@@ -2247,6 +2184,32 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
+                              }
+                            },
+                            "required": [
+                              "url"
+                            ]
+                          }
+                        },
+                        "references": {
+                          "description": "game: the sites kept for it, each with its trust. The whole list: a link left out is dropped; one kept keeps its trust unless given",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "pattern": "^https?:\\/\\/\\S+$",
+                                "description": "The page"
+                              },
+                              "title": {
+                                "description": "The site's name, such as Fextralife: Lies of P wiki",
+                                "type": "string"
+                              },
+                              "facts": {
+                                "description": "What the site is good for, or what you learned there about the game as a whole",
+                                "type": "string",
+                                "maxLength": 2000
                               },
                               "trust": {
                                 "type": "string",
@@ -2255,7 +2218,7 @@
                                   "medium",
                                   "low"
                                 ],
-                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
+                                "description": "How far the reference can be trusted: high for official guides and wikis (Fextralife), medium for large guide sites, low for forums, Steam discussions, single comments and one person's video. Default medium; left out on a reference already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -2582,7 +2545,48 @@
             ]
           },
           "facts": {
-            "description": "What was taken from the page, for an item",
+            "description": "What was taken from the page",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When it was added"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "facts",
+          "on"
+        ],
+        "additionalProperties": false,
+        "description": "A page an item's or codex entry's facts were taken from; Gamepanion never fetches it (ADR 0008)"
+      },
+      "Reference": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "facts": {
+            "description": "What the site is good for",
             "type": [
               "string",
               "null"
@@ -2607,7 +2611,7 @@
               "medium",
               "low"
             ],
-            "description": "How far it can be trusted: high (wikis, official pages), medium (large guide sites), low (forums, single comments, one person's video)"
+            "description": "How far it can be trusted: high (official guides, wikis), medium (large guide sites), low (forums, Steam discussions, single comments, one person's video)"
           }
         },
         "required": [
@@ -2618,7 +2622,7 @@
           "trust"
         ],
         "additionalProperties": false,
-        "description": "A page outside Gamepanion, which Gamepanion never fetches (ADR 0008)"
+        "description": "A site kept for a game, where Claude looks things up, with its trust (#95)"
       },
       "Playthrough": {
         "type": "object",
@@ -2760,12 +2764,12 @@
                   "null"
                 ]
               },
-              "sources": {
+              "references": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Source"
+                  "$ref": "#/components/schemas/Reference"
                 },
-                "description": "The sites the player trusts for this game"
+                "description": "The sites kept for this game, by trust, high first"
               },
               "itemKinds": {
                 "type": "array",
@@ -2802,7 +2806,7 @@
               "platform",
               "description",
               "notes",
-              "sources",
+              "references",
               "itemKinds"
             ],
             "additionalProperties": false
@@ -3004,21 +3008,11 @@
                         },
                         "title": {
                           "type": "string"
-                        },
-                        "trust": {
-                          "type": "string",
-                          "enum": [
-                            "high",
-                            "medium",
-                            "low"
-                          ],
-                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title",
-                        "trust"
+                        "title"
                       ],
                       "additionalProperties": false
                     },
@@ -3298,21 +3292,11 @@
                         },
                         "title": {
                           "type": "string"
-                        },
-                        "trust": {
-                          "type": "string",
-                          "enum": [
-                            "high",
-                            "medium",
-                            "low"
-                          ],
-                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title",
-                        "trust"
+                        "title"
                       ],
                       "additionalProperties": false
                     },
@@ -3615,21 +3599,11 @@
                         },
                         "title": {
                           "type": "string"
-                        },
-                        "trust": {
-                          "type": "string",
-                          "enum": [
-                            "high",
-                            "medium",
-                            "low"
-                          ],
-                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title",
-                        "trust"
+                        "title"
                       ],
                       "additionalProperties": false
                     },
@@ -4583,21 +4557,11 @@
                               },
                               "title": {
                                 "type": "string"
-                              },
-                              "trust": {
-                                "type": "string",
-                                "enum": [
-                                  "high",
-                                  "medium",
-                                  "low"
-                                ],
-                                "description": "The trust of the source it was filed from"
                               }
                             },
                             "required": [
                               "url",
-                              "title",
-                              "trust"
+                              "title"
                             ],
                             "additionalProperties": false
                           },
@@ -4859,12 +4823,12 @@
                       "null"
                     ]
                   },
-                  "sources": {
+                  "references": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/Source"
+                      "$ref": "#/components/schemas/Reference"
                     },
-                    "description": "The sites the player trusts for this game"
+                    "description": "The sites kept for this game, by trust, high first"
                   },
                   "itemKinds": {
                     "type": "array",
@@ -4901,7 +4865,7 @@
                   "platform",
                   "description",
                   "notes",
-                  "sources",
+                  "references",
                   "itemKinds"
                 ],
                 "additionalProperties": false
