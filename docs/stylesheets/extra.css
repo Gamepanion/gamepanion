@@ -1,41 +1,50 @@
-/* Gamepanion: ember and lamplight on night ink, the colours of the web app (app/globals.css). White pages, a hairline header. */
+/* Gamepanion: Violet arcade, the look of the web app (ADR 0018, docs/internals/brand.md). Near-black or pale ground, one violet
+   accent, lime for what's done, Atkinson set heavy, sharp corners and a hard offset shadow. Dark follows the system setting. */
 
 :root > * {
-  --ql-ember: #b4532a;
-  --ql-lamp: #8a6d1d;
-  --ql-ink: #1e2230;
-  --ql-mist: #f6f2ea;
+  --gp-accent: #6b3fd6;
+  --gp-accent-hover: #5530b8;
+  --gp-accent-on: #ffffff;
+  --gp-signal: #6b3fd6;
+  --gp-fg: #14121a;
+  --gp-surface: #eeebf5;
+  --gp-bg: #f7f6fa;
 
-  --md-primary-fg-color: #ffffff;
-  --md-primary-fg-color--light: #ffffff;
-  --md-primary-fg-color--dark: #ffffff;
-  --md-primary-bg-color: var(--ql-ink);
-  --md-primary-bg-color--light: #4f5466;
-  --md-accent-fg-color: var(--ql-lamp);
-  --md-typeset-a-color: var(--ql-ember);
-  --md-typeset-color: var(--ql-ink);
-  --md-code-bg-color: var(--ql-mist);
-  --md-footer-bg-color: var(--ql-ink);
-  --md-footer-bg-color--dark: #14161d;
+  --md-default-bg-color: var(--gp-bg);
+  --md-primary-fg-color: var(--gp-bg);
+  --md-primary-fg-color--light: var(--gp-bg);
+  --md-primary-fg-color--dark: var(--gp-bg);
+  --md-primary-bg-color: var(--gp-fg);
+  --md-primary-bg-color--light: #5a556a;
+  --md-accent-fg-color: var(--gp-accent-hover);
+  --md-typeset-a-color: var(--gp-accent);
+  --md-typeset-color: var(--gp-fg);
+  --md-code-bg-color: var(--gp-surface);
+  --md-footer-bg-color: #14121a;
+  --md-footer-bg-color--dark: #0c0b10;
 }
 
 [data-md-color-scheme="slate"] {
-  --md-hue: 235;
-  --ql-ember: #f0955a;
-  --ql-lamp: #e3c06a;
-  --ql-ink: #ece6da;
-  --ql-mist: hsla(235, 12%, 17%, 1);
+  --md-hue: 255;
+  --gp-accent: #a77bff;
+  --gp-accent-hover: #bc9bff;
+  --gp-accent-on: #12082a;
+  --gp-signal: #c6f432;
+  --gp-fg: #f2f0f7;
+  --gp-surface: #17151f;
+  --gp-bg: #0c0b10;
 
-  --md-default-bg-color: hsla(235, 12%, 9%, 1);
-  --md-primary-fg-color: hsla(235, 12%, 12%, 1);
-  --md-primary-fg-color--light: hsla(235, 12%, 12%, 1);
-  --md-primary-fg-color--dark: hsla(235, 12%, 12%, 1);
-  --md-primary-bg-color: var(--ql-ink);
-  --md-typeset-a-color: var(--ql-ember);
-  --md-typeset-color: hsla(38, 30%, 89%, 1);
-  --md-code-bg-color: var(--ql-mist);
-  --md-footer-bg-color: hsla(235, 12%, 7%, 1);
-  --md-footer-bg-color--dark: hsla(235, 12%, 5%, 1);
+  --md-default-bg-color: var(--gp-bg);
+  --md-default-fg-color--light: #a49fb4;
+  --md-primary-fg-color: var(--gp-bg);
+  --md-primary-fg-color--light: var(--gp-bg);
+  --md-primary-fg-color--dark: var(--gp-bg);
+  --md-primary-bg-color: var(--gp-fg);
+  --md-typeset-a-color: var(--gp-accent);
+  --md-typeset-color: var(--gp-fg);
+  --md-code-bg-color: var(--gp-surface);
+  --md-footer-bg-color: #17151f;
+  --md-footer-bg-color--dark: #0c0b10;
 }
 
 /* Header: a hairline instead of a coloured bar. */
@@ -48,8 +57,8 @@
 }
 .md-search__input,
 .md-search__input:hover {
-  background-color: var(--ql-mist);
-  color: var(--ql-ink);
+  background-color: var(--gp-surface);
+  color: var(--gp-fg);
 }
 .md-search__input::placeholder,
 .md-search__icon {
@@ -68,24 +77,37 @@
   line-height: 1.65;
 }
 .md-typeset h1 {
-  color: var(--ql-ink);
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  color: var(--gp-fg);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
 }
 .md-typeset h2 {
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.md-typeset h3 {
+  font-weight: 800;
+}
+/* Sharp corners everywhere, as in the app. */
+.md-typeset code,
+.md-typeset pre > code,
+.md-typeset .admonition,
+.md-typeset details,
+.md-search__form,
+.md-search__input {
+  border-radius: 2px;
 }
 .md-typeset a:focus-visible,
 .md-nav__link:focus-visible {
-  outline: 2px solid var(--ql-lamp);
+  outline: 2px solid var(--gp-accent-hover);
   outline-offset: 2px;
 }
 .md-typeset table:not([class]) th {
-  background-color: var(--ql-mist);
+  background-color: var(--gp-surface);
 }
 
-/* Home page: the journal mark and what Gamepanion does. */
+/* Home page: the speech-bubble mark and what Gamepanion does. */
 .ql-hero {
   padding: 0.6rem 0 0.4rem;
 }
@@ -96,8 +118,10 @@
   margin-bottom: 1.1rem;
 }
 .md-typeset .ql-hero h1 {
-  font-size: 2.2rem;
-  line-height: 1.12;
+  font-size: 2.6rem;
+  line-height: 0.98;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
   margin: 0 0 0.45em;
   max-width: 15em;
   text-wrap: balance;
@@ -110,25 +134,27 @@
   color: var(--md-default-fg-color--light);
 }
 .md-typeset .md-button {
-  color: var(--ql-ember);
-  border-color: currentColor;
-  margin: 0.3rem 0.4rem 0.3rem 0;
+  color: var(--gp-fg);
+  border: 2px solid var(--gp-fg);
+  border-radius: 2px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0.3rem 0.6rem 0.3rem 0;
 }
 .md-typeset .md-button--primary {
-  background-color: var(--ql-ember);
-  border-color: var(--ql-ember);
-  color: #ffffff;
-}
-[data-md-color-scheme="slate"] .md-typeset .md-button--primary {
-  color: hsla(235, 12%, 9%, 1);
+  background-color: var(--gp-accent);
+  border-color: var(--gp-accent);
+  color: var(--gp-accent-on);
+  box-shadow: 4px 4px 0 var(--gp-fg);
 }
 .md-typeset .md-button:hover,
 .md-typeset .md-button:focus,
 .md-typeset .md-button--primary:hover,
 .md-typeset .md-button--primary:focus {
-  background-color: var(--ql-lamp);
-  border-color: var(--ql-lamp);
-  color: #ffffff;
+  background-color: var(--gp-accent-hover);
+  border-color: var(--gp-accent-hover);
+  color: var(--gp-accent-on);
 }
 @media screen and (max-width: 44.9375em) {
   .md-typeset .ql-hero h1 {
@@ -136,24 +162,24 @@
   }
 }
 
-/* Notes and tips in ember rather than Material's blue and teal. */
+/* Notes and tips in violet rather than Material's blue and teal. */
 .md-typeset .admonition.note,
 .md-typeset details.note,
 .md-typeset .admonition.tip,
 .md-typeset details.tip {
-  border-color: var(--ql-ember);
+  border-color: var(--gp-accent);
 }
 .md-typeset .note > .admonition-title,
 .md-typeset .note > summary,
 .md-typeset .tip > .admonition-title,
 .md-typeset .tip > summary {
-  background-color: color-mix(in srgb, var(--ql-ember) 12%, transparent);
+  background-color: color-mix(in srgb, var(--gp-accent) 12%, transparent);
 }
 .md-typeset .note > .admonition-title::before,
 .md-typeset .note > summary::before,
 .md-typeset .tip > .admonition-title::before,
 .md-typeset .tip > summary::before {
-  background-color: var(--ql-ember);
+  background-color: var(--gp-accent);
 }
 
 /* ---- The roadmap timeline (docs/roadmap.yml, rendered by docs_hooks/roadmap.py; from passageway) ----------------------------------------
@@ -201,8 +227,10 @@
 .ql-tl-when {
   padding-top: 0.78rem;
   text-align: right;
-  font-size: 0.72rem;
-  font-style: italic;
+  font-family: var(--md-code-font-family);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
   color: var(--md-default-fg-color--light);
 }
@@ -213,24 +241,25 @@
   width: var(--ql-dot);
   height: var(--ql-dot);
   margin-top: 0.7rem;
-  border: 2px solid var(--ql-ember);
-  border-radius: 50%;
+  border: 2px solid var(--gp-accent);
+  border-radius: 2px;
   background: var(--md-default-bg-color);
 }
 .ql-now .ql-tl-dot {
   border-width: 3px;
-  border-color: var(--ql-ember);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ql-ember) 22%, transparent);
+  border-color: var(--gp-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gp-accent) 22%, transparent);
 }
 .ql-later .ql-tl-dot {
   border-color: var(--md-default-fg-color--lighter);
 }
 .ql-decide .ql-tl-dot {
   border-style: dashed;
-  border-color: var(--ql-ember);
+  border-color: var(--gp-accent);
 }
 .ql-done .ql-tl-dot {
-  background: var(--ql-ember);
+  background: var(--gp-signal);
+  border-color: var(--gp-signal);
 }
 .ql-done .ql-tl-dot::after {
   content: "";
@@ -246,8 +275,8 @@
 
 .ql-tl-card {
   padding: 0.65rem 1rem 0.7rem;
-  border-radius: 0.6rem;
-  background: var(--ql-mist);
+  border-radius: 2px;
+  background: var(--gp-surface);
 }
 .ql-tl-head {
   display: flex;
@@ -259,7 +288,7 @@
   flex: none;
   width: 1.05rem;
   height: 1.05rem;
-  color: var(--ql-ember);
+  color: var(--gp-accent);
 }
 .ql-ic svg {
   width: 100%;
@@ -270,7 +299,7 @@
   color: var(--md-default-fg-color--light);
 }
 .ql-decide .ql-ic {
-  color: var(--ql-lamp);
+  color: var(--gp-accent-hover);
 }
 .ql-tl-title {
   flex: 1 1 auto;
@@ -361,29 +390,29 @@
 /* Diagrams in the site's palette: Material reads these for Mermaid, in light and dark mode. */
 :root > * {
   --md-mermaid-font-family: var(--md-text-font-family), sans-serif;
-  --md-mermaid-edge-color: var(--ql-ember);
-  --md-mermaid-node-bg-color: var(--ql-mist);
-  --md-mermaid-node-fg-color: var(--ql-ink);
+  --md-mermaid-edge-color: var(--gp-accent);
+  --md-mermaid-node-bg-color: var(--gp-surface);
+  --md-mermaid-node-fg-color: var(--gp-fg);
   --md-mermaid-label-bg-color: var(--md-default-bg-color);
-  --md-mermaid-label-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-actor-bg-color: var(--ql-mist);
-  --md-mermaid-sequence-actor-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-actor-border-color: var(--ql-ember);
+  --md-mermaid-label-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-actor-bg-color: var(--gp-surface);
+  --md-mermaid-sequence-actor-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-actor-border-color: var(--gp-accent);
   --md-mermaid-sequence-actor-line-color: var(--md-default-fg-color--lighter);
-  --md-mermaid-sequence-actorman-bg-color: var(--ql-mist);
-  --md-mermaid-sequence-actorman-line-color: var(--ql-ember);
-  --md-mermaid-sequence-box-bg-color: var(--ql-mist);
-  --md-mermaid-sequence-box-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-label-bg-color: var(--ql-mist);
-  --md-mermaid-sequence-label-fg-color: var(--ql-ink);
+  --md-mermaid-sequence-actorman-bg-color: var(--gp-surface);
+  --md-mermaid-sequence-actorman-line-color: var(--gp-accent);
+  --md-mermaid-sequence-box-bg-color: var(--gp-surface);
+  --md-mermaid-sequence-box-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-label-bg-color: var(--gp-surface);
+  --md-mermaid-sequence-label-fg-color: var(--gp-fg);
   --md-mermaid-sequence-loop-bg-color: var(--md-default-bg-color);
-  --md-mermaid-sequence-loop-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-loop-border-color: var(--ql-ember);
-  --md-mermaid-sequence-message-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-message-line-color: var(--ql-ember);
-  --md-mermaid-sequence-note-bg-color: var(--ql-mist);
-  --md-mermaid-sequence-note-fg-color: var(--ql-ink);
-  --md-mermaid-sequence-note-border-color: var(--ql-ember);
-  --md-mermaid-sequence-number-bg-color: var(--ql-ember);
+  --md-mermaid-sequence-loop-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-loop-border-color: var(--gp-accent);
+  --md-mermaid-sequence-message-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-message-line-color: var(--gp-accent);
+  --md-mermaid-sequence-note-bg-color: var(--gp-surface);
+  --md-mermaid-sequence-note-fg-color: var(--gp-fg);
+  --md-mermaid-sequence-note-border-color: var(--gp-accent);
+  --md-mermaid-sequence-number-bg-color: var(--gp-accent);
   --md-mermaid-sequence-number-fg-color: var(--md-default-bg-color);
 }

@@ -43,7 +43,7 @@ export function Passkeys({ list }: { list: { id: string; name: string; added: st
           <p className="text-sm text-muted">{copy.passkeysLead}</p>
         </div>
       </div>
-      <div className="mt-3 space-y-3 sm:pl-9">
+      <div className="mt-3 space-y-3 pl-9">
         {list.length ? (
           <ul className="divide-y divide-rule rounded-lg border border-rule bg-surface">
             {list.map((p) => (

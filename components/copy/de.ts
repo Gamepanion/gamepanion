@@ -3,13 +3,13 @@ import type { Copy } from ".";
 
 export const de: Copy = {
   appName: "Gamepanion",
-  tagline: "Ein spoilerfreies Questlog für die Spiele, die du spielst.",
+  tagline: "Ein spoilerfreier Begleiter für die Spiele, die du spielst.",
+  sloganPlay: "Spiel weiter.",
+  sloganRemembers: "Dein Gamepanion merkt es sich.",
 
   // Sign-in
-  almanac: "Ein Almanach deiner Durchläufe",
-  keptBy: (email: string) => `Geführt von ${email}`,
   signInTitle: "Bei Gamepanion anmelden",
-  signInLead: "Dein Questlog, dein Build und deine Gegenstände, so wie du sie Claude erzählt hast.",
+  signInLead: "Deine Quests, dein Build und deine Gegenstände, so wie du sie Claude erzählt hast.",
   emailLabel: "E-Mail",
   sendCode: "Schick mir einen Code",
   codeSent: (email: string) => `Ein Code ist unterwegs an ${email}. Er gilt einmal, für fünf Minuten.`,
@@ -26,9 +26,9 @@ export const de: Copy = {
   refused: (provider: string | null, code: string) => `${provider ?? "Der Anmeldedienst"} hat die Anmeldung abgelehnt: ${code}`,
   signOut: "Abmelden",
 
-  // Die Kontoseite: das Exlibris (wer diesen Almanach führt) und wie man sich anmeldet
+  // Die Kontoseite: wer angemeldet ist, und wie man sich anmeldet
   account: "Konto",
-  keptByLead: "Diesen Almanach führt",
+  signedInAs: "Angemeldet als",
   noName: "Noch kein Name",
   rename: "Umbenennen",
   addName: "Namen eintragen",
@@ -72,13 +72,16 @@ export const de: Copy = {
   unknownClient: "Eine App",
   consentFailed: "Das hat nicht geklappt. Starte die Verbindung noch einmal aus der App.",
 
-  // The book: a contents page, then a page per playthrough
-  contents: "Inhalt",
+  // Die Seiten: deine Spiele, dann eine Seite je Durchlauf
+  contents: "Deine Spiele",
   previousPage: "Vorherige Seite",
   nextPage: "Nächste Seite",
   pages: "Seiten",
   nothingYet: "Noch nichts aufgezeichnet.",
-  connectHint: (url: string) => `Füge ${url} in Claude als eigenen Connector hinzu und erzähl Claude dann, was du spielst.`,
+  connectBefore: "Füge diese Adresse in Claude als eigenen Connector hinzu:",
+  connectAfter: "Dann erzähl Claude, was du spielst.",
+  copyIt: "Kopieren",
+  copied: "Kopiert",
   lastPlayed: (day: string) => `Zuletzt gespielt ${day}`,
   pageNumber: (n: number) => `Seite ${n}`,
   moreOpen: (n: number) => `und ${n} weitere offen`,

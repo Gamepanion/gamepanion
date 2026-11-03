@@ -2,12 +2,13 @@ import { buildOf, codexOf, itemsOf, listPlaythroughs, mcpUrl, questsOf, sessions
 import { Pages } from "@/components/Pages";
 import { serverCopy } from "@/components/copy/server";
 import { Sheet } from "./Sheet";
-import { Tile } from "@/components/icons";
-import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, Gamepad2, ScrollText } from "lucide-react";
+import { CopyField } from "@/components/CopyField";
+import { GameTile } from "@/components/GameTile";
+import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ScrollText } from "lucide-react";
 
-// The web app is one book (#12): a contents page, then one page per playthrough, most recently played first, so it opens on the game
+// The web app is a row of pages (#12): your games first, then one page per playthrough, most recently played first, so it opens on the game
 // being played now. Every page is rendered here; components/Pages.tsx lays them side by side and turns them. `at` is the playthrough
-// whose address was opened (null for the contents). Each page shows as much as its playthrough's spoiler setting (ADR 0016).
+// whose address was opened (null for your games). Each page shows as much as its playthrough's spoiler setting (ADR 0016).
 export async function Book({ player, at }: { player: Player; at: string | null }) {
   const copy = await serverCopy();
   const runs = await listPlaythroughs(player);
@@ -23,18 +24,19 @@ export async function Book({ player, at }: { player: Player; at: string | null }
   );
 }
 
-// The table of contents: every game, and under it a card for each of its playthroughs that says where the player is, like the page a
-// bookmark ribbon hangs from: the last session, the next step, the plan's next goals and how much is filed. The ribbon carries the page
-// number. A card turns to its page (data-page), or, without JavaScript, opens its address.
+// Your games: every game with its tile, and under it a card for each of its playthroughs that says where the player is: the last
+// session, the next step, the plan's next goals and how much is filed. The badge carries the page number. A card turns to its page (data-page), or, without JavaScript, opens its address.
 async function Contents({ player, runs }: { player: Player; runs: PlaythroughView[] }) {
   const copy = await serverCopy();
   if (!runs.length)
     return (
       <div className="space-y-4">
-        <h1 className="plate text-2xl font-bold">{copy.contents}</h1>
+        <h1 className="text-3xl">{copy.contents}</h1>
         <div className="card space-y-2">
           <p>{copy.nothingYet}</p>
-          <p className="text-sm text-muted">{copy.connectHint(mcpUrl())}</p>
+          <p className="text-sm text-muted">{copy.connectBefore}</p>
+          <CopyField value={mcpUrl()} />
+          <p className="text-sm text-muted">{copy.connectAfter}</p>
         </div>
       </div>
     );
@@ -42,12 +44,12 @@ async function Contents({ player, runs }: { player: Player; runs: PlaythroughVie
   const games = [...new Map(runs.map((t) => [t.game.id, t.game])).values()];
   return (
     <div className="space-y-6">
-      <h1 className="plate text-2xl font-bold">{copy.contents}</h1>
+      <h1 className="text-3xl">{copy.contents}</h1>
       {games.map((g) => (
         <section key={g.id} aria-labelledby={`game-${g.id}`} className="space-y-2">
-          <h2 id={`game-${g.id}`} className="plate flex items-center gap-3">
-            <Tile icon={Gamepad2} />
-            <span className="text-3xl font-bold tracking-tight">{g.title}</span>
+          <h2 id={`game-${g.id}`} className="flex items-center gap-3 pt-2">
+            <GameTile title={g.title} />
+            <span className="text-2xl">{g.title}</span>
             {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
           </h2>
           <ol className="space-y-3">{runs.map((t, i) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} page={i + 1} />))}</ol>
@@ -110,7 +112,7 @@ async function RunCard({ player, run: t, page }: { player: Player; run: Playthro
         {playing && goals.length > 0 && (
           <span className="run-line mt-3">
             <Crosshair aria-hidden="true" />
-            <span className="grid flex-1 gap-3 sm:grid-cols-2">
+            <span className={`grid flex-1 gap-3 ${goals.length > 1 ? "sm:grid-cols-2" : ""}`}>
               {goals.map((goal) => (
                 <span key={goal.id} className="block">
                   <span className="flex items-baseline justify-between gap-2 text-sm">

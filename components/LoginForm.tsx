@@ -20,7 +20,7 @@ function go(data: unknown, next: string) {
 }
 
 /**
- * `onSignedIn` runs once a sign-in has succeeded, before the browser moves on: the closed book opens there. `refused`: a provider turned
+ * `onSignedIn` runs once a sign-in has succeeded, before the browser moves on. `refused`: a provider turned
  * the last sign-in down, and says why.
  */
 export function LoginForm({

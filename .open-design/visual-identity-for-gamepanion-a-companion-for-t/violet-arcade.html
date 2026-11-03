@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Violet arcade · Gamepanion style tile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0C0B10; --surface: #17151F; --fg: #F2F0F7; --muted: #A49FB4; --border: #2E2A3A;
+  --accent: #A77BFF; --accent-on: #12082A; --accent-hover: #BC9BFF;
+  --signal: #C6F432;
+  --success: #009E73; --warn: #E69F00; --danger: #D55E00;
+  --font-display: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem; --text-lg: 1.125rem; --text-xl: 1.375rem;
+  --text-2xl: 1.875rem; --text-3xl: 3rem; --text-4xl: 5rem;
+  --leading-body: 1.5; --leading-tight: 0.92; --tracking-display: -0.035em;
+  --radius-sm: 0px; --radius-md: 2px; --radius-lg: 4px; --radius-pill: 999px;
+  --elev-raised: 4px 4px 0 var(--accent);
+  --container-max: 1200px; --container-gutter-phone: 16px; --container-gutter-tablet: 24px; --container-gutter-desktop: 32px;
+  --section-y-phone: 24px; --section-y-tablet: 32px; --section-y-desktop: 40px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 var(--text-base)/var(--leading-body) var(--font-body); }
+.tile { max-width: var(--container-max); margin: 0 auto; padding: var(--section-y-desktop) var(--container-gutter-desktop); display: grid; grid-template-columns: 220px 1fr; gap: 0; border: 1px solid var(--border); }
+.rail { border-right: 1px solid var(--border); padding-right: 24px; }
+.rail .logo { font: 800 var(--text-xl)/1 var(--font-display); letter-spacing: -0.02em; margin-bottom: 28px; }
+.rail .logo span { color: var(--accent); }
+.nav a { display: flex; align-items: center; gap: 10px; color: var(--muted); text-decoration: none; font-size: var(--text-sm); font-weight: 600; padding: 10px 12px; border-left: 4px solid var(--c); margin-bottom: 4px; }
+.nav a[aria-current] { color: var(--fg); background: var(--surface); }
+.nav small { margin-left: auto; font: var(--text-xs) var(--font-mono); }
+.games { margin-top: 28px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.game { font-size: var(--text-xs); color: var(--muted); }
+.game i { display: grid; place-items: center; height: 72px; font: 800 var(--text-2xl)/1 var(--font-display); font-style: normal; color: #fff; border-radius: var(--radius-md); }
+.main { padding-left: 32px; }
+.mega { font: 800 var(--text-4xl)/var(--leading-tight) var(--font-display); letter-spacing: var(--tracking-display); text-transform: uppercase; margin: 0; }
+.mega em { font-style: normal; color: var(--accent); }
+.sub { display: flex; gap: 24px; align-items: baseline; margin: 18px 0 30px; color: var(--muted); }
+.sub b { font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal); }
+.row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; }
+h2 { font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.swatches div { padding: 10px; font: var(--text-xs)/1.4 var(--font-mono); border: 1px solid var(--border); }
+.swatches b { display: block; font-size: var(--text-sm); }
+.scale div { display: flex; gap: 12px; align-items: baseline; border-bottom: 1px solid var(--border); padding: 3px 0; white-space: nowrap; overflow: hidden; }
+.scale small { width: 52px; flex: none; color: var(--muted); font: var(--text-xs) var(--font-mono); }
+.quest { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); margin-bottom: -1px; font-size: var(--text-sm); }
+.quest .st { font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.quest.done .st { color: var(--signal); }
+.btns { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+.btn { font: 800 var(--text-sm)/1 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; padding: 14px 18px; border-radius: var(--radius-md); border: 2px solid var(--fg); color: var(--fg); background: transparent; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-on); box-shadow: 4px 4px 0 var(--fg); }
+label { display: block; font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+input { width: 100%; font: var(--text-base) var(--font-body); color: var(--fg); background: var(--surface); border: 0; border-bottom: 2px solid var(--muted); border-radius: 0; padding: 10px 12px; }
+.tag { display: inline-block; font: 700 var(--text-xs)/1 var(--font-mono); padding: 5px 8px; border: 1px solid var(--accent); color: var(--fg); }
+.card { background: var(--surface); padding: 16px; box-shadow: var(--elev-raised); margin-top: 20px; }
+.card h3 { margin: 0 0 4px; font: 800 var(--text-lg)/1.2 var(--font-display); }
+.card p { margin: 0; color: var(--muted); font-size: var(--text-sm); }
+@media (max-width: 860px) {
+  .tile { grid-template-columns: 1fr; padding: var(--section-y-phone) var(--container-gutter-phone); }
+  .rail { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 20px; }
+  .main { padding: 20px 0 0; }
+  .row { grid-template-columns: 1fr; }
+  .mega { font-size: var(--text-3xl); }
+}
+</style>
+</head>
+<body>
+<div class="tile" data-od-style-tile>
+  <aside class="rail">
+    <div class="logo">Game<span>panion</span></div>
+    <nav class="nav" aria-label="Playthrough">
+      <a href="#" aria-current="page" style="--c:#E69F00">Quests <small>orange</small></a>
+      <a href="#" style="--c:#56B4E9">Build <small>sky</small></a>
+      <a href="#" style="--c:#009E73">Items <small>green</small></a>
+      <a href="#" style="--c:#CC79A7">Codex <small>purple</small></a>
+    </nav>
+    <div class="games" aria-label="Your games">
+      <div class="game"><i style="background:hsl(254 46% 34%)">HK</i>Hollow Knight</div>
+      <div class="game"><i style="background:hsl(4 50% 34%)">LP</i>Lies of P</div>
+      <div class="game"><i style="background:hsl(335 44% 34%)">CO</i>Clair Obscur</div>
+      <div class="game"><i style="background:hsl(86 40% 26%)">BG</i>Baldur's Gate 3</div>
+    </div>
+  </aside>
+
+  <section class="main">
+    <h1 class="mega">Play on.<br><em>We'll remember.</em></h1>
+    <div class="sub"><b>Violet arcade</b><span>Near-black, sharp edges, a violet hit and a lime signal for what's done. Energetic, gamer-coded.</span></div>
+
+    <div class="row">
+      <div>
+        <h2>Palette</h2>
+        <div class="swatches">
+          <div style="background:#0C0B10"><b>bg</b>#0C0B10<br>fg 17.35:1</div>
+          <div style="background:#17151F"><b>surface</b>#17151F<br>fg 15.97:1</div>
+          <div style="background:#F2F0F7;color:#0C0B10"><b>fg</b>#F2F0F7</div>
+          <div style="background:#A49FB4;color:#0C0B10"><b>muted</b>#A49FB4<br>on bg 7.65:1</div>
+          <div style="background:#A77BFF;color:#12082A"><b>accent</b>#A77BFF<br>on bg 6.46:1 · on 6.33:1</div>
+          <div style="background:#C6F432;color:#0C0B10"><b>signal</b>#C6F432<br>on bg 15.30:1</div>
+          <div style="background:#2E2A3A"><b>border</b>#2E2A3A<br>1.41:1</div>
+          <div style="background:#F7F6FA;color:#14121A"><b>light bg</b>#F7F6FA<br>fg 17.25:1</div>
+          <div style="background:#F7F6FA;color:#6B3FD6"><b>light accent</b>#6B3FD6<br>5.90:1</div>
+        </div>
+        <h2 style="margin-top:22px">Type · Atkinson Hyperlegible Next 800</h2>
+        <div class="scale">
+          <div><small>4xl 80</small><span style="font:800 3.25rem/1 var(--font-display);letter-spacing:var(--tracking-display);text-transform:uppercase">Boss</span><small style="width:auto">(shown at 52)</small></div>
+          <div><small>3xl 48</small><span style="font:800 var(--text-3xl)/1 var(--font-display);letter-spacing:-0.03em">Your build</span></div>
+          <div><small>2xl 30</small><span style="font:800 var(--text-2xl)/1.1 var(--font-display);letter-spacing:-0.01em">Open quests</span></div>
+          <div><small>xl 22</small><span style="font:600 var(--text-xl)/1.2 var(--font-display)">City of Tears</span></div>
+          <div><small>lg 18</small><span style="font-size:var(--text-lg)">Session 22</span></div>
+          <div><small>base 16</small><span>Body at 16, 1.5 leading.</span></div>
+          <div><small>sm 14</small><span style="font-size:var(--text-sm)">Rows and labels</span></div>
+          <div><small>xs 12</small><span style="font:700 var(--text-xs) var(--font-mono);letter-spacing:0.08em;text-transform:uppercase">HUD caps</span></div>
+        </div>
+      </div>
+      <div>
+        <h2>Quests · Hollow Knight</h2>
+        <div class="quest"><span>The locked gate beneath the city</span><span class="st">○ Open</span></div>
+        <div class="quest"><span>A charm the shopkeeper mentioned</span><span class="st">○ Open</span></div>
+        <div class="quest done"><span>Bring the map back to the cartographer</span><span class="st">✓ Done</span></div>
+        <div class="btns"><button class="btn primary">Where was I?</button><button class="btn">Open threads</button></div>
+        <label for="t3">Tell Gamepanion</label>
+        <input id="t3" placeholder="Found a new charm in the crossroads…">
+        <p style="margin:14px 0 0"><span class="tag">#nail</span> <span class="tag">#boss</span></p>
+        <div class="card"><h3>Build · Nail master</h3><p>3 charms equipped · 1 goal open</p></div>
+        <p style="font:var(--text-xs) var(--font-mono);color:var(--muted);margin-top:18px">radius 0 · 2 · 4 · elevation is a hard offset shadow</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // are public too, so a phone can fetch them for its home screen. Only the cookie's presence is checked here (the proxy doesn't ask the
 // database); pages get the player from playerFromHeaders, which checks the session.
 const EXEMPT =
-  /^\/(login|consent|health|mcp|favicon\.ico|icon\.svg|apple-icon\.png|icon-(192|512|maskable-512)\.png|manifest\.webmanifest|backdrop-(dark|light)\.svg)$|^\/(api|\.well-known|_next)\//;
+  /^\/(login|consent|health|mcp|favicon\.ico|icon\.svg|apple-icon\.png|icon-(192|512|maskable-512)\.png|manifest\.webmanifest)$|^\/(api|\.well-known|_next)\//;
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;

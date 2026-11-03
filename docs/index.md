@@ -8,9 +8,9 @@ hide:
 
 <img class="ql-hero__mark" src="assets/icon.svg" alt="">
 
-# Remember where you are in every game.
+# Play on. Your Gamepanion remembers.
 
-<p class="ql-hero__lead">Gamepanion is a quest log, build tracker and item list for the games you play. You tell Claude while you play; when you come back, Claude tells you what you left open. It only ever shows what you have already found.</p>
+<p class="ql-hero__lead">Gamepanion is a spoiler-free companion for the games you play: your quests, build and items. You tell Claude while you play; when you come back, Claude tells you what you left open. It only ever shows what you have already found.</p>
 
 [Set it up](self-hosting/configuration.md){ .md-button .md-button--primary }
 [What it stands for](values.md){ .md-button }

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "Gamepanion logo sketches",
+  "entry": ".open-design/gamepanion-logo/gamepanion-logo.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "standalone",
+    "site",
+    "png",
+    "jpeg",
+    "pdf"
+  ],
+  "createdAt": "2026-11-03T09:24:07.427Z",
+  "updatedAt": "2026-11-03T09:24:07.427Z",
+  "designSystemId": "user:visual-identity-for-gamepanion-a-companion-for-t"
+}

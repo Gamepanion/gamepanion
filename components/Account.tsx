@@ -1,5 +1,5 @@
 "use client";
-// The account page's two client parts: the bookplate, where the player renames themselves in place, and the email-code row, whose
+// The account page's two client parts: the account card, where the player renames themselves in place, and the email-code row, whose
 // "Change address" folds out the two steps of moving the account (a code to the new address, then the switch; #61).
 import { Mail, PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -7,8 +7,8 @@ import { useId, useState } from "react";
 import { authClient } from "./auth-client";
 import { useCopy } from "./copy/client";
 
-/** Who keeps this almanac: the name set large in a gilt double frame, the address under it, renamed in place. */
-export function Bookplate({ name, email }: { name: string; email: string }) {
+/** Who is signed in: the name set large, the address under it, renamed in place. */
+export function AccountCard({ name, email }: { name: string; email: string }) {
   const copy = useCopy();
   const router = useRouter();
   const hint = useId();
@@ -36,14 +36,9 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
   }
 
   return (
-    <section className="bookplate" aria-labelledby="kept-by">
-      {/* The compass star of the almanac's cover (ClosedBook.tsx), small, in its gilt. */}
-      <svg viewBox="0 0 64 64" className="mx-auto mb-2 size-8 text-hint" aria-hidden="true">
-        <circle cx="32" cy="32" r="27" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M32 6 L36 28 L58 32 L36 36 L32 58 L28 36 L6 32 L28 28 Z" fill="currentColor" opacity="0.8" />
-      </svg>
-      <p id="kept-by" className="text-sm text-muted">
-        {copy.keptByLead}
+    <section className="account-card" aria-labelledby="signed-in-as">
+      <p id="signed-in-as" className="eyebrow text-muted">
+        {copy.signedInAs}
       </p>
       {editing ? (
         <form onSubmit={save} onKeyDown={(e) => e.key === "Escape" && cancel()}>
@@ -52,7 +47,7 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
           </label>
           <input
             id={field}
-            className="bookplate-name bookplate-input"
+            className="account-name account-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={copy.noName}
@@ -63,7 +58,7 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
             aria-describedby={hint}
           />
           <p className="mt-1 text-sm text-muted [overflow-wrap:anywhere]">{email}</p>
-          <div className="mt-4 flex justify-center gap-5 text-sm">
+          <div className="mt-4 flex gap-5 text-sm">
             <button type="button" className="link text-muted" onClick={cancel}>
               {copy.cancel}
             </button>
@@ -82,7 +77,7 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
         </form>
       ) : (
         <>
-          {name ? <p className="bookplate-name">{name}</p> : <p className="mt-2 text-xl text-muted italic">{copy.noName}</p>}
+          {name ? <p className="account-name">{name}</p> : <p className="mt-2 text-xl text-muted italic">{copy.noName}</p>}
           <p className="mt-1 text-sm text-muted [overflow-wrap:anywhere]">{email}</p>
           <button type="button" className="link mt-4 inline-flex items-center gap-1.5 text-sm" onClick={() => setEditing(true)}>
             <PenLine aria-hidden="true" className="size-4" />

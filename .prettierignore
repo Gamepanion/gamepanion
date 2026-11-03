@@ -2,7 +2,8 @@
 # MkDocs Markdown: Python-Markdown needs nested lists and admonition bodies indented by four spaces, which Prettier rewrites.
 docs/**/*.md
 site/
-# Gamepanion's own: the lock file, build output, and openapi.json, written by npm run generate.
+# Gamepanion's own: the lock file, build output, openapi.json (written by npm run generate) and the design explorations (written by Open Design).
 package-lock.json
 .next/
 openapi.json
+.open-design/
