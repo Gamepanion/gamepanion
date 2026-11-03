@@ -26,7 +26,7 @@ export { chatEnabled, chatRoute, voiceEnabled, voiceRoute } from "./chat-route";
 export type { AboutKind, ChatLink } from "./chat";
 export { dispatch as apiRoute } from "./http/api";
 export { apiResourceMetadataRoute } from "./http/metadata";
-export { mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, todoPath, type PlaythroughTab } from "./urls";
+export { accountKeyPath, mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, todoPath, type PlaythroughTab } from "./urls";
 
 // What the pages read, as the signed-in player sees it: through the same gate as the tools, never asking for spoilers unless the
 // player asked on the page.
@@ -37,7 +37,7 @@ export { getPlaythrough, listPlaythroughs, type PlaythroughView } from "./games"
 export { itemsOf, type ItemView } from "./items";
 export { questsOf, type QuestView } from "./quests";
 export { todosOf, type TodoView } from "./todos";
-export { getSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
+export { getSession, latestSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
 export { InvalidInputError, NotFoundError } from "./errors";
 export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";
 export {

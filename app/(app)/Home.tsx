@@ -1,6 +1,8 @@
 import Link from "next/link";
 import {
+  accountKeyPath,
   briefing,
+  keyStorageEnabled,
   buildOf,
   continuePlaythrough,
   codexOf,
@@ -14,6 +16,7 @@ import {
 } from "@/backend";
 import { serverCopy } from "@/components/copy/server";
 import { CopyField } from "@/components/CopyField";
+import { FirstRun } from "@/components/FirstRun";
 import { GameTile } from "@/components/GameTile";
 import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ListTodo, ScrollText } from "lucide-react";
 import { ChatOn } from "@/components/chat/Chat";
@@ -23,16 +26,15 @@ import { ChatOn } from "@/components/chat/Chat";
 export async function Home({ player }: { player: Player }) {
   const copy = await serverCopy();
   const runs = await listPlaythroughs(player);
+  // The first-run notice (#80) wraps both views at one place in the tree, so it keeps saying "your first session is filed" when the page
+  // turns from the checklist to the games.
   if (!runs.length)
     return (
       <div className="space-y-4">
         <h1 className="text-3xl">{copy.contents}</h1>
-        <div className="card space-y-2">
-          <p>{copy.nothingYet}</p>
-          <p className="text-sm text-muted">{copy.connectBefore}</p>
-          <CopyField value={mcpUrl()} />
-          <p className="text-sm text-muted">{copy.connectAfter}</p>
-        </div>
+        <FirstRun watching>
+          <Welcome />
+        </FirstRun>
       </div>
     );
   // "Where was I?" (#79): the playthrough played most recently among those being played gets the Continue card; the rest below, by game.
@@ -41,19 +43,23 @@ export async function Home({ player }: { player: Player }) {
   // Games in the order of their latest playthrough; each game's playthroughs latest first.
   const games = [...new Map(rest.map((t) => [t.game.id, t.game])).values()];
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h1 className="text-3xl">{copy.contents}</h1>
-      {current && <Continue player={player} run={current} />}
-      {games.map((g) => (
-        <section key={g.id} aria-labelledby={`game-${g.id}`} className="space-y-2">
-          <h2 id={`game-${g.id}`} className="flex items-center gap-3 pt-2">
-            <GameTile title={g.title} />
-            <span className="text-2xl">{g.title}</span>
-            {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
-          </h2>
-          <ol className="space-y-3">{rest.map((t) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} />))}</ol>
-        </section>
-      ))}
+      <FirstRun watching={false}>
+        <div className="space-y-6">
+          {current && <Continue player={player} run={current} />}
+          {games.map((g) => (
+            <section key={g.id} aria-labelledby={`game-${g.id}`} className="space-y-2">
+              <h2 id={`game-${g.id}`} className="flex items-center gap-3 pt-2">
+                <GameTile title={g.title} />
+                <span className="text-2xl">{g.title}</span>
+                {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
+              </h2>
+              <ol className="space-y-3">{rest.map((t) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} />))}</ol>
+            </section>
+          ))}
+        </div>
+      </FirstRun>
     </div>
   );
 }
@@ -213,5 +219,51 @@ async function Continue({ player, run: t }: { player: Player; run: PlaythroughVi
         <ChatOn playthroughId={t.id} label={copy.continueChat} />
       </div>
     </section>
+  );
+}
+
+// Nothing filed yet (#80): a checklist for each way in, the connector always and the player's own key where the instance stores keys,
+// side by side from a tablet up. It turns into "your first session is filed" as soon as one arrives (components/FirstRun.tsx).
+async function Welcome() {
+  const copy = await serverCopy();
+  const ownKey = keyStorageEnabled();
+  return (
+    <div className="space-y-4">
+      <p>{copy.nothingYet}</p>
+      <div className={`grid gap-4 ${ownKey ? "md:grid-cols-2" : ""}`}>
+        <section aria-labelledby="way-connector" className="card space-y-3">
+          <h2 id="way-connector" className="text-xl font-bold">
+            {copy.wayConnector}
+          </h2>
+          <ol className="first-run-steps">
+            <li>
+              <span>{copy.connectBefore}</span>
+              <CopyField value={mcpUrl()} />
+            </li>
+            <li>{copy.connectSteps}</li>
+            <li>{copy.connectAfter}</li>
+          </ol>
+        </section>
+        {ownKey && (
+          <section aria-labelledby="way-key" className="card space-y-3">
+            <h2 id="way-key" className="text-xl font-bold">
+              {copy.wayOwnKey}
+            </h2>
+            <ol className="first-run-steps">
+              <li>
+                <span>
+                  {copy.ownKeyStepBefore}{" "}
+                  <Link href={accountKeyPath()} className="font-semibold text-accent underline">
+                    {copy.ownKeyStepLink}
+                  </Link>
+                </span>
+                <span className="block text-sm text-muted">{copy.keyNote}</span>
+              </li>
+              <li>{copy.ownKeyOpenChat}</li>
+            </ol>
+          </section>
+        )}
+      </div>
+    </div>
   );
 }
