@@ -37,14 +37,20 @@ export type ChatContext = { playthroughId?: string; about?: { kind: AboutKind; i
 
 /** Something a tool call filed or changed, for the link chips under the reply. */
 export type ChatLink = { name: string; url: string };
-export type ChatCode = "chat_refused" | "chat_too_long" | "chat_limit" | "chat_unavailable";
+export type ChatCode = "chat_refused" | "chat_too_long" | "chat_limit" | "chat_unavailable" | "own_key_rejected";
 /** A code is a failure the app words in the player's language; when something was written before it, `links` and `filed` say what,
  * so the player doesn't send it again. */
 export type ChatReply = { reply: string; links: ChatLink[]; filed: boolean } | { code: ChatCode; links?: ChatLink[]; filed?: boolean };
 
 export interface ChatModel {
   create(params: Anthropic.Beta.MessageCreateParamsNonStreaming): Promise<Anthropic.Beta.BetaMessage>;
+  /** Running on the player's own key (ADR 0021): a key Anthropic refuses is the player's to fix, never a reason to use the instance's. */
+  own?: boolean;
 }
+
+/** Whether an API error means the player's own key can't be used: not valid, not allowed, or out of credit. */
+export const keyRefused = (e: InstanceType<typeof Anthropic.APIError>): boolean =>
+  e.status === 401 || e.status === 403 || e.status === 402 || (e.status === 400 && /credit|billing/i.test(e.message));
 
 /** Claude through the API key. A declined request is re-run on a fallback model by the API itself ("default" routing). */
 export function anthropicModel(apiKey: string): ChatModel {
@@ -186,8 +192,8 @@ export async function chat(p: Player, turns: ChatTurn[], context: ChatContext, m
       });
     } catch (e) {
       if (e instanceof Anthropic.APIError) {
-        log.warn({ status: e.status }, "the Claude API failed");
-        return fail("chat_unavailable");
+        log.warn({ status: e.status, own: !!model.own }, "the Claude API failed");
+        return fail(model.own && keyRefused(e) ? "own_key_rejected" : "chat_unavailable");
       }
       throw e;
     }

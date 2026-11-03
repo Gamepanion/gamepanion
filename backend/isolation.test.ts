@@ -72,7 +72,7 @@ test("A game's stat names are its player's", async () => {
 });
 
 test("every tool, as B, returns nothing of A's: with A's ids it is not found, without ids it is B's own", async () => {
-  for (const t of TOOLS.filter((x) => x.annotations.readOnlyHint)) {
+  for (const t of TOOLS.filter((x) => x.annotations.readOnlyHint && "playthroughId" in x.input.shape)) {
     // missed reads only when asked; ask for everything, so nothing is held back by the spoiler gate here.
     const ask = t.name === "missed" ? { reveal: "full" } : t.name === "item" ? { reveal: "full", name: "" } : {};
     await expect(t.run(s.b, { ...ask, playthroughId: s.liesOfP })).rejects.toBeInstanceOf(NotFoundError);

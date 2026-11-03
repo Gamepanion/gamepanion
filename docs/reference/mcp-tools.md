@@ -54,6 +54,10 @@ Fixes or removes what was filed, in `changes`: each names one row by `what` (`ga
 
 The ids come from `briefing`, `open_threads`, `item` and `record`. `next` asks Claude to read back each change and says that a removal can't be undone.
 
+## chat_key
+
+The link to the account page's key section (`/account#key`), where the player stores their own Anthropic API key for the in-app chat ([ADR 0021](../adr/0021-players-own-keys.md)), and whether the instance stores keys at all (`keyStorage`). It takes no key and returns none: `next` tells Claude to send the player there and never to ask for the key in a chat. A claude.ai subscription has no API key; an account with prepaid credits at console.anthropic.com does.
+
 ## missed
 
 "Did I miss anything?", only when the player asks, after Claude warned them, and at the level they agreed to: `reveal` is required, `hint` or `full`. Gamepanion knows only the player's own log (values V6), so it returns:

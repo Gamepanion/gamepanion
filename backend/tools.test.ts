@@ -14,7 +14,7 @@ const run = (name: string, p: { id: string }, args: unknown) => toolByName(name)
 const next = (out: Record<string, unknown>) => (out.next as string[]).join("\n");
 
 test("the table has record, briefing, open_threads, item, codex, correct and missed, each with an English description and a next in its output", () => {
-  expect(TOOLS.map((t) => t.name)).toEqual(["record", "briefing", "open_threads", "item", "codex", "correct", "missed"]);
+  expect(TOOLS.map((t) => t.name)).toEqual(["record", "briefing", "open_threads", "item", "codex", "correct", "chat_key", "missed"]);
   for (const t of TOOLS) {
     expect(t.description).toMatch(/^[\x20-\x7e]+$/);
     expect(Object.keys(t.output.shape)).toContain("next");

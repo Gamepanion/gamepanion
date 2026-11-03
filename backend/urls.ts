@@ -21,6 +21,11 @@ export const codexPath = (playthroughId: string, id: string) => `${tabPath(playt
 /** An item's row on its playthrough's Items tab. */
 export const itemPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "items")}#item-${id}`;
 
+/** Where a player pastes their own Anthropic key for the in-app chat (ADR 0021). */
+export const accountKeyPath = () => "/account#key";
+/** The home page: what the player is playing, or, with nothing filed, how to start. */
+export const homePath = () => "/";
+
 /** A to-do's row on its playthrough's To-dos tab. */
 export const todoPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "todos")}#todo-${id}`;
 
