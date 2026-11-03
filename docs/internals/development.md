@@ -10,7 +10,7 @@ npm run dev
 | Command | What it does |
 |---|---|
 | `npm run dev` / `npm run build` / `npm start` | Next.js |
-| `npm run demo` | A dev server on port 3123 with its own data in `data/demo`: a demo player with two playthroughs, signed in without a mail server; prints the session cookie for a browser or curl. Delete `data/demo` to start over. |
+| `npm run demo` | A dev server on port 3123 whose `data/demo` is emptied and filled from the fixed seed in `backend/testing/demo.ts` on every start (`DEMO_KEEP=1` keeps the last run's data): the demo player, signed in without a mail server, with two playthroughs that fill every tab. Prints the session cookie for a browser or curl. |
 | `npm run typecheck` | `next typegen` and `tsc --noEmit` |
 | `npm run lint` | ESLint, with the frontend/backend boundary and `eslint-config-prettier` last |
 | `npm run format` / `npm run format:check` | Prettier at 160 columns |
