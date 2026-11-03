@@ -23,6 +23,8 @@ import {
   PLAYTHROUGH_STATUSES,
   QUEST_STATUSES,
   SPOILER_LEVELS,
+  TODO_STATUSES,
+  type TodoStatus,
   type Attributes,
   type BackgroundLevel,
   type CodexStatus,
@@ -35,7 +37,8 @@ import {
   type SpoilerLevel,
 } from "./types";
 import type { SourceInput } from "./types";
-import { codexPath, itemPath, playthroughPath, questPath, sessionPath } from "./urls";
+import { codexPath, itemPath, playthroughPath, questPath, sessionPath, tabPath } from "./urls";
+import { removeTodo, todoRow, unlinkTodo, writeTodos, type TodoTarget } from "./todos";
 
 // The new list replaces the old one; a link that stays keeps the day it was first added.
 const replaceSources = (before: string, next: SourceInput[] | undefined) => {
@@ -45,7 +48,7 @@ const replaceSources = (before: string, next: SourceInput[] | undefined) => {
 };
 
 /** What a correction can name. */
-export const TARGETS = ["game", "playthrough", "session", "quest", "entry", "snapshot", "item", "goal", "codex", "tag", "background"] as const;
+export const TARGETS = ["game", "playthrough", "session", "quest", "entry", "snapshot", "item", "goal", "codex", "tag", "background", "todo"] as const;
 export type Target = (typeof TARGETS)[number];
 
 /** One change: the row (`what`, `id`), and either `remove` or the fields to set. A nullable field set to null is cleared. */
@@ -111,6 +114,10 @@ export type Correction = {
   addBackground?: BackgroundInput[];
   /** A background line's source; null clears it. */
   source?: { url: string; title: string } | null;
+  /** A to-do's words in the game's own language; null clears them. */
+  localText?: string | null;
+  /** What a to-do is about; null points it at nothing. */
+  about?: { what: TodoTarget; id?: string; name?: string } | null;
 };
 
 // The fields each target takes; any other field in a change is a refusal, so a typo doesn't pass silently.
@@ -157,6 +164,7 @@ const FIELDS: Record<Target, readonly (keyof Correction)[]> = {
   goal: ["target", "text", "status", "suggested", "rank", "spoiler", "notes"],
   tag: ["name"],
   background: ["text", "spoiler", "source"],
+  todo: ["text", "localText", "status", "suggested", "spoiler", "about"],
 };
 
 export type Corrected = {
@@ -249,7 +257,34 @@ function target(trx: Trx, p: Player, c: Correction): Promise<Corrected> {
       return tag(trx, p, c);
     case "background":
       return background(trx, p, c);
+    case "todo":
+      return todo(trx, p, c);
   }
+}
+
+// A to-do (ADR 0020): its words, status, whether the player took it, what it is about, or gone.
+async function todo(trx: Trx, p: Player, c: Correction): Promise<Corrected> {
+  const row = await todoRow(trx, p, c.id);
+  const url = tabPath(row.playthrough_id, "overview");
+  if (c.remove) {
+    await removeTodo(trx, p, c.id);
+    return done(c, row.text, row.playthrough_id, url);
+  }
+  const t = text("text", c.text);
+  const status = oneOf<TodoStatus>("status", c.status, TODO_STATUSES);
+  if (c.about === null) await unlinkTodo(trx, p, c.id);
+  const [filed] = await writeTodos(trx, p, row.playthrough_id, null, [
+    {
+      id: c.id,
+      text: t,
+      localText: c.localText === undefined ? undefined : (c.localText ?? ""),
+      status,
+      suggested: c.suggested,
+      spoiler: oneOf<SpoilerLevel>("spoiler", c.spoiler, SPOILER_LEVELS),
+      about: c.about ?? undefined,
+    },
+  ]);
+  return done(c, filed.text, row.playthrough_id, url);
 }
 
 // A background line (ADR 0016): its text, spoiler level and source, or gone.

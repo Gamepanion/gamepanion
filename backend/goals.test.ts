@@ -120,7 +120,7 @@ test("an NG+ takes the character, the plan and the open goals along only when as
   expect(t.label).toBe("NG+");
   expect(t.character.class).toBe("Path of the Bastard");
   expect(out.carried).toBe(2);
-  expect(plan(out)).toMatch(/Taken along from the earlier playthrough: the character, the build plan and 2 open goals/);
+  expect(plan(out)).toMatch(/Taken along from the earlier playthrough: the character, the build plan, 2 open goals and 0 open to-dos/);
   const b = await buildOf(s.a, t.id);
   expect(b.plan?.mainStat).toBe("motivity");
   expect(b.goals.map((g) => [g.kind, g.rank])).toEqual([

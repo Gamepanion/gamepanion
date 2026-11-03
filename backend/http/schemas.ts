@@ -14,7 +14,9 @@ import {
   GOAL_STATUSES,
   PLAYTHROUGH_STATUSES,
   QUEST_STATUSES,
+  TODO_STATUSES,
 } from "../types";
+import { TODO_TARGETS } from "../todos";
 import { ERROR_CODES } from "./errors";
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL");
@@ -29,6 +31,31 @@ export const BackgroundJson = z
     }),
   )
   .describe("Background Claude added (ADR 0016), oldest first");
+
+const TodoRefJson = z
+  .array(z.object({ id: z.string(), text: z.string(), localText: z.string().nullable(), suggested: z.boolean() }))
+  .describe("The open to-dos about it (ADR 0020); suggested ones are Claude's, not the player's yet");
+
+export const TodoJson = z
+  .object({
+    id: z.string(),
+    text: z.string().describe("The player's words"),
+    localText: z.string().nullable().describe("The same with the game's own names"),
+    status: z.enum(TODO_STATUSES),
+    suggested: z.boolean().describe("Proposed by Claude, not taken by the player yet"),
+    spoiler: z.enum(SPOILER_LEVELS),
+    about: z
+      .object({ what: z.enum(TODO_TARGETS), id: z.string(), name: z.string(), url: Url })
+      .nullable()
+      .describe("The quest, item or codex entry it is about"),
+    addedIn: z.object({ id: z.string(), url: Url }).nullable().describe("The session it was added in"),
+    closedIn: z.object({ id: z.string(), url: Url }).nullable().describe("The session it was done or dropped in"),
+  })
+  .meta({ id: "Todo", description: "An errand the player keeps that is neither a quest nor a goal (ADR 0020)" });
+
+export const TodoListJson = z
+  .object({ todos: z.array(TodoJson).describe("Open first (the player's, then suggestions), then done and dropped, the latest closed first") })
+  .meta({ id: "TodoList" });
 
 export const ErrorJson = z
   .object({ error: z.string().describe("What went wrong, in English"), code: z.enum(ERROR_CODES) })
@@ -103,6 +130,7 @@ export const QuestJson = z
     entries: z.array(EntryJson).describe("Oldest first"),
     tags: Tags,
     background: BackgroundJson,
+    todos: TodoRefJson,
     url: Url,
   })
   .meta({ id: "Quest" });
@@ -137,6 +165,7 @@ export const ItemJson = z
     sources: z.array(SourceJson).describe("Where its facts come from"),
     tags: Tags,
     background: BackgroundJson,
+    todos: TodoRefJson,
     url: Url,
   })
   .meta({ id: "Item" });
@@ -171,6 +200,7 @@ export const CodexJson = z
       .describe("The player's items rated against it, best first, from very good to very bad"),
     tags: Tags,
     background: BackgroundJson,
+    todos: TodoRefJson,
     url: Url,
   })
   .meta({ id: "CodexEntry", description: "A boss, enemy, NPC or place the player met (ADR 0010)" });
@@ -245,6 +275,8 @@ export const BriefingJson = z
     lastSession: SessionSummaryJson.nullable(),
     openQuests: z.array(QuestJson).describe("Open first, then waiting on the game"),
     build: z.object({ plan: PlanJson.nullable(), goals: z.array(GoalJson), current: SnapshotJson.nullable() }),
+    todos: z.array(TodoJson).describe("The player's open to-dos"),
+    suggestedTodos: z.array(TodoJson).describe("Open to-dos Claude proposed, not taken yet"),
     equipped: z.array(ItemJson),
     bosses: z.array(CodexJson).describe("Bosses met and not beaten yet"),
     others: z.array(PlaythroughJson).describe("The player's other playthroughs"),
@@ -286,6 +318,10 @@ export const RecordedJson = z
       .describe("The codex entries the session filed or changed"),
     character: z.boolean().describe("Whether the character changed"),
     carried: z.number().nullable().describe("Open goals taken along from carryFrom"),
+    todos: z
+      .array(z.object({ id: z.string(), text: z.string(), status: z.enum(TODO_STATUSES), suggested: z.boolean(), created: z.boolean() }))
+      .describe("The to-dos the session added, closed or changed"),
+    carriedTodos: z.number().nullable().describe("Open to-dos taken along from carryFrom"),
   })
   .meta({ id: "Recorded", description: "What was filed from a session" });
 
@@ -326,6 +362,8 @@ export const COMPONENTS = [
   CodexJson,
   CodexListJson,
   TagListJson,
+  TodoJson,
+  TodoListJson,
   SnapshotJson,
   GoalJson,
   BuildJson,

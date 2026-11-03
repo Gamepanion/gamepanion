@@ -17,6 +17,7 @@ import { record, type Recorded } from "./record";
 import { ChangeInput, Day, RecordInput, Spoiler } from "./schemas";
 import { tagsInPlaythrough } from "./tags-in-use";
 import { goalLabel, type GoalView } from "./goals";
+import { todosOf, TODO_TARGETS } from "./todos";
 import {
   BACKGROUND_LEVELS,
   CODEX_KINDS,
@@ -29,6 +30,7 @@ import {
   PLAYTHROUGH_STATUSES,
   QUEST_STATUSES,
   SPOILER_LEVELS,
+  TODO_STATUSES,
   type Player,
   type SpoilerLevel,
 } from "./types";
@@ -83,6 +85,24 @@ function tool<I extends z.ZodObject, O extends z.ZodObject>(t: {
 // ---- Shapes -------------------------------------------------------------------------------------------------------------------
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL: give it to the player when they may want to look");
+
+const TodoRefJson = z
+  .array(
+    z.object({ id: z.string().describe("For record (todos with id) or correct"), text: z.string(), localText: z.string().nullable(), suggested: z.boolean() }),
+  )
+  .describe("The open to-dos about it; suggested ones are yours, not the player's yet");
+
+const TodoJson = z.object({
+  id: z.string().describe("For record (todos with id, to close it) or correct"),
+  text: z.string().describe("The player's words"),
+  localText: z.string().nullable().describe("The same with the game's own names"),
+  status: z.enum(TODO_STATUSES),
+  suggested: z.boolean().describe("Proposed by you; the player hasn't taken it yet"),
+  about: z
+    .object({ what: z.enum(TODO_TARGETS), id: z.string(), name: z.string(), url: Url })
+    .nullable()
+    .describe("The quest, item or codex entry it is about"),
+});
 
 const SourceJson = z.object({
   url: z.string(),
@@ -141,6 +161,7 @@ const QuestJson = z.object({
   status: z.enum(QUEST_STATUSES),
   nextStep: z.string().nullable().describe("The latest next step this call may show"),
   background: BackgroundJson,
+  todos: TodoRefJson,
   url: Url,
 });
 
@@ -175,6 +196,7 @@ const ItemJson = z.object({
     .describe("Codex entries it works on, best first, from very good to very bad"),
   sources: z.array(SourceJson).describe("Where its facts come from"),
   background: BackgroundJson,
+  todos: TodoRefJson,
   url: Url,
 });
 
@@ -206,6 +228,7 @@ const CodexJson = z.object({
     )
     .describe("The player's items rated against it, best first, from very good to very bad, with how many they have"),
   background: BackgroundJson,
+  todos: TodoRefJson.describe("The open to-dos about it (\"what's left to do here?\"); suggested ones are yours, not the player's yet"),
   url: Url,
 });
 
@@ -268,6 +291,10 @@ const RecordedJson = z.object({
     .array(z.object({ id: z.string(), kind: z.enum(CODEX_KINDS), name: z.string(), status: z.enum(CODEX_STATUSES), created: z.boolean(), url: Url }))
     .describe("The codex entries this call filed or changed"),
   carried: z.number().nullable().describe("Open goals taken along from carryFrom; null when nothing was carried"),
+  todos: z
+    .array(z.object({ id: z.string(), text: z.string(), status: z.enum(TODO_STATUSES), suggested: z.boolean(), created: z.boolean() }))
+    .describe("The to-dos this call added, closed or changed"),
+  carriedTodos: z.number().nullable().describe("Open to-dos taken along from carryFrom; null when nothing was carried"),
 });
 
 // What "add background" means at each level of the setting (ADR 0016).
@@ -303,6 +330,7 @@ function recordNext(r: Recorded): Next {
     r.stats && "a stat snapshot",
     r.build && "the build plan",
     r.items.length && `${r.items.length} item${r.items.length === 1 ? "" : "s"}`,
+    r.todos.length && `${r.todos.length} to-do${r.todos.length === 1 ? "" : "s"}`,
   ].filter(Boolean);
   next.push(
     `Read back in a sentence or two what was filed from the session of ${r.playedOn}${parts.length ? `: ${parts.join(", ")}` : " (only the transcript)"}, with its link.`,
@@ -334,7 +362,19 @@ function recordNext(r: Recorded): Next {
     );
   if (r.carried !== null)
     next.push(
-      `Taken along from the earlier playthrough: the character, the build plan and ${r.carried} open goal${r.carried === 1 ? "" : "s"}. Read them back and ask which still hold.`,
+      `Taken along from the earlier playthrough: the character, the build plan, ${r.carried} open goal${r.carried === 1 ? "" : "s"} and ${r.carriedTodos ?? 0} open to-do${r.carriedTodos === 1 ? "" : "s"}. Read them back and ask which still hold.`,
+    );
+  const doneTodos = r.todos.filter((x) => !x.created && x.status === "done");
+  if (doneTodos.length)
+    next.push(
+      `Ticked off: ${doneTodos.map((x) => x.text).join("; ")}. Say so; if the player didn't finish one, open it again with record (todos, id, status open).`,
+    );
+  const newTodos = r.todos.filter((x) => x.created && !x.suggested);
+  if (newTodos.length) next.push(`On the player's to-do list now: ${newTodos.map((x) => x.text).join("; ")}.`);
+  const suggestedTodos = r.todos.filter((x) => x.suggested && x.status === "open");
+  if (suggestedTodos.length)
+    next.push(
+      `Filed as suggested to-dos, not the player's yet: ${suggestedTodos.map((x) => x.text).join("; ")}. Ask whether they want them; if so, record todos with each id and suggested false.`,
     );
   if (r.newItemKinds.length)
     next.push(
@@ -366,6 +406,8 @@ const BriefingJson = z.object({
     goals: z.array(GoalJson).describe("Open goals first, by rank (the player's, then suggestions), then the reached ones"),
     current: SnapshotJson.nullable().describe("The latest snapshot"),
   }),
+  todos: z.array(TodoJson).describe("The player's open to-dos, in the order they were added"),
+  suggestedTodos: z.array(TodoJson).describe("Open to-dos you proposed that the player hasn't taken yet: mention them apart, as suggestions"),
   equipped: z.array(ItemJson),
   bosses: z.array(CodexJson).describe("Bosses the player met and hasn't beaten yet, with their tries, weaknesses, strategy and counters"),
   others: z.array(PlaythroughJson).describe("The player's other playthroughs, most recently played first"),
@@ -409,6 +451,9 @@ function briefingNext(b: Briefing, more: boolean): Next {
     next.push(
       `The player's plan, in order: ${mine.map((g) => (g.current !== null && g.target !== null ? `${goalLabel(g)} (now ${g.current})` : goalLabel(g))).join("; ")}. Say what comes next.`,
     );
+  if (b.todos.length) next.push(`On the player's to-do list: ${b.todos.map((x) => x.text).join("; ")}. Mention it after the plan.`);
+  if (b.suggestedTodos.length)
+    next.push(`To-dos you suggested, not taken yet: ${b.suggestedTodos.map((x) => x.text).join("; ")}. Mention them as suggestions, apart from the player's.`);
   if (b.bosses.length)
     next.push(
       `In the way: ${b.bosses.map((x) => `${x.name}${x.attempts ? ` (${x.attempts} tries)` : ""}`).join(", ")}. Mention them; for help, call codex with the name.`,
@@ -427,11 +472,16 @@ const ThreadsJson = z.object({
   playthrough: PlaythroughJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
   quests: z.array(QuestJson.extend({ entries: z.array(EntryJson).describe("Oldest first") })).describe("Open first, then blocked; most recently changed first"),
+  todos: z.array(TodoJson).describe("The player's open to-dos"),
+  suggestedTodos: z.array(TodoJson).describe("Open to-dos you proposed that the player hasn't taken yet"),
 });
 
-const threadsNext = (t: PlaythroughView | null, reveal: SpoilerLevel, quests: QuestView[], more: boolean): Next => {
+const threadsNext = (t: PlaythroughView | null, reveal: SpoilerLevel, quests: QuestView[], more: boolean, todos = 0): Next => {
   if (!t) return ["The player has no such playthrough yet. Ask what they are playing."];
-  if (!quests.length) return [`No quest is open in ${t.game.title} ${t.label}. Tell the player; don't suggest quests from your own knowledge of the game.`];
+  if (!quests.length)
+    return [
+      `No quest is open in ${t.game.title} ${t.label}${todos ? ", but the to-do list isn't empty: name those" : ""}. Tell the player; don't suggest quests from your own knowledge of the game.`,
+    ];
   const next: Next = [NO_ADDING.replace(", unless the player asks for hints (open_threads with reveal)", "")];
   if (more) next.push(offerMore(t));
   if (beyond(t, reveal))
@@ -594,7 +644,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "record",
     description:
-      "File one play session: the player's words verbatim as transcript, then what was learned from it, split into quests (with log entries, next steps and decisions), a stat snapshot, the build plan with its goals, the character, the codex (bosses, enemies, NPCs and places, with weaknesses and strategies) and the inventory (items with counts, numbers and what they are good or bad against, in the game's inventory groups). Before filing, call briefing for the playthrough and reuse the ids of quests and items that are already there. Ask the player when you aren't sure which quest they mean, whether they finished something or only started it, or which choice they made: never file a guess.",
+      "File one play session: the player's words verbatim as transcript, then what was learned from it, split into quests (with log entries, next steps and decisions), a stat snapshot, the build plan with its goals, the character, the codex (bosses, enemies, NPCs and places, with weaknesses and strategies), the inventory (items with counts, numbers and what they are good or bad against, in the game's inventory groups) and to-dos (errands that are neither quest nor goal, added and ticked off as the player says). Before filing, call briefing for the playthrough and reuse the ids of quests and items that are already there. Ask the player when you aren't sure which quest they mean, whether they finished something or only started it, or which choice they made: never file a guess.",
     input: RecordInput,
     output: RecordedJson,
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
@@ -614,6 +664,8 @@ export const TOOLS: Tool[] = [
         codex: r.codex,
         reached: r.reached,
         carried: r.carried,
+        todos: r.todos,
+        carriedTodos: r.carriedTodos,
       };
       return ok(RecordedJson, body, recordNext(r));
     },
@@ -621,7 +673,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "briefing",
     description:
-      'Where the player was: for one playthrough, the last session, the open quests with their next steps, the current build and what is equipped. Call it when the player picks a game up again ("where was I?") and before record. It shows only as much as the player\'s spoiler setting for the playthrough.',
+      'Where the player was: for one playthrough, the last session, the open quests with their next steps, the open to-dos, the current build and what is equipped. Call it when the player picks a game up again ("where was I?") and before record. It shows only as much as the player\'s spoiler setting for the playthrough.',
     input: z.object(PlaythroughRefInput),
     output: BriefingJson,
     annotations: { readOnlyHint: true },
@@ -642,7 +694,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "open_threads",
     description:
-      "The quests the player started and hasn't finished, with their whole log: what they did, the next steps and the choices made. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
+      "The quests the player started and hasn't finished, with their whole log: what they did, the next steps and the choices made, and their open to-dos. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
     input: z.object({
       ...PlaythroughRefInput,
       reveal: Spoiler.optional().describe("Default: the player's spoiler setting. Higher only when the player asked for hints or spoilers just now"),
@@ -655,7 +707,13 @@ export const TOOLS: Tool[] = [
       const quests = t ? await questsOf(p, t.id, { statuses: OPEN_STATUSES, reveal }) : [];
       const ordered = [...quests.filter((q) => q.status === "open"), ...quests.filter((q) => q.status === "blocked")];
       const more = t ? await moreAbove(p, t.id, reveal, ["quest"]) : false;
-      return ok(ThreadsJson, { playthrough: t, reveal, quests: ordered }, threadsNext(t, reveal, ordered, more));
+      const todos = t ? await todosOf(p, t.id, { statuses: ["open"], reveal }) : [];
+      const mine = todos.filter((x) => !x.suggested);
+      return ok(
+        ThreadsJson,
+        { playthrough: t, reveal, quests: ordered, todos: mine, suggestedTodos: todos.filter((x) => x.suggested) },
+        threadsNext(t, reveal, ordered, more, mine.length),
+      );
     },
   }),
   tool({
@@ -731,7 +789,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "correct",
     description:
-      "Fix or remove what was filed: a game's title or inventory groups, a playthrough's label, status or character, a session's day, a quest's name or status, a log entry, a stat snapshot, an item (its count, numbers and what it is good or bad against), a goal, a codex entry (a boss, enemy, NPC or place), the tags of an item, codex entry or quest, a tag itself (rename it, merge it into another, remove it: only when the player asked). Each change names one row by what and id and sets some of its fields, or removes it. Only what the player said is wrong; never merge two quests (mergeInto) without asking them first.",
+      "Fix or remove what was filed: a game's title or inventory groups, a playthrough's label, status or character, a session's day, a quest's name or status, a log entry, a stat snapshot, an item (its count, numbers and what it is good or bad against), a goal, a codex entry (a boss, enemy, NPC or place), the tags of an item, codex entry or quest, a tag itself (rename it, merge it into another, remove it: only when the player asked), a to-do (its words, what it is about, done or dropped, taking a suggested one, or removing it). Each change names one row by what and id and sets some of its fields, or removes it. Only what the player said is wrong; never merge two quests (mergeInto) without asking them first.",
     input: z.object({ changes: z.array(ChangeInput).min(1).max(50) }),
     output: CorrectedJson,
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },

@@ -9,6 +9,22 @@ type Json = ColumnType<string, string | undefined, string>;
 type Defaulted = ColumnType<string, string | undefined, string>;
 
 export interface Schema {
+  todos: {
+    id: string;
+    player_id: string;
+    playthrough_id: string;
+    text: string;
+    local_text: string | null;
+    what: string | null;
+    row_id: string | null;
+    status: Defaulted;
+    suggested: Flag;
+    spoiler: Defaulted;
+    session_id: string | null;
+    closed_session_id: string | null;
+    created_at: number;
+    updated_at: number;
+  };
   games: {
     id: string;
     player_id: string;

@@ -10,6 +10,7 @@ import { buildOf } from "./builds";
 import { goalsOf } from "./goals";
 import { record } from "./record";
 import { FULL, HINT, SPOILER_ITEM, SPOILER_SOURCE, seed, type Seed } from "./testing/fixtures";
+import { todosOf } from "./todos";
 import { toolByName } from "./tools";
 
 let s: Seed;
@@ -125,4 +126,18 @@ test("a goal marked as a spoiler stays out of the build, the briefing and its ne
   expect(JSON.stringify(await buildOf(s.a, s.liesOfP))).not.toContain(HINT);
   expect(JSON.stringify(await toolByName("briefing")!.run(s.a, { playthroughId: s.liesOfP }))).not.toContain(HINT);
   expect((await goalsOf(s.a, s.liesOfP, { reveal: "hint" })).map((g) => g.text)).toContain(HINT);
+});
+
+test("a suggested to-do marked as a spoiler stays out of the briefing, open_threads and the quest it is about unless asked for", async () => {
+  await record(s.a, {
+    playthroughId: s.liesOfP,
+    summary: "Planned.",
+    transcript: "What should I do next?",
+    todos: [{ text: HINT, suggested: true, spoiler: "hint", about: { what: "quest", id: s.venigni } }],
+  });
+  for (const tool of ["briefing", "open_threads"]) expect(JSON.stringify(await toolByName(tool)!.run(s.a, { playthroughId: s.liesOfP }))).not.toContain(HINT);
+  expect(JSON.stringify(await todosOf(s.a, s.liesOfP))).not.toContain(HINT);
+  expect(JSON.stringify(await questsOf(s.a, s.liesOfP))).not.toContain(HINT);
+  expect((await todosOf(s.a, s.liesOfP, { reveal: "hint" })).map((t) => t.text)).toEqual([HINT]);
+  expect(JSON.stringify(await toolByName("open_threads")!.run(s.a, { playthroughId: s.liesOfP, reveal: "hint" }))).toContain(HINT);
 });

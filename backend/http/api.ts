@@ -12,9 +12,10 @@ import { missed } from "../missed";
 import { questsOf } from "../quests";
 import { record } from "../record";
 import { tagsInPlaythrough } from "../tags-in-use";
+import { todosOf } from "../todos";
 import { ChangeInput, RecordInput, Spoiler } from "../schemas";
 import { getSession, sessionsOf } from "../sessions";
-import { CODEX_KINDS, QUEST_STATUSES } from "../types";
+import { CODEX_KINDS, QUEST_STATUSES, TODO_STATUSES } from "../types";
 import { API_PREFIX, apiResource } from "../urls";
 import { createDispatcher, op, type AnyOp, type ResponseSpec } from "./dispatch";
 import {
@@ -33,6 +34,7 @@ import {
   RecordedJson,
   SessionJson,
   SessionListJson,
+  TodoListJson,
 } from "./schemas";
 
 const err = (description: string) => ({ description, schema: ErrorJson }) satisfies ResponseSpec;
@@ -149,6 +151,27 @@ const OPS: AnyOp[] = [
     params: { id: Id },
     responses: { 200: { description: "The build", schema: BuildJson }, 401: E401, 404: E404 },
   }).handle(async ({ player, params }) => ({ status: 200, body: await buildOf(player, params.id) })),
+  op({
+    method: "GET",
+    path: `${API_PREFIX}/playthroughs/{id}/todos`,
+    operationId: "listTodos",
+    summary: "A playthrough's to-dos",
+    description: "The errands the player keeps that are neither a quest nor a goal (ADR 0020); Claude's suggestions marked.",
+    tags: ["Playthroughs"],
+    params: { id: Id },
+    query: z.object({
+      status: z
+        .string()
+        .regex(new RegExp(`^(${TODO_STATUSES.join("|")})(,(${TODO_STATUSES.join("|")}))*$`), `statuses, comma-separated: ${TODO_STATUSES.join(", ")}`)
+        .optional()
+        .describe(`Only to-dos with one of these statuses, comma-separated (${TODO_STATUSES.join(", ")}). Default: all`),
+      reveal: RevealQuery,
+    }),
+    responses: { 200: { description: "Open first, then closed", schema: TodoListJson }, 400: E400, 401: E401, 404: E404 },
+  }).handle(async ({ player, params, query }) => {
+    const statuses = query.status?.split(",") as (typeof TODO_STATUSES)[number][] | undefined;
+    return { status: 200, body: { todos: await todosOf(player, params.id, { statuses, reveal: query.reveal }) } };
+  }),
   op({
     method: "GET",
     path: `${API_PREFIX}/playthroughs/{id}/sessions`,

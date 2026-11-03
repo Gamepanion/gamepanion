@@ -1,5 +1,5 @@
 // Filing a play session: the transcript as the player said it (values V3), and what was filed from it: quest entries, a stat snapshot,
-// the build plan, goals, the codex (bosses, enemies, NPCs, places) and items. One transaction; everything points to the session. Quests and items are matched by id or by their exact name
+// the build plan, goals, the codex (bosses, enemies, NPCs, places), items and to-dos. One transaction; everything points to the session. Quests and items are matched by id or by their exact name
 // in the playthrough, never by a guess (values V4).
 import { db, newId, now } from "./db";
 import { today } from "./dates";
@@ -15,6 +15,7 @@ import { seen } from "./spoilers";
 import { addBackground, type BackgroundInput } from "./background";
 import { setTags } from "./tags";
 import { mergeSources, parseSources } from "./sources";
+import { carryTodos, writeTodos, type FiledTodo, type TodoInput } from "./todos";
 import type { Attributes, EntryKind, GoalKind, ItemKind, Player, QuestStatus, SourceInput, SpoilerLevel, StatName } from "./types";
 import { itemPath, questPath, sessionPath } from "./urls";
 
@@ -86,6 +87,8 @@ export type RecordInput = {
   /** For a new playthrough (NG+): the run to take the character, the build plan and the open goals from. */
   carryFrom?: string;
   items?: ItemInput[];
+  /** To-dos (ADR 0020) the player added ("remind me to …"), closed ("I did the …") or changed; ones you propose marked suggested. */
+  todos?: TodoInput[];
   /** Pages the player trusts for this game; merged into the game's, by link. */
   sources?: SourceInput[];
   /** The player's own thoughts on the game, this run or this session, each added to its notes (ADR 0011). */
@@ -125,6 +128,10 @@ export type Recorded = {
   character: boolean;
   /** How many open goals came along from carryFrom; null when nothing was carried. */
   carried: number | null;
+  /** The to-dos this call added, closed or changed. */
+  todos: FiledTodo[];
+  /** How many open to-dos came along from carryFrom; null when nothing was carried. */
+  carriedTodos: number | null;
   /** How many of the game's sources this call added or refreshed. */
   sources: number;
 };
@@ -173,6 +180,7 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
       .execute();
 
     let carried: number | null = null;
+    let carriedTodos: number | null = null;
     if (input.carryFrom) {
       const from = await seen(trx.selectFrom("playthroughs"), p, "playthroughs")
         .select(["id", "game_id", "character_name", "character_class", "character_local_class"])
@@ -190,6 +198,7 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
           .values({ playthrough_id: t.id, player_id: p.id, summary: plan.summary, main_stat: plan.main_stat, updated_at: at })
           .execute();
       carried = await carryGoals(trx, p, from.id, t.id, sessionId);
+      carriedTodos = await carryTodos(trx, p, from.id, t.id, sessionId);
     }
 
     const character = input.character && Object.values(input.character).some((v) => v?.trim());
@@ -444,6 +453,9 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
       reached.push(g?.label ?? (await reachedLabel(trx, p, id, t.game.id)));
     }
 
+    // After the quests, items and codex, so a to-do can point at one filed in this same call.
+    const todos = input.todos?.length ? await writeTodos(trx, p, t.id, sessionId, input.todos) : [];
+
     const itemKinds = await itemKindsOf(p, t.game.id, trx);
     return {
       sessionId,
@@ -461,6 +473,8 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
       reached,
       character: !!character || carried !== null,
       carried,
+      todos,
+      carriedTodos,
       sources: input.sources?.length ?? 0,
     };
   });

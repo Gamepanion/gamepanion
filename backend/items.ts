@@ -5,6 +5,7 @@ import { db } from "./db";
 import { getPlaythrough } from "./games";
 import { norm } from "./names";
 import { seen } from "./spoilers";
+import { todosAbout, type TodoRef } from "./todos";
 import { backgroundOf, type BackgroundLine } from "./background";
 import { tagsOf } from "./tags";
 import { parseSources } from "./sources";
@@ -37,6 +38,8 @@ export type ItemView = {
   tags: string[];
   /** What Claude added about it (ADR 0016), as far as the read reveals. */
   background: BackgroundLine[];
+  /** The open to-dos about it (ADR 0020), as far as the read reveals. */
+  todos: TodoRef[];
   url: string;
 };
 
@@ -80,6 +83,13 @@ export async function itemsOf(
     found.map((r) => r.id),
     opts.reveal ?? "none",
   );
+  const todos = await todosAbout(
+    await db(),
+    p,
+    "item",
+    found.map((r) => r.id),
+    opts.reveal ?? "none",
+  );
   return found.map((r) => ({
     id: r.id,
     name: r.name,
@@ -97,6 +107,7 @@ export async function itemsOf(
     sources: parseSources(r.sources),
     tags: tags.get(r.id) ?? [],
     background: background.get(r.id) ?? [],
+    todos: todos.get(r.id) ?? [],
     url: itemPath(playthroughId, r.id),
   }));
 }

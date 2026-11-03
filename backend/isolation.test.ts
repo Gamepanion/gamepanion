@@ -13,6 +13,7 @@ import { record } from "./record";
 import { getSession, sessionsOf } from "./sessions";
 import { seen } from "./spoilers";
 import { A_FIRST, A_SECOND, seed, type Seed } from "./testing/fixtures";
+import { todosOf } from "./todos";
 import { TOOLS, toolByName } from "./tools";
 
 let s: Seed;
@@ -150,4 +151,24 @@ test("deleting a player's log leaves the other's untouched", async () => {
     expect(await d.selectFrom(table).select("player_id").where("player_id", "=", s.a.id).execute()).toEqual([]);
   expect((await listPlaythroughs(s.b)).map((t) => t.game.title)).toEqual(["Elden Ring"]);
   expect(await questsOf(s.b, s.eldenRing)).toHaveLength(1);
+});
+
+test("A's to-dos never reach B: not by A's playthrough, not on B's own reads, and B can't close, change or remove one", async () => {
+  const { todos } = await record(s.a, {
+    playthroughId: s.liesOfP,
+    summary: "Errands.",
+    transcript: "Remind me to ask Antonia again.",
+    todos: [{ text: "Ask Antonia again", about: { what: "quest", id: s.antonia } }],
+  });
+  await expect(todosOf(s.b, s.liesOfP)).rejects.toBeInstanceOf(NotFoundError);
+  clean(await todosOf(s.b, s.eldenRing, { reveal: "full" }));
+  clean(await briefing(s.b));
+  await expect(toolByName("correct")!.run(s.b, { changes: [{ what: "todo", id: todos[0].id, remove: true }] })).rejects.toBeInstanceOf(NotFoundError);
+  await expect(record(s.b, { playthroughId: s.eldenRing, summary: "x", transcript: "x", todos: [{ id: todos[0].id, status: "done" }] })).rejects.toBeInstanceOf(
+    NotFoundError,
+  );
+  await expect(
+    record(s.b, { playthroughId: s.eldenRing, summary: "x", transcript: "x", todos: [{ text: "x", about: { what: "quest", id: s.antonia } }] }),
+  ).rejects.toBeInstanceOf(NotFoundError);
+  expect((await todosOf(s.a, s.liesOfP)).map((t) => t.status)).toEqual(["open"]);
 });

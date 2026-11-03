@@ -38,6 +38,10 @@ export type GoalKind = (typeof GOAL_KINDS)[number];
 export const GOAL_STATUSES = ["open", "reached", "dropped"] as const;
 export type GoalStatus = (typeof GOAL_STATUSES)[number];
 
+/** A to-do (ADR 0020): `open` until the player says it is `done`, or `dropped` when they give it up. */
+export const TODO_STATUSES = ["open", "done", "dropped"] as const;
+export type TodoStatus = (typeof TODO_STATUSES)[number];
+
 /** What the codex keeps (ADR 0010): the bosses, enemies, NPCs and places the player met. */
 export const CODEX_KINDS = ["boss", "enemy", "npc", "place"] as const;
 export type CodexKind = (typeof CODEX_KINDS)[number];
