@@ -25,6 +25,8 @@ export function absoluteUrls<T>(base: string, body: T): T {
 
 // Better Auth lives under this path; its issuer is the public URL plus it.
 export const AUTH_PATH = "/api/auth";
+/** The instance's own address, for absolute links such as the link preview image. */
+export const siteUrl = () => config.publicUrl();
 /** The OAuth resource (RFC 8707) MCP access tokens are bound to. */
 export const mcpResource = () => `${config.publicUrl()}/mcp`;
 /** Where the REST API lives; its paths in the route table start with it. */

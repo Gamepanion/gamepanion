@@ -61,7 +61,7 @@ test("correct adds background lines to a row; raising background offers to fill 
   await run("correct", { changes: [{ what: "item", id: lamp, addBackground: [{ text: "Scales with Motivity." }] }] });
   expect((await itemsOf(s.a, s.liesOfP)).find((i) => i.id === lamp)!.background.map((l) => l.text)).toEqual(["Scales with Motivity."]);
   const raised = await run("correct", { changes: [{ what: "playthrough", id: s.liesOfP, background: "useful" }] });
-  expect(next(raised)).toMatch(/already in the book/);
+  expect(next(raised)).toMatch(/already filed/);
   const lowered = await run("correct", { changes: [{ what: "playthrough", id: s.liesOfP, background: "none" }] });
-  expect(next(lowered)).not.toMatch(/already in the book/);
+  expect(next(lowered)).not.toMatch(/already filed/);
 });

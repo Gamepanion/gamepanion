@@ -1,6 +1,9 @@
-# Gamepanion
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/internals/brand/lockup.svg">
+  <img src="docs/internals/brand/lockup-light.svg" alt="Gamepanion" width="320">
+</picture>
 
-A spoiler-free companion for the games you play: your quest log, build and items. You talk to Claude while you play; Gamepanion remembers where you are, and tells you what you left open when you pick the game up again.
+**Play on. Your Gamepanion remembers.** A spoiler-free companion for the games you play: your quests, build and items. You talk to Claude while you play; Gamepanion remembers where you are, and tells you what you left open when you pick the game up again.
 
 Capture happens through a built-in MCP endpoint (`/mcp`), so there is nothing to fill in by hand: say "I just talked to Toma" or share a screenshot of your stat screen, and Claude files it. The web UI is for looking things up on your phone next to the console. Everything is spoiler-aware: Gamepanion only shows you what you have already found.
 

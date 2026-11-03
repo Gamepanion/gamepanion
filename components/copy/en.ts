@@ -63,7 +63,7 @@ export const en = {
 
   // Consent
   consentTitle: "Connect Gamepanion",
-  consentLead: (client: string) => `${client} wants to read and write your quest log: your games, sessions, quests, builds and items.`,
+  consentLead: (client: string) => `${client} wants to read and write what your Gamepanion keeps: your games, sessions, quests, builds and items.`,
   consentWho: (name: string) => `Signed in as ${name}.`,
   allow: "Allow",
   deny: "Deny",
