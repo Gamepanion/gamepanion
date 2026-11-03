@@ -1,4 +1,4 @@
-// The third-party packages Gamepanion ships (production dependencies, transitive), with their licenses, for the licenses page (#48):
+// The third-party packages Gamepanion ships (production dependencies, transitive, the platform's optional binaries left out), with their licenses, for the licenses page (#48):
 // third-party-licenses.json, sorted by name. Run by `npm run generate`; CI fails when the committed file differs.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -7,7 +7,9 @@ const root = join(import.meta.dirname, "..");
 const lock = JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"));
 const out = new Map();
 for (const [path, pkg] of Object.entries(lock.packages ?? {})) {
-  if (!path.startsWith("node_modules/") || pkg.dev || pkg.devOptional) continue;
+  // Not dev-only, and not optional: optional packages are the platform-specific binaries, installed only on their platform, which would
+  // make the file differ between machines.
+  if (!path.startsWith("node_modules/") || pkg.dev || pkg.devOptional || pkg.optional) continue;
   const name = path.slice(path.lastIndexOf("node_modules/") + "node_modules/".length);
   if (out.has(name)) continue;
   const dir = join(root, path);
