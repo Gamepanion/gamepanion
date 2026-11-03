@@ -8,6 +8,8 @@ import {
   questsOf,
   sessionsOf,
   tagsInUse,
+  todosOf,
+  type TodoView,
   type BackgroundLine,
   type CodexView,
   type ItemView,
@@ -17,11 +19,13 @@ import {
   type QuestView,
   PLAYTHROUGH_TABS,
   tabPath,
+  todoPath,
 } from "@/backend";
 import { serverCopy } from "@/components/copy/server";
 import { Notes } from "@/components/Notes";
 import { PlaythroughSettings } from "@/components/PlaythroughSettings";
 import { TagFilter } from "@/components/TagFilter";
+import { TodoCheck } from "@/components/TodoCheck";
 import { Register } from "@/components/Register";
 import { CODEX_ICONS, Group, Heading, itemIcon, PART_ICONS, QUEST_ICONS, Tile } from "@/components/icons";
 import { TalkAbout } from "@/components/chat/Chat";
@@ -42,13 +46,14 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
   const copy = await serverCopy();
   const id = t.id;
   const reveal = t.settings.spoilers;
-  const [threads, all, build, items, sessions, codex] = await Promise.all([
+  const [threads, all, build, items, sessions, codex, todos] = await Promise.all([
     questsOf(p, id, { statuses: ["open", "blocked"], reveal }),
     questsOf(p, id, { reveal }),
     buildOf(p, id, 1),
     itemsOf(p, id, { reveal }),
     sessionsOf(p, id),
     codexOf(p, id, { reveal }),
+    todosOf(p, id, { reveal }),
   ]);
   // The inventory by the game's groups, in the player's order, under the game's own name when it has one; an item without one goes last.
   const kinds = t.game.itemKinds;
@@ -148,6 +153,7 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
                 )}
               </div>
             ),
+            todos: <Todos todos={todos} />,
             character: (
               <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
                 <section>
@@ -398,6 +404,7 @@ async function Quests({ quests, run }: { quests: QuestView[]; run: string }) {
           <Tags tags={q.tags} />
           <Notes description={q.description} notes={q.notes} />
           <Background lines={q.background} />
+          <LinkedTodos todos={q.todos} run={run} />
           {q.entries.length > 0 && (
             <ul className="mt-2 space-y-1 text-sm">
               {q.entries.map((e) => (
@@ -509,6 +516,7 @@ async function Item({ item: i, run }: { item: ItemView; run: string }) {
       })}
       <Notes description={i.description} />
       <Background lines={i.background} />
+      <LinkedTodos todos={i.todos} run={run} />
       {i.verdict && <p className="mt-1 text-sm">{i.verdict}</p>}
       <Notes notes={i.notes} />
       {i.sources.length > 0 && (
@@ -564,6 +572,7 @@ async function CodexEntry({ entry: e, run }: { entry: CodexView; run: string }) 
       )}
       <Notes description={e.description} />
       <Background lines={e.background} />
+      <LinkedTodos todos={e.todos} run={run} />
       {e.strategy && <p className="mt-1 text-sm">{e.strategy}</p>}
       <Notes notes={e.notes} />
       {EFFECTS.map((effect) => {
@@ -599,5 +608,86 @@ async function CodexEntry({ entry: e, run }: { entry: CodexView; run: string }) 
         </p>
       )}
     </li>
+  );
+}
+
+// The to-do list (ADR 0020): the player's open to-dos with a checkbox each, Claude's suggestions apart and marked, and the done and
+// dropped ones folded away below.
+async function Todos({ todos }: { todos: TodoView[] }) {
+  const copy = await serverCopy();
+  const mine = todos.filter((t) => t.status === "open" && !t.suggested);
+  const suggested = todos.filter((t) => t.status === "open" && t.suggested);
+  const closed = todos.filter((t) => t.status !== "open");
+  if (!todos.length) return <p className="card text-muted">{copy.noTodos}</p>;
+  return (
+    <div className="space-y-6">
+      <section>
+        <Heading icon={PART_ICONS.todos}>{copy.todos}</Heading>
+        {mine.length === 0 ? <p className="card text-muted">{copy.noTodos}</p> : <TodoList todos={mine} />}
+      </section>
+      {suggested.length > 0 && (
+        <section>
+          <Heading icon={Sparkles}>{copy.suggestedTodos}</Heading>
+          <p className="mb-2 text-sm text-muted">{copy.suggestedTodosLead}</p>
+          <TodoList todos={suggested} suggested />
+        </section>
+      )}
+      {closed.length > 0 && (
+        <details className="card">
+          <summary className="cursor-pointer font-semibold">{copy.closedTodos(closed.length)}</summary>
+          <TodoList todos={closed} />
+        </details>
+      )}
+    </div>
+  );
+}
+
+async function TodoList({ todos, suggested }: { todos: TodoView[]; suggested?: boolean }) {
+  const copy = await serverCopy();
+  return (
+    <ul className={`card divide-y divide-rule py-1 ${suggested ? "border-dashed" : ""}`}>
+      {todos.map((t) => (
+        <li key={t.id} id={`todo-${t.id}`} className="todo">
+          {t.status === "dropped" ? (
+            <span className="mt-1 size-5 shrink-0" aria-hidden="true" />
+          ) : (
+            <TodoCheck id={t.id} done={t.status === "done"} label={t.text} />
+          )}
+          <span className="min-w-0 flex-1">
+            <span className={t.status === "open" ? "" : "todo-done"}>{t.text}</span>
+            {t.localText && <span className="text-sm text-muted"> · {t.localText}</span>}
+            {t.about && (
+              <Link href={t.about.url} className="block text-sm text-accent">
+                {t.about.name}
+              </Link>
+            )}
+          </span>
+          {(t.suggested || t.status !== "open") && (
+            <span className="shrink-0 text-sm text-muted">{t.status !== "open" ? copy.todoStatus[t.status] : copy.suggested}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// The open to-dos about a quest, item or codex entry ("what's left to do here?"), each a link to its row on the To-dos tab.
+async function LinkedTodos({ todos, run }: { todos: { id: string; text: string; suggested: boolean }[]; run: string }) {
+  const copy = await serverCopy();
+  return (
+    todos.length > 0 && (
+      <p className="mt-1 text-sm">
+        <span className="text-muted">{copy.todos}: </span>
+        {todos.map((t, n) => (
+          <span key={t.id}>
+            {n > 0 && ", "}
+            <Link href={todoPath(run, t.id)} className="text-accent">
+              {t.text}
+            </Link>
+            {t.suggested && <span className="text-muted"> ({copy.suggested})</span>}
+          </span>
+        ))}
+      </p>
+    )
   );
 }

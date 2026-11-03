@@ -57,6 +57,12 @@ export const DEMO_SESSIONS: Parameters<typeof record>[1][] = [
       { kind: "npc", name: "Venigni", description: "Runs the Venigni Works and wants his workers back" },
       { kind: "place", name: "Krat Central Station", description: "Where the night began" },
     ],
+    todos: [
+      { text: "Buy the Amulet of Courage once I have the ergo", about: { what: "item", name: "Amulet of Courage" } },
+      { text: "Come back to the station with a lamp", about: { what: "codex", name: "Krat Central Station" } },
+      { text: "Restock Fire Abrasives", status: "done" },
+      { text: "Try the side street behind the hotel", suggested: true },
+    ],
   },
   {
     game: "Elden Ring",

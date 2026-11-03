@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: todos
+    status: done
+    date: 2026-11-03
+    icon: format-list-checks
+    title: A to-do list per playthrough
+    title_de: Eine To-do-Liste je Durchlauf
+    summary: Errands that are neither quest nor goal, filed as the player says them, ticked off on their own tab, shown on the place or NPC they are about, and taken along to an NG+.
+    summary_de: Erledigungen, die weder Quest noch Ziel sind, so abgelegt, wie du sie sagst, auf einem eigenen Reiter abgehakt, beim Ort oder NPC gezeigt, um den es geht, und ins NG+ mitgenommen.
+    links:
+      - { label: "ADR 0020", url: "https://docs.gamepanion.app/adr/0020-a-to-do-list-of-its-own/" }
+      - { label: "#84", url: "https://github.com/gamepanion/gamepanion/pull/84" }
   - id: switcher
     status: done
     date: 2026-11-03

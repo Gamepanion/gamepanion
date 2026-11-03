@@ -11,6 +11,7 @@ import { norm } from "./names";
 import { addNote } from "./notes";
 import { seen } from "./spoilers";
 import { mergeSources, parseSources } from "./sources";
+import { todosAbout, type TodoRef } from "./todos";
 import { backgroundOf, type BackgroundInput, type BackgroundLine } from "./background";
 import { tagsOf } from "./tags";
 import { CODEX_KINDS, EFFECTS, type CodexKind, type CodexStatus, type Effect, type Player, type Source, type SourceInput, type SpoilerLevel } from "./types";
@@ -44,6 +45,8 @@ export type CodexView = {
   tags: string[];
   /** What Claude added about it (ADR 0016), as far as the read reveals. */
   background: BackgroundLine[];
+  /** The open to-dos about it (ADR 0020), as far as the read reveals. */
+  todos: TodoRef[];
   url: string;
 };
 
@@ -129,6 +132,13 @@ export async function codexOf(
     rows.map((r) => r.id),
     reveal,
   );
+  const todos = await todosAbout(
+    d,
+    p,
+    "codex",
+    rows.map((r) => r.id),
+    reveal,
+  );
   const STATUS: Record<string, number> = { met: 0, beaten: 1, gone: 2 };
   return rows
     .sort(
@@ -158,6 +168,7 @@ export async function codexOf(
         .map(({ item, effect, note }) => ({ item: { ...item, url: itemPath(playthroughId, item.id) }, effect, note })),
       tags: tags.get(r.id) ?? [],
       background: background.get(r.id) ?? [],
+      todos: todos.get(r.id) ?? [],
       url: codexPath(playthroughId, r.id),
     }));
 }

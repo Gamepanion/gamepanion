@@ -3,6 +3,7 @@ import { sql } from "kysely";
 import { db } from "./db";
 import { getPlaythrough } from "./games";
 import { seen } from "./spoilers";
+import { todosAbout, type TodoRef } from "./todos";
 import { backgroundOf, type BackgroundLine } from "./background";
 import { tagsOf } from "./tags";
 import type { EntryKind, Player, QuestStatus, SpoilerLevel } from "./types";
@@ -32,6 +33,8 @@ export type QuestView = {
   tags: string[];
   /** What Claude added about it (ADR 0016), as far as the read reveals. */
   background: BackgroundLine[];
+  /** The open to-dos about it (ADR 0020), as far as the read reveals. */
+  todos: TodoRef[];
   url: string;
 };
 
@@ -83,6 +86,13 @@ export async function questsOf(
     quests.map((x) => x.id),
     reveal,
   );
+  const todos = await todosAbout(
+    d,
+    p,
+    "quest",
+    quests.map((x) => x.id),
+    reveal,
+  );
   return quests.map((x) => {
     const mine = entries
       .filter((e) => e.quest_id === x.id)
@@ -109,6 +119,7 @@ export async function questsOf(
       updatedAt: x.updated_at,
       tags: tags.get(x.id) ?? [],
       background: background.get(x.id) ?? [],
+      todos: todos.get(x.id) ?? [],
       url: questPath(playthroughId, x.id),
     };
   });

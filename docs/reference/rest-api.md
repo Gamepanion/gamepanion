@@ -14,6 +14,7 @@
 | `GET /api/v1/playthroughs/{id}/tags` | The tags in use, with ids and counts, most used first |
 | `GET /api/v1/playthroughs/{id}/build` | The build plan and the stat snapshots |
 | `GET /api/v1/playthroughs/{id}/sessions` | The sessions, newest first |
+| `GET /api/v1/playthroughs/{id}/todos` | The to-dos, open first; `status` filters (`open,done,dropped`) |
 | `GET /api/v1/playthroughs/{id}/missed` | What may have been missed; `reveal=hint` or `full` is required |
 | `GET /api/v1/sessions/{id}` | One session, with its transcript |
 | `POST /api/v1/sessions` | File a session: the same body as the `record` tool; 201 |

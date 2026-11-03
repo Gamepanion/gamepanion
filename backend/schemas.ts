@@ -15,7 +15,9 @@ import {
   QUEST_STATUSES,
   SPOILER_LEVELS,
   BACKGROUND_LEVELS,
+  TODO_STATUSES,
 } from "./types";
+import { TODO_TARGETS } from "./todos";
 
 export const Spoiler = z.enum(SPOILER_LEVELS);
 export const TagNames = z
@@ -147,6 +149,30 @@ export const CodexInput = z.object({
   background: BackgroundLines.optional(),
 });
 
+export const TodoAbout = z
+  .object({
+    what: z.enum(TODO_TARGETS),
+    id: z.string().optional().describe("Its id, from briefing, item, codex or this call's quests/items/codex"),
+    name: z.string().optional().describe("Or its exact name in the playthrough"),
+  })
+  .describe("The one quest, item or codex entry (a boss, an NPC, a place) it is about");
+
+export const TodoInput = z.object({
+  id: z.string().optional().describe("An existing to-do's id, from briefing or open_threads: to close or change it"),
+  text: z.string().max(500).optional().describe("A new to-do: the player's words (farm 5 crystals, come back with the key, try the boss with fire)"),
+  localText: z.string().max(500).optional().describe("The same with the game's own names, when the game is played in another language"),
+  about: TodoAbout.optional(),
+  status: z
+    .enum(TODO_STATUSES)
+    .optional()
+    .describe("open (the default for a new one); done only when the player said they did it; dropped when they gave it up"),
+  suggested: z
+    .boolean()
+    .optional()
+    .describe("true for one you propose from your own knowledge; false once the player takes a suggested one. Default false: the player's own"),
+  spoiler: Spoiler.optional().describe("Default none. A suggested to-do that names what the player hasn't reached: hint or full"),
+});
+
 export const RecordInput = z.object({
   transcript: z
     .string()
@@ -229,7 +255,7 @@ export const RecordInput = z.object({
     .string()
     .optional()
     .describe(
-      "Starting a new playthrough (NG+) with game and label: the playthrough to take the character, build plan and open goals from. Only when the player wants it",
+      "Starting a new playthrough (NG+) with game and label: the playthrough to take the character, build plan, open goals and open to-dos from. Only when the player wants it",
     ),
   items: z
     .array(
@@ -259,6 +285,12 @@ export const RecordInput = z.object({
     )
     .optional()
     .describe("The player's inventory: items they found, used up, equipped or put away"),
+  todos: z
+    .array(TodoInput)
+    .optional()
+    .describe(
+      'To-dos: errands the player keeps that are neither a quest nor a goal ("remind me to …"), and ones they did ("I did the …", by id). Only what the player said; yours marked suggested',
+    ),
   itemKinds: ItemKinds.optional().describe(
     "Names the game's inventory groups when the player says what the game calls them; a group named by key gets the names, a new one goes last",
   ),
@@ -283,7 +315,7 @@ export const ChangeInput = z.object({
   what: z
     .enum(TARGETS)
     .describe(
-      "The kind of row: game, playthrough, session, quest, entry (a quest's log line), snapshot (stats), item, goal, codex (a boss, enemy, NPC or place), tag or background (a line of background, by its id)",
+      "The kind of row: game, playthrough, session, quest, entry (a quest's log line), snapshot (stats), item, goal, codex (a boss, enemy, NPC or place), tag, background (a line of background, by its id) or todo",
     ),
   id: z.string().describe("Its id, as briefing, open_threads, item or record returned it"),
   remove: z
@@ -306,7 +338,7 @@ export const ChangeInput = z.object({
     .string()
     .optional()
     .describe(
-      `playthrough: ${PLAYTHROUGH_STATUSES.join(", ")}. quest: ${QUEST_STATUSES.join(", ")}; done only when the player said they finished it. goal: ${GOAL_STATUSES.join(", ")}. codex: ${CODEX_STATUSES.join(", ")}`,
+      `playthrough: ${PLAYTHROUGH_STATUSES.join(", ")}. quest: ${QUEST_STATUSES.join(", ")}; done only when the player said they finished it. goal: ${GOAL_STATUSES.join(", ")}. codex: ${CODEX_STATUSES.join(", ")}. todo: ${TODO_STATUSES.join(", ")}; done only when the player said they did it`,
     ),
   summary: z.string().optional().describe("session"),
   playedOn: Day.optional().describe("session (its snapshot moves with it) or snapshot: the day"),
@@ -316,8 +348,10 @@ export const ChangeInput = z.object({
   giver: Nullable(z.string(), "quest"),
   location: Nullable(z.string(), "quest: where it started; item: where it was found; codex: where the player met it"),
   kind: Nullable(z.string(), `entry: ${ENTRY_KINDS.join(", ")}. item: ${ITEM_KINDS.join(", ")}, or the game's term`),
-  text: z.string().optional().describe("entry or background; goal: the note, or why"),
-  spoiler: Spoiler.optional().describe("entry, item, goal, codex or background: none once the player has found what it names"),
+  text: z.string().optional().describe("entry, background or todo; goal: the note, or why"),
+  localText: Nullable(z.string(), "todo: the words with the game's own names"),
+  about: TodoAbout.nullable().optional().describe("todo: what it is about, a quest, item or codex entry; null points it at nothing"),
+  spoiler: Spoiler.optional().describe("entry, item, goal, codex, background or todo: none once the player has found what it names"),
   source: z
     .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200) })
     .nullable()
@@ -338,7 +372,7 @@ export const ChangeInput = z.object({
   characterClass: Nullable(z.string(), "playthrough: the character's class, in English"),
   characterLocalClass: Nullable(z.string(), "playthrough: the class in the game's own language"),
   target: z.number().optional().describe("goal (stat or level): the new value"),
-  suggested: z.boolean().optional().describe("goal: false once the player agreed to a suggestion"),
+  suggested: z.boolean().optional().describe("goal or todo: false once the player agreed to a suggestion"),
   rank: z.number().int().min(1).optional().describe("goal: its place in the order, 1 first"),
   quantity: z.number().int().min(0).nullable().optional().describe("item: how many; null when it isn't counted"),
   attributes: Attributes.optional().describe("item: its numbers, all of them: a key left out is dropped"),

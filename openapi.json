@@ -616,6 +616,98 @@
         }
       }
     },
+    "/playthroughs/{id}/todos": {
+      "get": {
+        "operationId": "listTodos",
+        "summary": "A playthrough's to-dos",
+        "description": "The errands the player keeps that are neither a quest nor a goal (ADR 0020); Claude's suggestions marked.",
+        "tags": [
+          "Playthroughs"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Only to-dos with one of these statuses, comma-separated (open, done, dropped). Default: all",
+            "schema": {
+              "type": "string",
+              "pattern": "^(open|done|dropped)(,(open|done|dropped))*$"
+            }
+          },
+          {
+            "name": "reveal",
+            "in": "query",
+            "required": false,
+            "description": "Default none: only what the player found. hint or full only when the player asked for spoilers",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "none",
+                "hint",
+                "full"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Open first, then closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodoList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request can't be read (`invalid_request`), or a value in it is not acceptable (`invalid_input`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token for this API (`unauthorized`); `WWW-Authenticate` points to how to get one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such thing, or one of another player's (`not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/playthroughs/{id}/sessions": {
       "get": {
         "operationId": "listSessions",
@@ -1173,7 +1265,7 @@
                     }
                   },
                   "carryFrom": {
-                    "description": "Starting a new playthrough (NG+) with game and label: the playthrough to take the character, build plan and open goals from. Only when the player wants it",
+                    "description": "Starting a new playthrough (NG+) with game and label: the playthrough to take the character, build plan, open goals and open to-dos from. Only when the player wants it",
                     "type": "string"
                   },
                   "items": {
@@ -1360,6 +1452,76 @@
                       "required": [
                         "name"
                       ]
+                    }
+                  },
+                  "todos": {
+                    "description": "To-dos: errands the player keeps that are neither a quest nor a goal (\"remind me to …\"), and ones they did (\"I did the …\", by id). Only what the player said; yours marked suggested",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "An existing to-do's id, from briefing or open_threads: to close or change it",
+                          "type": "string"
+                        },
+                        "text": {
+                          "description": "A new to-do: the player's words (farm 5 crystals, come back with the key, try the boss with fire)",
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "localText": {
+                          "description": "The same with the game's own names, when the game is played in another language",
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "about": {
+                          "type": "object",
+                          "properties": {
+                            "what": {
+                              "type": "string",
+                              "enum": [
+                                "quest",
+                                "item",
+                                "codex"
+                              ]
+                            },
+                            "id": {
+                              "description": "Its id, from briefing, item, codex or this call's quests/items/codex",
+                              "type": "string"
+                            },
+                            "name": {
+                              "description": "Or its exact name in the playthrough",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "what"
+                          ],
+                          "description": "The one quest, item or codex entry (a boss, an NPC, a place) it is about"
+                        },
+                        "status": {
+                          "description": "open (the default for a new one); done only when the player said they did it; dropped when they gave it up",
+                          "type": "string",
+                          "enum": [
+                            "open",
+                            "done",
+                            "dropped"
+                          ]
+                        },
+                        "suggested": {
+                          "description": "true for one you propose from your own knowledge; false once the player takes a suggested one. Default false: the player's own",
+                          "type": "boolean"
+                        },
+                        "spoiler": {
+                          "description": "Default none. A suggested to-do that names what the player hasn't reached: hint or full",
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "hint",
+                            "full"
+                          ]
+                        }
+                      }
                     }
                   },
                   "itemKinds": {
@@ -1711,9 +1873,10 @@
                             "goal",
                             "codex",
                             "tag",
-                            "background"
+                            "background",
+                            "todo"
                           ],
-                          "description": "The kind of row: game, playthrough, session, quest, entry (a quest's log line), snapshot (stats), item, goal, codex (a boss, enemy, NPC or place), tag or background (a line of background, by its id)"
+                          "description": "The kind of row: game, playthrough, session, quest, entry (a quest's log line), snapshot (stats), item, goal, codex (a boss, enemy, NPC or place), tag, background (a line of background, by its id) or todo"
                         },
                         "id": {
                           "type": "string",
@@ -1750,7 +1913,7 @@
                           ]
                         },
                         "status": {
-                          "description": "playthrough: playing, finished, dropped. quest: open, blocked, done, failed, dropped; done only when the player said they finished it. goal: open, reached, dropped. codex: met, beaten, gone",
+                          "description": "playthrough: playing, finished, dropped. quest: open, blocked, done, failed, dropped; done only when the player said they finished it. goal: open, reached, dropped. codex: met, beaten, gone. todo: open, done, dropped; done only when the player said they did it",
                           "type": "string"
                         },
                         "summary": {
@@ -1805,11 +1968,51 @@
                           ]
                         },
                         "text": {
-                          "description": "entry or background; goal: the note, or why",
+                          "description": "entry, background or todo; goal: the note, or why",
                           "type": "string"
                         },
+                        "localText": {
+                          "description": "todo: the words with the game's own names; null clears it",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "about": {
+                          "description": "todo: what it is about, a quest, item or codex entry; null points it at nothing",
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "what": {
+                                  "type": "string",
+                                  "enum": [
+                                    "quest",
+                                    "item",
+                                    "codex"
+                                  ]
+                                },
+                                "id": {
+                                  "description": "Its id, from briefing, item, codex or this call's quests/items/codex",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "description": "Or its exact name in the playthrough",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "what"
+                              ],
+                              "description": "The one quest, item or codex entry (a boss, an NPC, a place) it is about"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "spoiler": {
-                          "description": "entry, item, goal, codex or background: none once the player has found what it names",
+                          "description": "entry, item, goal, codex, background or todo: none once the player has found what it names",
                           "type": "string",
                           "enum": [
                             "none",
@@ -1995,7 +2198,7 @@
                           "type": "number"
                         },
                         "suggested": {
-                          "description": "goal: false once the player agreed to a suggestion",
+                          "description": "goal or todo: false once the player agreed to a suggestion",
                           "type": "boolean"
                         },
                         "rank": {
@@ -2724,6 +2927,37 @@
             },
             "description": "Background Claude added (ADR 0016), oldest first"
           },
+          "todos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "localText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "suggested": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "localText",
+                "suggested"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The open to-dos about it (ADR 0020); suggested ones are Claude's, not the player's yet"
+          },
           "url": {
             "type": "string",
             "description": "Its page in the web app, as an absolute URL"
@@ -2742,6 +2976,7 @@
           "entries",
           "tags",
           "background",
+          "todos",
           "url"
         ],
         "additionalProperties": false
@@ -2976,6 +3211,37 @@
             },
             "description": "Background Claude added (ADR 0016), oldest first"
           },
+          "todos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "localText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "suggested": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "localText",
+                "suggested"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The open to-dos about it (ADR 0020); suggested ones are Claude's, not the player's yet"
+          },
           "url": {
             "type": "string",
             "description": "Its page in the web app, as an absolute URL"
@@ -2998,6 +3264,7 @@
           "sources",
           "tags",
           "background",
+          "todos",
           "url"
         ],
         "additionalProperties": false
@@ -3251,6 +3518,37 @@
             },
             "description": "Background Claude added (ADR 0016), oldest first"
           },
+          "todos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "localText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "suggested": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "localText",
+                "suggested"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The open to-dos about it (ADR 0020); suggested ones are Claude's, not the player's yet"
+          },
           "url": {
             "type": "string",
             "description": "Its page in the web app, as an absolute URL"
@@ -3275,6 +3573,7 @@
           "counters",
           "tags",
           "background",
+          "todos",
           "url"
         ],
         "additionalProperties": false,
@@ -3327,6 +3626,162 @@
         },
         "required": [
           "tags"
+        ],
+        "additionalProperties": false
+      },
+      "Todo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "The player's words"
+          },
+          "localText": {
+            "description": "The same with the game's own names",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "done",
+              "dropped"
+            ]
+          },
+          "suggested": {
+            "type": "boolean",
+            "description": "Proposed by Claude, not taken by the player yet"
+          },
+          "spoiler": {
+            "type": "string",
+            "enum": [
+              "none",
+              "hint",
+              "full"
+            ]
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "what": {
+                    "type": "string",
+                    "enum": [
+                      "quest",
+                      "item",
+                      "codex"
+                    ]
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL"
+                  }
+                },
+                "required": [
+                  "what",
+                  "id",
+                  "name",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The quest, item or codex entry it is about"
+          },
+          "addedIn": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL"
+                  }
+                },
+                "required": [
+                  "id",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The session it was added in"
+          },
+          "closedIn": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL"
+                  }
+                },
+                "required": [
+                  "id",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The session it was done or dropped in"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "localText",
+          "status",
+          "suggested",
+          "spoiler",
+          "about",
+          "addedIn",
+          "closedIn"
+        ],
+        "additionalProperties": false,
+        "description": "An errand the player keeps that is neither a quest nor a goal (ADR 0020)"
+      },
+      "TodoList": {
+        "type": "object",
+        "properties": {
+          "todos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "description": "Open first (the player's, then suggestions), then done and dropped, the latest closed first"
+          }
+        },
+        "required": [
+          "todos"
         ],
         "additionalProperties": false
       },
@@ -3820,6 +4275,20 @@
             ],
             "additionalProperties": false
           },
+          "todos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "description": "The player's open to-dos"
+          },
+          "suggestedTodos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "description": "Open to-dos Claude proposed, not taken yet"
+          },
           "equipped": {
             "type": "array",
             "items": {
@@ -3846,6 +4315,8 @@
           "lastSession",
           "openQuests",
           "build",
+          "todos",
+          "suggestedTodos",
           "equipped",
           "bosses",
           "others"
@@ -4005,6 +4476,37 @@
                   },
                   "description": "Background Claude added (ADR 0016), oldest first"
                 },
+                "todos": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "localText": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "suggested": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "localText",
+                      "suggested"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "description": "The open to-dos about it (ADR 0020); suggested ones are Claude's, not the player's yet"
+                },
                 "url": {
                   "type": "string",
                   "description": "Its page in the web app, as an absolute URL"
@@ -4030,6 +4532,7 @@
                 "entries",
                 "tags",
                 "background",
+                "todos",
                 "url",
                 "hidden"
               ],
@@ -4519,6 +5022,50 @@
               "number",
               "null"
             ]
+          },
+          "todos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "done",
+                    "dropped"
+                  ]
+                },
+                "suggested": {
+                  "type": "boolean"
+                },
+                "created": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "status",
+                "suggested",
+                "created"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The to-dos the session added, closed or changed"
+          },
+          "carriedTodos": {
+            "description": "Open to-dos taken along from carryFrom",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -4534,7 +5081,9 @@
           "reached",
           "codex",
           "character",
-          "carried"
+          "carried",
+          "todos",
+          "carriedTodos"
         ],
         "additionalProperties": false,
         "description": "What was filed from a session"
@@ -4560,7 +5109,8 @@
                     "goal",
                     "codex",
                     "tag",
-                    "background"
+                    "background",
+                    "todo"
                   ]
                 },
                 "id": {

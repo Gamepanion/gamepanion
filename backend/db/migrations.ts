@@ -405,6 +405,44 @@ const migrations: Record<string, Migration> = {
         end`.execute(db);
     },
   },
+  "009_todos": {
+    // ADR 0020: a to-do list per playthrough, apart from goals: errands the player keeps while playing. A to-do may point at one quest,
+    // item or codex entry; deleting that row unlinks the to-do (a trigger, as there is no foreign key across three tables), it stays.
+    async up(db: Kysely<any>) {
+      await db.schema
+        .createTable("todos")
+        .addColumn("id", "text", (c) => c.primaryKey())
+        .addColumn("player_id", "text", (c) => c.notNull())
+        .addColumn("playthrough_id", "text", (c) => c.notNull().references("playthroughs.id").onDelete("cascade"))
+        .addColumn("text", "text", (c) => c.notNull())
+        .addColumn("local_text", "text")
+        .addColumn("what", "text", (c) => c.check(sql`what is null or ${oneOf("what", ["quest", "item", "codex"])}`))
+        .addColumn("row_id", "text")
+        .addColumn("status", "text", (c) =>
+          c
+            .notNull()
+            .defaultTo("open")
+            .check(oneOf("status", ["open", "done", "dropped"])),
+        )
+        .addColumn("suggested", "integer", (c) => c.notNull().defaultTo(0))
+        .addColumn("spoiler", "text", (c) => c.notNull().defaultTo("none").check(oneOf("spoiler", SPOILER)))
+        .addColumn("session_id", "text", (c) => c.references("sessions.id").onDelete("set null"))
+        .addColumn("closed_session_id", "text", (c) => c.references("sessions.id").onDelete("set null"))
+        .addColumn("created_at", "bigint", (c) => c.notNull())
+        .addColumn("updated_at", "bigint", (c) => c.notNull())
+        .execute();
+      await db.schema.createIndex("todos_by_playthrough").on("todos").columns(["playthrough_id", "status"]).execute();
+      await db.schema.createIndex("todos_by_row").on("todos").columns(["what", "row_id"]).execute();
+      for (const [table, what] of [
+        ["items", "item"],
+        ["codex", "codex"],
+        ["quests", "quest"],
+      ])
+        await sql`create trigger ${sql.raw(`${table}_untodo`)} after delete on ${sql.table(table)} begin
+          update todos set what = null, row_id = null where what = ${sql.lit(what)} and row_id = old.id;
+        end`.execute(db);
+    },
+  },
 };
 
 export const NEWER = "the database was made by a newer Gamepanion than this one; upgrade Gamepanion, do not point an older one at it";

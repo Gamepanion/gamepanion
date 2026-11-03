@@ -5,7 +5,7 @@ import { config } from "./config";
 /**
  * The tabs of a playthrough's page, in their order; each has an address of its own (ADR 0019). Overview is the playthrough's own address.
  */
-export const PLAYTHROUGH_TABS = ["overview", "quests", "character", "items", "codex", "sessions", "notes", "settings"] as const;
+export const PLAYTHROUGH_TABS = ["overview", "quests", "todos", "character", "items", "codex", "sessions", "notes", "settings"] as const;
 export type PlaythroughTab = (typeof PLAYTHROUGH_TABS)[number];
 
 /** A playthrough: its Overview, where the player left off. */
@@ -20,6 +20,9 @@ export const questPath = (playthroughId: string, id: string) => `${tabPath(playt
 export const codexPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "codex")}#codex-${id}`;
 /** An item's row on its playthrough's Items tab. */
 export const itemPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "items")}#item-${id}`;
+
+/** A to-do's row on its playthrough's To-dos tab. */
+export const todoPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "todos")}#todo-${id}`;
 
 /** A copy of `body` with every `url` that is a path prefixed with `base`. */
 export function absoluteUrls<T>(base: string, body: T): T {
