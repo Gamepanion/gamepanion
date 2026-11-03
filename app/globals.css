@@ -752,7 +752,7 @@ h1 {
   @apply min-w-0 flex-1 overflow-x-auto px-3 py-2 font-mono text-sm whitespace-nowrap text-accent-soft select-all;
 }
 .copy-button {
-  @apply inline-flex shrink-0 items-center gap-1.5 border-l border-muted px-3 text-xs font-extrabold tracking-[0.06em] text-ink uppercase hover:bg-surface;
+  @apply inline-flex w-11 shrink-0 items-center justify-center border-l border-muted text-ink hover:bg-surface hover:text-accent;
 }
 .copy-button:focus-visible {
   @apply outline-2 -outline-offset-2 outline-ink;
