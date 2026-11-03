@@ -215,7 +215,14 @@ export const de: Copy = {
   // Der Chat in der App (ADR 0013)
   askClaude: "Frag Claude",
   chatTitle: "Claude",
-  chatHello: "Frag nach deinem Spiel, erzähl, was passiert ist, oder sag, was auf der Seite falsch ist.",
+  chatExamples: "Beispiele",
+  chatPrompts: [
+    { kind: "Erzählen", text: "Ich hab gerade den Boss im Glockenturm besiegt" },
+    { kind: "Fragen", text: "Wo war ich?" },
+    { kind: "Korrigieren", text: "Das Schwert war das +2" },
+  ],
+  chatOn: (run: string) => `Zu ${run}`,
+  chatHello: "Hier ist Claude, eine KI. Erzähl, was passiert ist, frag, wo du warst, oder korrigiere, was abgelegt ist.",
   newChat: "Neuer Chat",
   closeChat: "Chat schließen",
   message: "Nachricht",

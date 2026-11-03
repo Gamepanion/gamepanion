@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: chat-on-a-playthrough
+    status: done
+    date: 2026-11-03
+    icon: chat-processing-outline
+    title: The chat knows which game
+    title_de: Der Chat weiß, um welches Spiel es geht
+    summary: The in-app chat always opens on a playthrough and names it, and the empty chat shows three example prompts.
+    summary_de: Der Chat in der App öffnet immer zu einem Durchlauf und nennt ihn, und der leere Chat zeigt drei Beispiele.
+    links:
+      - { label: "#89", url: "https://github.com/gamepanion/gamepanion/pull/89" }
   - id: first-run
     status: done
     date: 2026-11-03

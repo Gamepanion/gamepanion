@@ -41,7 +41,13 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <SignOutButton />
         </div>
       </header>
-      <ChatProvider enabled={await chatEnabled(player)} voice={await voiceEnabled(player)} playerId={player.id}>
+      <ChatProvider
+        enabled={await chatEnabled(player)}
+        voice={await voiceEnabled(player)}
+        playerId={player.id}
+        runs={Object.fromEntries(runs.map((r) => [r.id, `${r.game} · ${r.label}`]))}
+        homeRun={runs.find((r) => r.status === "playing")?.id ?? null}
+      >
         <Follow>{children}</Follow>
       </ChatProvider>
     </div>

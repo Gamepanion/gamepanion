@@ -210,7 +210,14 @@ export const en = {
   // The in-app chat (ADR 0013)
   askClaude: "Ask Claude",
   chatTitle: "Claude",
-  chatHello: "Ask about your game, tell what happened, or say what is wrong on the page.",
+  chatHello: "This is Claude, an AI. Tell it what happened, ask where you were, or fix what is filed.",
+  chatExamples: "Examples",
+  chatPrompts: [
+    { kind: "Tell", text: "I just beat the boss in the bell tower" },
+    { kind: "Ask", text: "Where was I?" },
+    { kind: "Fix", text: "That sword was the +2 one" },
+  ],
+  chatOn: (run: string) => `On ${run}`,
   newChat: "New chat",
   closeChat: "Close the chat",
   message: "Message",
