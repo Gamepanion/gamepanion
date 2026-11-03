@@ -23,6 +23,10 @@ export const itemPath = (playthroughId: string, id: string) => `${tabPath(playth
 
 /** Where a player pastes their own Anthropic key for the in-app chat (ADR 0021). */
 export const accountKeyPath = () => "/account#key";
+/** Where a player subscribes (#48). */
+export const subscribePath = () => "/subscribe";
+/** The account page. */
+export const accountPath = () => "/account";
 /** The home page: what the player is playing, or, with nothing filed, how to start. */
 export const homePath = () => "/";
 

@@ -84,6 +84,7 @@ nav:
           - A to-do list of its own: adr/0020-a-to-do-list-of-its-own.md
           - "Players' own Anthropic keys": adr/0021-players-own-keys.md
           - "One SQLite file, with full-text search": adr/0022-one-sqlite-file-with-full-text-search.md
+          - "A subscription, one game free": adr/0023-a-subscription-one-game-free.md
 
 theme:
   name: material

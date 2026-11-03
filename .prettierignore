@@ -7,3 +7,4 @@ package-lock.json
 .next/
 openapi.json
 .open-design/
+third-party-licenses.json

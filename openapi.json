@@ -1864,6 +1864,16 @@
               }
             }
           },
+          "402": {
+            "description": "Where the instance sells subscriptions: the game would be a free player's second, or it is frozen since the subscription ended (`subscription_required`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "404": {
             "description": "No such thing, or one of another player's (`not_found`)",
             "content": {
@@ -2547,6 +2557,7 @@
               "unauthorized",
               "not_found",
               "ambiguous",
+              "subscription_required",
               "internal"
             ]
           }

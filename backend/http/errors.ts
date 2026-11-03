@@ -1,10 +1,11 @@
 // The HTTP status for each refusal, and the JSON error body every /api/v1 endpoint answers with.
 import { AmbiguousError, AuthError, InvalidInputError, NotFoundError, GamepanionError } from "../errors";
 import { logger } from "../log";
+import { SubscriptionRequiredError } from "../access";
 
 const log = logger("http");
 
-export const ERROR_CODES = ["invalid_request", "invalid_input", "unauthorized", "not_found", "ambiguous", "internal"] as const;
+export const ERROR_CODES = ["invalid_request", "invalid_input", "unauthorized", "not_found", "ambiguous", "subscription_required", "internal"] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 // A request that can't be read at all: not JSON, too large, a query that doesn't parse.
@@ -20,6 +21,7 @@ const STATUS: [new (...args: never[]) => GamepanionError, number][] = [
   [AuthError, 401],
   [NotFoundError, 404],
   [AmbiguousError, 409],
+  [SubscriptionRequiredError, 402],
 ];
 
 export type ErrorReply = { status: number; body: { error: string; code: ErrorCode } };

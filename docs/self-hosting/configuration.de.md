@@ -71,6 +71,14 @@ Um hineinzusprechen, lass neben Gamepanion einen Whisper-Server laufen und richt
 
 und `GAMEPANION_TRANSCRIBE_URL=http://whisper:8000` in der `.env`. Die erste Umwandlung lädt das Modell herunter.
 
+## Die Seiten des Betreibers
+
+`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` und `GAMEPANION_TERMS_FILE` nennen eigene Markdown-Dateien: Impressum, Datenschutzerklärung und AGB unter `/imprint`, `/privacy` und `/terms`, verlinkt in der Fußzeile. Ohne Einstellung, oder wenn die Datei fehlt oder größer als 256 KiB ist, gibt es keine Seite und keinen Link. Ein Wert darf `{lang}` enthalten (`/legal/imprint.{lang}.md`), ersetzt durch die Sprache der Seite (`en`, `de`), sonst Englisch. Die Dateien werden bei jedem Aufruf gelesen. Gamepanion liefert keine der Texte mit. `/licenses` listet die Open-Source-Pakete, die Gamepanion mitbringt, und ist immer da.
+
+## Zahlungen
+
+Zahlungen sind aus, solange `GAMEPANION_PAYMENT_PROVIDER` nicht gesetzt ist: Dann hat jeder Spieler alles, nichts ist begrenzt oder verkauft ([ADR 0023](../adr/0023-a-subscription-one-game-free.md)). Es ist nur für einen Betreiber, der Abos verkauft: `creem` braucht `GAMEPANION_CREEM_API_KEY`, `GAMEPANION_CREEM_PRODUCT_ID`, `GAMEPANION_CREEM_WEBHOOK_SECRET` (und `GAMEPANION_CREEM_YEARLY_PRODUCT_ID` für ein Jahresabo) und alle vier Betreiber-Dateien (auch `GAMEPANION_PRICING_FILE`); bis dahin antwortet `/health` mit 503 und nennt die fehlende Einstellung. `GAMEPANION_FREE_PLAYERS` nennt Spieler, die nie begrenzt sind, im Format von `GAMEPANION_SIGNUP_ALLOW`. `fake` (mit `GAMEPANION_FAKE_WEBHOOK_SECRET`) probiert den Ablauf aus, ohne jemandem etwas zu berechnen. Die Abo-Daten liegen in `DATA_DIR/billing.sqlite`.
+
 ## Daten und Backups
 
 Sichere `DATA_DIR`. `gamepanion.sqlite` ist das Log; `auth.sqlite` enthält Konten, Sessions und die verbundenen Clients, also enthält eine Kopie des Logs allein keine Tokens ([ADR 0004](../adr/0004-sign-in-with-better-auth.md)). Geht `auth.sqlite` verloren, sind alle abgemeldet und es ist verloren, wer wer ist: Behalte beide.

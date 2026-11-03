@@ -114,6 +114,36 @@ export const config = {
   // slash. Unset: the chat takes typing only.
   transcribeUrl: (): string | undefined => env("GAMEPANION_TRANSCRIBE_URL").trim().replace(/\/+$/, "") || undefined,
   transcribeModel: (): string => env("GAMEPANION_TRANSCRIBE_MODEL").trim() || "deepdml/faster-whisper-large-v3-turbo-ct2",
+  // Payments (#48, ADR 0023): only for an operator who sells. Empty: every feature, no limits, nothing sold (V7).
+  paymentProvider: (): "" | "fake" | "creem" => {
+    const v = env("GAMEPANION_PAYMENT_PROVIDER").trim().toLowerCase();
+    if (v === "" || v === "fake" || v === "creem") return v;
+    throw new Error(`GAMEPANION_PAYMENT_PROVIDER=${v} is not a payment provider; use creem`);
+  },
+  creem: (): { apiKey: string; productId: string; yearlyProductId: string; webhookSecret: string } => {
+    const v = (name: string) => env(name).trim();
+    const missing = ["GAMEPANION_CREEM_API_KEY", "GAMEPANION_CREEM_PRODUCT_ID", "GAMEPANION_CREEM_WEBHOOK_SECRET"].filter((n) => !v(n));
+    if (missing.length) throw new Error(`GAMEPANION_PAYMENT_PROVIDER=creem needs ${missing.join(", ")}`);
+    return {
+      apiKey: v("GAMEPANION_CREEM_API_KEY"),
+      productId: v("GAMEPANION_CREEM_PRODUCT_ID"),
+      yearlyProductId: v("GAMEPANION_CREEM_YEARLY_PRODUCT_ID"),
+      webhookSecret: v("GAMEPANION_CREEM_WEBHOOK_SECRET"),
+    };
+  },
+  fakeWebhookSecret: (): string => {
+    const v = env("GAMEPANION_FAKE_WEBHOOK_SECRET").trim();
+    if (!v) throw new Error("GAMEPANION_PAYMENT_PROVIDER=fake needs GAMEPANION_FAKE_WEBHOOK_SECRET");
+    return v;
+  },
+  // Players never limited when payments are on: the operator's own and family accounts, in GAMEPANION_SIGNUP_ALLOW's format.
+  freePlayers: (): string[] =>
+    env("GAMEPANION_FREE_PLAYERS")
+      .split(",")
+      .map((n) => n.trim().toLowerCase())
+      .filter(Boolean),
+  // The operator's pages (#48): Markdown files, `{lang}` replaced by the page's language (en, de), falling back to English. No file, no page.
+  operatorFile: (page: "imprint" | "privacy" | "terms" | "pricing"): string | undefined => env(`GAMEPANION_${page.toUpperCase()}_FILE`).trim() || undefined,
   // Unset, empty or not a level → info.
   logLevel: (): LogLevel =>
     ((l) => ((LOG_LEVELS as readonly string[]).includes(l) ? (l as LogLevel) : "info"))(env("GAMEPANION_LOG_LEVEL").trim().toLowerCase()),

@@ -71,9 +71,17 @@ To speak into it, run a Whisper server next to Gamepanion and point `GAMEPANION_
 
 and `GAMEPANION_TRANSCRIBE_URL=http://whisper:8000` in `.env`. The first transcription downloads the model.
 
+## The operator's pages
+
+`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` and `GAMEPANION_TERMS_FILE` name Markdown files of your own: the imprint, privacy policy and terms at `/imprint`, `/privacy` and `/terms`, linked in the footer. Without a setting, or with a file that is missing or larger than 256 KiB, there is no page and no link. A value may hold `{lang}` (`/legal/imprint.{lang}.md`), replaced by the page's language (`en`, `de`) and falling back to English. Files are read on every request, so an edited file shows at once. Gamepanion ships none of the texts. `/licenses` lists the open-source packages Gamepanion ships and is always there.
+
+## Payments
+
+Payments are off unless `GAMEPANION_PAYMENT_PROVIDER` is set: then every player has every feature and nothing is limited or sold ([ADR 0023](../adr/0023-a-subscription-one-game-free.md)). It is only for an operator who sells subscriptions: `creem` needs `GAMEPANION_CREEM_API_KEY`, `GAMEPANION_CREEM_PRODUCT_ID`, `GAMEPANION_CREEM_WEBHOOK_SECRET` (and `GAMEPANION_CREEM_YEARLY_PRODUCT_ID` for a yearly plan) and all four operator files (`GAMEPANION_PRICING_FILE` too); `/health` answers 503 and names the missing setting until they are there. `GAMEPANION_FREE_PLAYERS` lists players who are never limited, in the format of `GAMEPANION_SIGNUP_ALLOW`. `fake` (with `GAMEPANION_FAKE_WEBHOOK_SECRET`) tries the flow without charging anyone. The subscription records live in `DATA_DIR/billing.sqlite`.
+
 ## Data and backups
 
-Back up `DATA_DIR`. `gamepanion.sqlite` is the log; `auth.sqlite` holds accounts, sessions and the connected clients, so a copy of the log alone holds no tokens ([ADR 0004](../adr/0004-sign-in-with-better-auth.md)). Losing `auth.sqlite` signs everyone out and loses who is who: keep both.
+Back up `DATA_DIR`. `gamepanion.sqlite` is the log (and `billing.sqlite` the subscriptions, where the instance sells); `auth.sqlite` holds accounts, sessions and the connected clients, so a copy of the log alone holds no tokens ([ADR 0004](../adr/0004-sign-in-with-better-auth.md)). Losing `auth.sqlite` signs everyone out and loses who is who: keep both.
 
 SQLite runs in WAL mode: new data sits in `gamepanion.sqlite-wal` for a while. Back up the whole directory, or copy with `sqlite3 gamepanion.sqlite ".backup copy.sqlite"`; the main file alone can be nearly empty.
 

@@ -6,3 +6,6 @@ cd "$(dirname "$0")/.."
 
 # openapi.json, from the route table (vitest resolves backend/'s TypeScript imports).
 UPDATE_OPENAPI=1 npx vitest run backend/http/openapi.test.ts --silent >/dev/null
+
+# third-party-licenses.json, from package-lock.json and node_modules: the licenses page (#48).
+node scripts/third-party-licenses.mjs

@@ -2,6 +2,7 @@
 // answers, 503 `{"status":"unavailable"}` when not; nothing of the error is in the answer (it is logged). Open and without a
 // switch: it says nothing but that, and a probe (Docker, a monitor) has no credential.
 import { logger } from "../log";
+import { setupProblem } from "../operator";
 
 const log = logger("health");
 
@@ -22,6 +23,12 @@ export async function healthRoute(): Promise<Response> {
   } catch (e) {
     ok = false;
     log.error({ err: e }, "database check failed");
+  }
+  // An instance that sells needs its operator pages and settings (#48); the problem names the setting, never a path.
+  const problem = await setupProblem();
+  if (problem) {
+    ok = false;
+    log.error({ problem }, "payment setup incomplete");
   }
   return Response.json({ status: ok ? "ok" : "unavailable" }, { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
 }

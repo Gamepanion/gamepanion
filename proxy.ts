@@ -1,12 +1,12 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Every page needs a session. Exempt: the sign-in (/login) and consent pages, /health, and /mcp, /api/* and /.well-known/*, which check
+// Every page needs a session. Exempt: the sign-in (/login) and consent pages, the operator's pages and the licenses (#48), /health, and /mcp, /api/* and /.well-known/*, which check
 // credentials themselves: redirecting them to /login would turn a client's 401 into a success-looking 307. The icons and the manifest
 // are public too, so a phone can fetch them for its home screen, and so is the link preview image, for the sites that unfurl a link. Only the cookie's presence is checked here (the proxy doesn't ask the
 // database); pages get the player from playerFromHeaders, which checks the session.
 const EXEMPT =
-  /^\/(login|consent|health|mcp|favicon\.ico|icon\.svg|apple-icon\.png|icon-(192|512|maskable-512)\.png|manifest\.webmanifest|opengraph-image\.png)$|^\/(api|\.well-known|_next)\//;
+  /^\/(login|consent|health|mcp|imprint|privacy|terms|licenses|favicon\.ico|icon\.svg|apple-icon\.png|icon-(192|512|maskable-512)\.png|manifest\.webmanifest|opengraph-image\.png)$|^\/(api|\.well-known|_next)\//;
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
