@@ -21,7 +21,7 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
   const copy = await serverCopy();
   const locale = await serverLocale();
   const words = await readOperatorPage("pricing", locale);
-  const { plans, yearlySavingPercent } = await pricingPlans();
+  const { plans, yearlySavingPercent, hostedAiSavingPercent } = await pricingPlans();
   const back = typeof (await searchParams).checkout_id === "string";
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
   return (
@@ -39,7 +39,9 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
             </form>
           )}
         </div>
-      ) : back ? (
+      ) : null}
+      {/* A subscriber without the AI still sees the plans with it (#56); the others see every plan. */}
+      {sub.subscribed && sub.hostedAi ? null : !sub.subscribed && back ? (
         <p role="status" className="card">
           {copy.confirming}{" "}
           <a href="/subscribe" className="font-semibold text-accent underline">
@@ -50,11 +52,14 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
         <p className="card">{copy.noPlans}</p>
       ) : (
         <Plans
-          plans={plans.map((x) => ({
-            period: x.period,
-            price: new Intl.NumberFormat(locale, { style: "currency", currency: x.currency }).format(x.amount / 100),
-          }))}
-          saving={yearlySavingPercent}
+          plans={plans
+            .filter((x) => !sub.subscribed || x.tier === "hostedAi")
+            .map((x) => ({
+              period: x.period,
+              tier: x.tier,
+              price: new Intl.NumberFormat(locale, { style: "currency", currency: x.currency }).format(x.amount / 100),
+            }))}
+          saving={{ standard: yearlySavingPercent, hostedAi: hostedAiSavingPercent }}
         />
       )}
     </div>

@@ -3,6 +3,7 @@ import {
   accountKeyPath,
   briefing,
   keyStorageEnabled,
+  subscriptionOf,
   buildOf,
   continuePlaythrough,
   codexOf,
@@ -34,7 +35,7 @@ export async function Home({ player }: { player: Player }) {
       <div className="space-y-4">
         <h1 className="text-3xl">{copy.contents}</h1>
         <FirstRun watching>
-          <Welcome />
+          <Welcome player={player} />
         </FirstRun>
       </div>
     );
@@ -174,9 +175,11 @@ async function Continue({ player, run: t }: { player: Player; run: PlaythroughVi
 
 // Nothing filed yet (#80): a checklist for each way in, the connector always and the player's own key where the instance stores keys,
 // side by side from a tablet up. It turns into "your first session is filed" as soon as one arrives (components/FirstRun.tsx).
-async function Welcome() {
+async function Welcome({ player }: { player: Player }) {
   const copy = await serverCopy();
-  const ownKey = keyStorageEnabled();
+  // On the hosted-AI plan (#56) the second way in is just talking; otherwise the player's own key, where the instance stores keys.
+  const hostedAi = (await subscriptionOf(player)).hostedAi;
+  const ownKey = keyStorageEnabled() || hostedAi;
   return (
     <div className="space-y-4">
       <p>{copy.nothingYet}</p>
@@ -194,24 +197,33 @@ async function Welcome() {
             <li>{copy.connectAfter}</li>
           </ol>
         </section>
-        {ownKey && (
+        {hostedAi ? (
           <section aria-labelledby="way-key" className="card space-y-3">
             <h2 id="way-key" className="text-xl font-bold">
-              {copy.wayOwnKey}
+              {copy.startTalking}
             </h2>
-            <ol className="first-run-steps">
-              <li>
-                <span>
-                  {copy.ownKeyStepBefore}{" "}
-                  <Link href={accountKeyPath()} className="font-semibold text-accent underline">
-                    {copy.ownKeyStepLink}
-                  </Link>
-                </span>
-                <span className="block text-sm text-muted">{copy.keyNote}</span>
-              </li>
-              <li>{copy.ownKeyOpenChat}</li>
-            </ol>
+            <p>{copy.startTalkingLead}</p>
           </section>
+        ) : (
+          ownKey && (
+            <section aria-labelledby="way-key" className="card space-y-3">
+              <h2 id="way-key" className="text-xl font-bold">
+                {copy.wayOwnKey}
+              </h2>
+              <ol className="first-run-steps">
+                <li>
+                  <span>
+                    {copy.ownKeyStepBefore}{" "}
+                    <Link href={accountKeyPath()} className="font-semibold text-accent underline">
+                      {copy.ownKeyStepLink}
+                    </Link>
+                  </span>
+                  <span className="block text-sm text-muted">{copy.keyNote}</span>
+                </li>
+                <li>{copy.ownKeyOpenChat}</li>
+              </ol>
+            </section>
+          )
         )}
       </div>
     </div>

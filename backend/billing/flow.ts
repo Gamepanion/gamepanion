@@ -4,7 +4,7 @@
 import { emailOf } from "../auth/session";
 import { InvalidInputError, NotFoundError } from "../errors";
 import { logger } from "../log";
-import { paymentProvider, WebhookRejectedError, type PaymentEvent, type Period, type Plan } from "../payments";
+import { paymentProvider, WebhookRejectedError, type PaymentEvent, type Period, type Plan, type Tier } from "../payments";
 import { processState } from "../state";
 import type { Player } from "../types";
 import { siteUrl, subscribePath } from "../urls";
@@ -20,12 +20,12 @@ export const setEmailLookupForTests = (f: ((id: string) => Promise<string | null
 /** The player's sign-in address. */
 export const playerEmail = (id: string) => (state.emailOf ?? emailOf)(id);
 
-/** Where the player goes to pay for `period`; they come back to /subscribe. */
-export async function startCheckout(p: Player, period: Period): Promise<{ url: string }> {
+/** Where the player goes to pay for `period` of `tier`; they come back to /subscribe. */
+export async function startCheckout(p: Player, period: Period, tier: Tier = "standard"): Promise<{ url: string }> {
   const provider = paymentProvider();
   if (!provider) throw new NotFoundError("Nothing is sold on this instance");
-  if (!(await provider.plans()).some((x) => x.period === period)) throw new InvalidInputError(`No plan per ${period} is sold`);
-  return provider.createCheckout({ period, playerId: p.id, email: await playerEmail(p.id), successUrl: `${siteUrl()}${subscribePath()}` });
+  if (!(await provider.plans()).some((x) => x.period === period && x.tier === tier)) throw new InvalidInputError(`No ${tier} plan per ${period} is sold`);
+  return provider.createCheckout({ period, tier, playerId: p.id, email: await playerEmail(p.id), successUrl: `${siteUrl()}${subscribePath()}` });
 }
 
 async function apply(e: PaymentEvent): Promise<void> {
@@ -85,10 +85,15 @@ export async function portalFor(p: Player): Promise<string | null> {
   return ref ? provider.portalUrl(ref) : null;
 }
 
-/** The plans for the subscribe page, yearly first, and what the yearly one saves against twelve months, in percent. */
-export async function pricingPlans(): Promise<{ plans: Plan[]; yearlySavingPercent: number | null }> {
+/** The plans for the subscribe page, by tier, yearly first, and what a yearly one saves against twelve months, in percent. */
+export async function pricingPlans(): Promise<{ plans: Plan[]; yearlySavingPercent: number | null; hostedAiSavingPercent: number | null }> {
   const plans = (await paymentProvider()?.plans()) ?? [];
-  return { plans: [...plans].sort((a) => (a.period === "year" ? -1 : 1)), yearlySavingPercent: yearlySaving(plans) };
+  const order = (x: Plan) => (x.tier === "standard" ? 0 : 2) + (x.period === "year" ? 0 : 1);
+  return {
+    plans: [...plans].sort((a, b) => order(a) - order(b)),
+    yearlySavingPercent: yearlySaving(plans.filter((x) => x.tier === "standard")),
+    hostedAiSavingPercent: yearlySaving(plans.filter((x) => x.tier === "hostedAi")),
+  };
 }
 
 export const yearlySaving = (plans: Plan[]): number | null => {
@@ -99,9 +104,12 @@ export const yearlySaving = (plans: Plan[]): number | null => {
 
 /** What the account and subscribe pages show (#48): whether anything is sold, whether the player subscribes and until when, and whether
  * they have a portal. */
-export async function subscriptionOf(p: Player): Promise<{ sold: boolean; subscribed: boolean; validUntil: number | null; portal: boolean }> {
-  if (!paymentProvider()) return { sold: false, subscribed: false, validUntil: null, portal: false };
+export async function subscriptionOf(
+  p: Player,
+): Promise<{ sold: boolean; subscribed: boolean; hostedAi: boolean; validUntil: number | null; portal: boolean }> {
+  if (!paymentProvider()) return { sold: false, subscribed: false, hostedAi: false, validUntil: null, portal: false };
   const subs = await (await billing()).ofPlayer(p.id);
-  const live = subs.find((s) => s.status === "active" && (s.validUntil === null || s.validUntil > Date.now()));
-  return { sold: true, subscribed: !!live, validUntil: live?.validUntil ?? null, portal: subs.some((s) => s.customerRef) };
+  const live = subs.filter((s) => s.status === "active" && (s.validUntil === null || s.validUntil > Date.now()));
+  const best = live.find((s) => s.tier === "hostedAi") ?? live[0];
+  return { sold: true, subscribed: !!best, hostedAi: best?.tier === "hostedAi", validUntil: best?.validUntil ?? null, portal: subs.some((s) => s.customerRef) };
 }

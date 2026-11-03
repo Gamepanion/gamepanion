@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: hosted-ai
+    status: done
+    date: 2026-11-03
+    icon: robot-outline
+    title: The chat on Gamepanion's AI, for those who want it
+    title_de: Der Chat mit Gamepanions KI, für alle, die ihn wollen
+    summary: The in-app chat runs on your own key, or with the "Subscription + hosted AI" plan on Gamepanion's AI within a monthly allowance, voice included. Self-hosted, nothing changes.
+    summary_de: Der Chat in der App läuft mit deinem eigenen Schlüssel, oder im „Abo mit KI“ mit Gamepanions KI im Rahmen eines Monatskontingents, auch gesprochen. Selbst gehostet ändert sich nichts.
+    links:
+      - { label: "ADR 0024", url: "https://docs.gamepanion.app/adr/0024-the-hosted-ai-tier/" }
+      - { label: "#94", url: "https://github.com/gamepanion/gamepanion/pull/94" }
   - id: subscription
     status: done
     date: 2026-11-03

@@ -14,12 +14,14 @@ export function createFake(webhookSecret: string): PaymentProvider {
   return {
     async plans() {
       return [
-        { period: "month", name: "Monthly", amount: 499, currency: "EUR", taxIncluded: true },
-        { period: "year", name: "Yearly", amount: 4990, currency: "EUR", taxIncluded: true },
+        { period: "month", tier: "standard", name: "Monthly", amount: 499, currency: "EUR", taxIncluded: true },
+        { period: "year", tier: "standard", name: "Yearly", amount: 4990, currency: "EUR", taxIncluded: true },
+        { period: "month", tier: "hostedAi", name: "Monthly with AI", amount: 999, currency: "EUR", taxIncluded: true },
+        { period: "year", tier: "hostedAi", name: "Yearly with AI", amount: 9990, currency: "EUR", taxIncluded: true },
       ];
     },
-    async createCheckout({ successUrl, playerId }) {
-      return { url: `${successUrl}?checkout_id=fake_${encodeURIComponent(playerId)}` };
+    async createCheckout({ successUrl, playerId, tier = "standard" }) {
+      return { url: `${successUrl}?checkout_id=fake_${tier}_${encodeURIComponent(playerId)}` };
     },
     async parseWebhook(rawBody, headers) {
       const a = Buffer.from(headers.get("x-fake-signature") ?? "");

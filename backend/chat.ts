@@ -39,6 +39,9 @@ export type ChatContext = { playthroughId?: string; about?: { kind: AboutKind; i
 /** Something a tool call filed or changed, for the link chips under the reply. */
 export type ChatLink = { name: string; url: string };
 export type ChatCode = "chat_refused" | "chat_too_long" | "chat_limit" | "chat_unavailable" | "own_key_rejected";
+
+/** On the hosted-AI plan (ADR 0024): a shorter reply, the guardrails, and every round's tokens counted. */
+export type ChatLimits = { maxTokens?: number; extraRules?: string; onUsage?: (tokens: number) => Promise<void> | void };
 /** A code is a failure the app words in the player's language; when something was written before it, `links` and `filed` say what,
  * so the player doesn't send it again. */
 export type ChatReply = { reply: string; links: ChatLink[]; filed: boolean } | { code: ChatCode; links?: ChatLink[]; filed?: boolean };
@@ -163,11 +166,18 @@ export function linksOf(out: Record<string, unknown>): ChatLink[] {
 }
 
 /** One message of the in-app chat: the whole conversation so far (the last turn is the player's), as `p`, on `model`. */
-export async function chat(p: Player, turns: ChatTurn[], context: ChatContext, model: ChatModel, now = new Date()): Promise<ChatReply> {
+export async function chat(
+  p: Player,
+  turns: ChatTurn[],
+  context: ChatContext,
+  model: ChatModel,
+  now = new Date(),
+  limits: ChatLimits = {},
+): Promise<ChatReply> {
   const day = today(now);
   if (!(await spend(p, day))) return { code: "chat_limit" };
   const system: Anthropic.Beta.BetaTextBlockParam[] = [
-    { type: "text", text: INSTRUCTIONS + "\n" + CHAT_RULES, cache_control: { type: "ephemeral" } },
+    { type: "text", text: INSTRUCTIONS + "\n" + CHAT_RULES + (limits.extraRules ?? ""), cache_control: { type: "ephemeral" } },
     { type: "text", text: await situation(p, context, day) },
   ];
   const messages: Anthropic.Beta.BetaMessageParam[] = recent(turns).map((t) => ({ role: t.role, content: t.content }));
@@ -181,7 +191,7 @@ export async function chat(p: Player, turns: ChatTurn[], context: ChatContext, m
     try {
       response = await model.create({
         model: config.anthropicModel(),
-        max_tokens: 16000,
+        max_tokens: limits.maxTokens ?? 16000,
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default",
         output_config: { effort: "medium" },
@@ -198,6 +208,8 @@ export async function chat(p: Player, turns: ChatTurn[], context: ChatContext, m
       }
       throw e;
     }
+    const usage = response.usage as { input_tokens?: number; output_tokens?: number } | undefined;
+    if (limits.onUsage) await limits.onUsage((usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0));
     if (response.stop_reason === "refusal") return fail("chat_refused");
     if (response.stop_reason === "max_tokens" || response.stop_reason === "model_context_window_exceeded") return fail("chat_too_long");
 

@@ -18,6 +18,8 @@ export function useVoice(onText: (text: string) => void, onError: (message: stri
   const copy = useCopy();
   const [state, setState] = useState<VoiceState>("idle");
   const [seconds, setSeconds] = useState(0);
+  // When the recording started, for its length (the hosted-AI quota's minutes).
+  const startedAt = useRef(0);
   const recorder = useRef<MediaRecorder | null>(null);
   const keep = useRef(false);
   const mounted = useRef(true);
@@ -63,6 +65,7 @@ export function useVoice(onText: (text: string) => void, onError: (message: stri
   useEffect(() => {
     if (state !== "recording") return;
     const started = Date.now();
+    startedAt.current = started;
     const tick = setInterval(() => setSeconds(Math.floor((Date.now() - started) / 1000)), 250);
     return () => clearInterval(tick);
   }, [state]);
@@ -85,12 +88,16 @@ export function useVoice(onText: (text: string) => void, onError: (message: stri
       if (!keep.current || !chunks.length) return setState("idle");
       setState("transcribing");
       const blob = new Blob(chunks, { type: (rec.mimeType || type || "audio/webm").split(";")[0] });
-      const res = await fetch("/api/chat/voice", { method: "POST", body: blob, headers: { "Content-Type": blob.type } }).catch(() => null);
+      // How long it was, for the hosted-AI quota's minutes (ADR 0024).
+      const length = String(Math.max(1, Math.ceil((Date.now() - startedAt.current) / 1000)));
+      const res = await fetch("/api/chat/voice", { method: "POST", body: blob, headers: { "Content-Type": blob.type, "X-Audio-Seconds": length } }).catch(
+        () => null,
+      );
       const body = res ? ((await res.json().catch(() => null)) as { text?: string; code?: string } | null) : null;
       if (!mounted.current) return;
       setState("idle");
       if (res?.ok && body?.text) handlers.current.onText(body.text);
-      else handlers.current.onError(body?.code === "voice_too_long" ? copy.voiceTooLong : copy.voiceFailed);
+      else handlers.current.onError(body?.code === "voice_too_long" ? copy.voiceTooLong : body?.code === "quota_used" ? copy.quotaUsed : copy.voiceFailed);
     };
     recorder.current = rec;
     keep.current = false;

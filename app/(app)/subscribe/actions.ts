@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { chooseActiveGame, portalFor, startCheckout } from "@/backend";
 import { pagePlayer } from "../viewer";
 
-export async function checkoutAction(period: "month" | "year"): Promise<void> {
-  const { url } = await startCheckout(await pagePlayer(), period);
+export async function checkoutAction(period: "month" | "year", tier: "standard" | "hostedAi" = "standard"): Promise<void> {
+  const { url } = await startCheckout(await pagePlayer(), period, tier);
   redirect(url);
 }
 

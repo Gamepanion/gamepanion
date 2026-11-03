@@ -27,9 +27,11 @@ test("the fake signs and parses its own events; plans are a monthly and a yearly
     { type: "renewed", providerRef: "sub_1", validUntil: 5 },
   ]);
   await expect(f.parseWebhook(body, new Headers({ "x-fake-signature": "nope" }))).rejects.toBeInstanceOf(WebhookRejectedError);
-  expect((await f.plans()).map((p) => [p.period, p.amount, p.currency, p.taxIncluded])).toEqual([
-    ["month", 499, "EUR", true],
-    ["year", 4990, "EUR", true],
+  expect((await f.plans()).map((p) => [p.period, p.tier, p.amount])).toEqual([
+    ["month", "standard", 499],
+    ["year", "standard", 4990],
+    ["month", "hostedAi", 999],
+    ["year", "hostedAi", 9990],
   ]);
 });
 
@@ -62,7 +64,7 @@ test("checkout.completed becomes started with the player from metadata; without 
       p,
       event("checkout.completed", { metadata: { player_id: "p1" }, customer: { id: "cust_1" }, subscription: { id: "sub_1", current_period_end_date: end } }),
     ),
-  ).toEqual([{ type: "started", providerRef: "sub_1", playerId: "p1", customerRef: "cust_1", validUntil: Date.parse(end) }]);
+  ).toEqual([{ type: "started", providerRef: "sub_1", playerId: "p1", customerRef: "cust_1", validUntil: Date.parse(end), tier: "standard" }]);
   expect(await parse(p, event("checkout.completed", { request_id: "p2", subscription: { id: "sub_2" } }))).toMatchObject([{ playerId: "p2" }]);
   await expect(parse(p, event("checkout.completed", { subscription: { id: "sub_3" } }))).rejects.toBeInstanceOf(WebhookRejectedError);
 });

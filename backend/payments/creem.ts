@@ -7,12 +7,21 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { logger } from "../log";
 import { processState } from "../state";
-import { WebhookRejectedError, type PaymentProvider, type Period, type Plan } from "./types";
+import { WebhookRejectedError, type PaymentProvider, type Period, type Plan, type Tier } from "./types";
 
 const log = logger("payments");
 
-/** `productId` is the monthly subscription; `yearlyProductId` the yearly one, if sold. */
-export type CreemOptions = { apiKey: string; productId: string; yearlyProductId?: string; webhookSecret: string; fetch?: typeof fetch };
+/** `productId` is the monthly subscription; `yearlyProductId` the yearly one, if sold; the hosted-AI ones the same with the chat on the
+ * instance's AI (#56), if sold. */
+export type CreemOptions = {
+  apiKey: string;
+  productId: string;
+  yearlyProductId?: string;
+  hostedAiProductId?: string;
+  hostedAiYearlyProductId?: string;
+  webhookSecret: string;
+  fetch?: typeof fetch;
+};
 
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj | undefined => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : undefined);
@@ -32,7 +41,25 @@ export function resetPlansForTests(): void {
 
 class ProductsUnreadable extends Error {}
 
-export function createCreem({ apiKey, productId, yearlyProductId = "", webhookSecret, fetch: doFetch = fetch }: CreemOptions): PaymentProvider {
+export function createCreem({
+  apiKey,
+  productId,
+  yearlyProductId = "",
+  hostedAiProductId = "",
+  hostedAiYearlyProductId = "",
+  webhookSecret,
+  fetch: doFetch = fetch,
+}: CreemOptions): PaymentProvider {
+  // Every product sold, with what it is; a completed checkout's product says which tier was bought.
+  const sold: [Period, Tier, string][] = (
+    [
+      ["month", "standard", productId],
+      ["year", "standard", yearlyProductId],
+      ["month", "hostedAi", hostedAiProductId],
+      ["year", "hostedAi", hostedAiYearlyProductId],
+    ] as [Period, Tier, string][]
+  ).filter(([, , id]) => id);
+  const tierOf = (product: string | undefined): Tier => sold.find(([, , id]) => id === product)?.[1] ?? "standard";
   const base = apiKey.startsWith("creem_test_") ? "https://test-api.creem.io/v1" : "https://api.creem.io/v1";
   const call = async (what: string, path: string, body?: unknown): Promise<Obj | undefined> => {
     const res = await doFetch(`${base}${path}`, {
@@ -47,7 +74,7 @@ export function createCreem({ apiKey, productId, yearlyProductId = "", webhookSe
     log.warn({ product: id, reason }, "a configured product is not offered");
     return null;
   };
-  const product = async (period: Period, id: string): Promise<Plan | null> => {
+  const product = async (period: Period, tier: Tier, id: string): Promise<Plan | null> => {
     let res: Response;
     try {
       res = await doFetch(`${base}/products?product_id=${encodeURIComponent(id)}`, { headers: { "x-api-key": apiKey }, signal: AbortSignal.timeout(5000) });
@@ -62,15 +89,13 @@ export function createCreem({ apiKey, productId, yearlyProductId = "", webhookSe
     const amount = p.price;
     const currency = typeof p.currency === "string" && /^[A-Z]{3}$/.test(p.currency) ? p.currency : undefined;
     if (!name || !Number.isInteger(amount) || (amount as number) < 0 || !currency) return notOffered(id, "not a product");
-    return { period, name, amount: amount as number, currency, taxIncluded: p.tax_mode === "inclusive" };
+    return { period, tier, name, amount: amount as number, currency, taxIncluded: p.tax_mode === "inclusive" };
   };
-  const refresh = async (): Promise<Plan[]> => {
-    const sold: [Period, string][] = [["month", productId], ...(yearlyProductId ? [["year", yearlyProductId] as [Period, string]] : [])];
-    return (await Promise.all(sold.map(([period, id]) => product(period, id)))).filter((p): p is Plan => p !== null);
-  };
+  const refresh = async (): Promise<Plan[]> =>
+    (await Promise.all(sold.map(([period, tier, id]) => product(period, tier, id)))).filter((p): p is Plan => p !== null);
   return {
     async plans() {
-      const key = `${base} ${productId} ${yearlyProductId}`;
+      const key = `${base} ${sold.map(([, , id]) => id).join(" ")}`;
       if (plansCache.key !== key) resetPlansForTests();
       if (plansCache.plans && Date.now() - (plansCache.at ?? 0) <= PLANS_FRESH_MS) return plansCache.plans;
       plansCache.key = key;
@@ -85,9 +110,9 @@ export function createCreem({ apiKey, productId, yearlyProductId = "", webhookSe
       return plansCache.plans ?? plansCache.pending;
     },
 
-    async createCheckout({ period, playerId, email, successUrl }) {
-      const product = period === "year" ? yearlyProductId : productId;
-      if (!product) throw new Error(`creem: no product for a subscription per ${period}`);
+    async createCheckout({ period, tier = "standard", playerId, email, successUrl }) {
+      const product = sold.find(([p, t]) => p === period && t === tier)?.[2];
+      if (!product) throw new Error(`creem: no product for a ${tier} subscription per ${period}`);
       const checkout = await call("creating a checkout", "/checkouts", {
         product_id: product,
         success_url: successUrl,
@@ -127,6 +152,7 @@ export function createCreem({ apiKey, productId, yearlyProductId = "", webhookSe
               playerId,
               customerRef: str(customer?.id) ?? str(o.customer) ?? null,
               validUntil: time(subscription?.current_period_end_date),
+              tier: tierOf(str(obj(o.product)?.id) ?? str(o.product)),
             },
           ];
         }
