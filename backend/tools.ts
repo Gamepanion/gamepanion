@@ -38,7 +38,7 @@ import {
 import { BackgroundJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
 import { keyStorageEnabled } from "./keys";
-import { accountKeyPath } from "./urls";
+import { accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -318,7 +318,7 @@ function backgroundNext(r: Recorded): string | null {
     ...r.quests.map((x) => `quest ${x.name} (${x.id})`),
   ];
   if (!rows.length) return null;
-  return `The player's background setting for ${t.game.title} ${t.label} is ${level}: add ${DEPTH[level]} of what was filed just now: ${rows.join(", ")}. Look it up yourself on their sources for the game${t.game.sources.length ? ` (by trust: ${sourcesByTrust(t)})` : ""}, or say it is your own knowledge, then file it with correct (that what and id, addBackground): each line in your own words, with its source (a line from a low source says it is one person's claim), and an honest spoiler level (hint when it names what the player hasn't reached, full when it gives away an outcome, a fate or a story event). Lines a row has already are skipped. Tell the player in a line what you added, and read out nothing above their spoiler setting (${t.settings.spoilers}).`;
+  return `The player's background setting for ${t.game.title} ${t.label} is ${level}: add ${DEPTH[level]} of what was filed just now: ${rows.join(", ")}. Look it up yourself on their sources for the game${t.game.sources.length ? ` (by trust: ${sourcesByTrust(t)})` : ""}, or say it is your own knowledge, then file it with correct (that what and id, addBackground): each line in your own words, with its source (a line from a low source says it is one person's claim), and an honest spoiler level (hint when it names what the player hasn't reached, full when it gives away an outcome, a fate or a story event). Lines a row has already are skipped. Tell the player in a line what you added, and read out nothing above their spoiler setting (${t.settings.spoilers}). They change how much you add on the playthrough's Settings tab: ${inText(tabPath(t.id, "settings"))}.`;
 }
 
 function recordNext(r: Recorded): Next {
@@ -337,7 +337,7 @@ function recordNext(r: Recorded): Next {
     r.todos.length && `${r.todos.length} to-do${r.todos.length === 1 ? "" : "s"}`,
   ].filter(Boolean);
   next.push(
-    `Read back in a sentence or two what was filed from the session of ${r.playedOn}${parts.length ? `: ${parts.join(", ")}` : " (only the transcript)"}, with its link.`,
+    `Read back in a sentence or two what was filed from the session of ${r.playedOn}${parts.length ? `: ${parts.join(", ")}` : " (only the transcript)"}, with its link: ${inText(r.url)}.`,
   );
   const fresh = r.quests.filter((q) => q.created);
   if (fresh.length && !t.createdPlaythrough)
@@ -429,7 +429,7 @@ const NO_ADDING =
 // The player's spoiler setting is what shows without asking (ADR 0016). Above it Claude offers, and only after a yes asks again with
 // reveal; a read says that more is there, never what or how much.
 const offerMore = (t: PlaythroughView) =>
-  `There is more filed for ${t.game.title} ${t.label} than the player's spoiler setting (${t.settings.spoilers}) shows. Never say what it is or how much, and never hint at it. You may offer it once, in a few words ("there are hints for this, want them?"); only after a yes, ask again with reveal and warn before you read it out.`;
+  `There is more filed for ${t.game.title} ${t.label} than the player's spoiler setting (${t.settings.spoilers}) shows. Never say what it is or how much, and never hint at it. You may offer it once, in a few words ("there are hints for this, want them?"); only after a yes, ask again with reveal and warn before you read it out. If they'd rather always see more, they raise their spoiler setting on the playthrough's Settings tab: ${inText(tabPath(t.id, "settings"))}.`;
 const LEVEL = { none: 0, hint: 1, full: 2 } as const;
 /** The reveal of a read: what the player asked for just now, else their setting. */
 const revealFor = (t: PlaythroughView | null, asked: SpoilerLevel | undefined): SpoilerLevel => asked ?? t?.settings.spoilers ?? "none";
@@ -441,13 +441,13 @@ function briefingNext(b: Briefing, more: boolean): Next {
     return [
       b.others.length
         ? `No playthrough matches. The player has: ${b.others.map((t) => `${t.game.title} ${t.label} (id ${t.id})`).join(", ")}. Ask which one they mean.`
-        : "Gamepanion has no game for this player yet. Ask what they are playing, and file their first session with record.",
+        : `Gamepanion has no game for this player yet. Ask what they are playing, and file their first session with record. Until then their Gamepanion's home page shows how to start: ${inText(homePath())}.`,
     ];
   const next: Next = [];
   const t = b.playthrough;
   next.push(
     b.lastSession
-      ? `Start with where the player left off: the session of ${b.lastSession.playedOn}.`
+      ? `Start with where the player left off: the session of ${b.lastSession.playedOn}. The same briefing is the Overview of the playthrough's page: ${inText(playthroughPath(t.id))}.`
       : `Nothing has been recorded in ${t.game.title} ${t.label} yet: ask what happened so far and file it with record.`,
   );
   if (b.openQuests.length) next.push(NO_ADDING);
@@ -824,7 +824,8 @@ export const TOOLS: Tool[] = [
         { url: accountKeyPath(), keyStorage: on },
         on
           ? [
-              "Give the player this link and tell them to paste their Anthropic API key there, on the account page. Never ask for the key in this chat and never repeat one they paste here: if they do, tell them to remove it from the conversation and paste it on the page instead.",
+              `Give the player this link, ${inText(accountKeyPath())}, and tell them to paste their Anthropic API key there, on the account page.`,
+              "Never ask for the key in this chat and never repeat one they paste here: if they do, tell them to remove it from the conversation and paste it on the page instead.",
               "A claude.ai subscription has no API key: they need an account with prepaid credits at console.anthropic.com.",
             ]
           : ["This Gamepanion instance doesn't store players' keys; its in-app chat runs on the instance's own key, if it has one. Tell the player."],

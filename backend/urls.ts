@@ -29,12 +29,28 @@ export const homePath = () => "/";
 /** A to-do's row on its playthrough's To-dos tab. */
 export const todoPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "todos")}#todo-${id}`;
 
-/** A copy of `body` with every `url` that is a path prefixed with `base`. */
+/**
+ * A path written into a tool's `next` text (#82), marked so absoluteUrls can make it absolute like every `url`: the domain hands out paths,
+ * never the public address.
+ */
+export const inText = (path: string) => `<${path}>`;
+const IN_TEXT = /<(\/[^<>\s]*)>/g;
+
+/** A copy of `body` with every `url` that is a path prefixed with `base`, and every path marked in a `next` text (inText) too. */
 export function absoluteUrls<T>(base: string, body: T): T {
   const walk = (x: unknown): unknown => {
     if (Array.isArray(x)) return x.map(walk);
     if (x === null || typeof x !== "object") return x;
-    return Object.fromEntries(Object.entries(x).map(([k, val]) => [k, k === "url" && typeof val === "string" && val.startsWith("/") ? base + val : walk(val)]));
+    return Object.fromEntries(
+      Object.entries(x).map(([k, val]) => [
+        k,
+        k === "url" && typeof val === "string" && val.startsWith("/")
+          ? base + val
+          : k === "next" && Array.isArray(val)
+            ? val.map((t) => (typeof t === "string" ? t.replace(IN_TEXT, (_, path: string) => base + path) : t))
+            : walk(val),
+      ]),
+    );
   };
   return walk(body) as T;
 }

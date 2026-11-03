@@ -4,6 +4,7 @@
 // and arrives whole with every message. Opened on a card, the chat gets that card's row (read through the gate) as what the player
 // means. Claude is behind ChatModel, so tests stand in for it. Modelled on freundebuch's chat (its ADR 0006).
 import Anthropic from "@anthropic-ai/sdk";
+import { absoluteUrls } from "./urls";
 import * as z from "zod";
 import { buildOf } from "./builds";
 import { codexOf } from "./codex";
@@ -223,7 +224,8 @@ export async function chat(p: Player, turns: ChatTurn[], context: ChatContext, m
           filed = true;
           for (const l of linksOf(out)) links.set(l.url, l);
         }
-        results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify(out) });
+        // Claude reads the result as Claude over MCP would: links (in next too) absolute; the chips keep the paths.
+        results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify(absoluteUrls(config.publicUrl(), out)) });
       } catch (e) {
         if (!(e instanceof GamepanionError)) log.error({ err: e, tool: use.name }, "tool failed");
         results.push({ type: "tool_result", tool_use_id: use.id, content: e instanceof GamepanionError ? e.message : "internal error", is_error: true });
