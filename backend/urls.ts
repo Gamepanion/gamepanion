@@ -5,7 +5,7 @@ import { config } from "./config";
 /**
  * The tabs of a playthrough's page, in their order; each has an address of its own (ADR 0019). Overview is the playthrough's own address.
  */
-export const PLAYTHROUGH_TABS = ["overview", "quests", "todos", "character", "items", "codex", "sessions", "notes", "settings"] as const;
+export const PLAYTHROUGH_TABS = ["overview", "quests", "todos", "character", "items", "codex", "sessions", "notes", "sources", "settings"] as const;
 export type PlaythroughTab = (typeof PLAYTHROUGH_TABS)[number];
 
 /** A playthrough: its Overview, where the player left off. */

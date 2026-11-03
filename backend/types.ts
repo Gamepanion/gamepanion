@@ -80,5 +80,12 @@ export type StatName = { key: string; name: string; localName: string | null };
  * A page outside Gamepanion (ADR 0008): one the player trusts for a game, or one an item's facts come from. Gamepanion never fetches it;
  * Claude reads it in the conversation and files `facts` (never the page's text) with the link. `on` is the day it was added.
  */
-export type Source = { url: string; title: string | null; facts: string | null; on: string | null };
-export type SourceInput = { url: string; title?: string; facts?: string };
+/**
+ * How far a source is trusted (#58): `high` for wikis and official pages, `medium` for large guide sites, `low` for forums, single
+ * comments and one person's video. A source filed without one counts as `medium`.
+ */
+export const TRUST_LEVELS = ["high", "medium", "low"] as const;
+export type Trust = (typeof TRUST_LEVELS)[number];
+
+export type Source = { url: string; title: string | null; facts: string | null; on: string | null; trust: Trust };
+export type SourceInput = { url: string; title?: string; facts?: string; trust?: Trust };

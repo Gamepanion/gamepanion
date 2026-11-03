@@ -1033,6 +1033,15 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
+                                  },
+                                  "trust": {
+                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
+                                    "type": "string",
+                                    "enum": [
+                                      "high",
+                                      "medium",
+                                      "low"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -1392,6 +1401,15 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
+                                  },
+                                  "trust": {
+                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
+                                    "type": "string",
+                                    "enum": [
+                                      "high",
+                                      "medium",
+                                      "low"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -1441,6 +1459,15 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
+                              },
+                              "trust": {
+                                "type": "string",
+                                "enum": [
+                                  "high",
+                                  "medium",
+                                  "low"
+                                ],
+                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -1652,6 +1679,15 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
+                              },
+                              "trust": {
+                                "type": "string",
+                                "enum": [
+                                  "high",
+                                  "medium",
+                                  "low"
+                                ],
+                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -1702,6 +1738,15 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
+                                  },
+                                  "trust": {
+                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
+                                    "type": "string",
+                                    "enum": [
+                                      "high",
+                                      "medium",
+                                      "low"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -1741,6 +1786,15 @@
                           "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                           "type": "string",
                           "maxLength": 2000
+                        },
+                        "trust": {
+                          "type": "string",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ],
+                          "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                         }
                       },
                       "required": [
@@ -2034,6 +2088,15 @@
                                   "type": "string",
                                   "minLength": 1,
                                   "maxLength": 200
+                                },
+                                "trust": {
+                                  "type": "string",
+                                  "enum": [
+                                    "high",
+                                    "medium",
+                                    "low"
+                                  ],
+                                  "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                                 }
                               },
                               "required": [
@@ -2080,6 +2143,15 @@
                                     "type": "string",
                                     "minLength": 1,
                                     "maxLength": 200
+                                  },
+                                  "trust": {
+                                    "description": "The source's trust; default the trust the game's source with this link has, else medium",
+                                    "type": "string",
+                                    "enum": [
+                                      "high",
+                                      "medium",
+                                      "low"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -2165,6 +2237,15 @@
                                 "description": "For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text",
                                 "type": "string",
                                 "maxLength": 2000
+                              },
+                              "trust": {
+                                "type": "string",
+                                "enum": [
+                                  "high",
+                                  "medium",
+                                  "low"
+                                ],
+                                "description": "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own"
                               }
                             },
                             "required": [
@@ -2507,13 +2588,23 @@
               }
             ],
             "description": "When it was added"
+          },
+          "trust": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "description": "How far it can be trusted: high (wikis, official pages), medium (large guide sites), low (forums, single comments, one person's video)"
           }
         },
         "required": [
           "url",
           "title",
           "facts",
-          "on"
+          "on",
+          "trust"
         ],
         "additionalProperties": false,
         "description": "A page outside Gamepanion, which Gamepanion never fetches (ADR 0008)"
@@ -2902,11 +2993,21 @@
                         },
                         "title": {
                           "type": "string"
+                        },
+                        "trust": {
+                          "type": "string",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ],
+                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title"
+                        "title",
+                        "trust"
                       ],
                       "additionalProperties": false
                     },
@@ -3186,11 +3287,21 @@
                         },
                         "title": {
                           "type": "string"
+                        },
+                        "trust": {
+                          "type": "string",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ],
+                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title"
+                        "title",
+                        "trust"
                       ],
                       "additionalProperties": false
                     },
@@ -3493,11 +3604,21 @@
                         },
                         "title": {
                           "type": "string"
+                        },
+                        "trust": {
+                          "type": "string",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ],
+                          "description": "The trust of the source it was filed from"
                         }
                       },
                       "required": [
                         "url",
-                        "title"
+                        "title",
+                        "trust"
                       ],
                       "additionalProperties": false
                     },
@@ -4451,11 +4572,21 @@
                               },
                               "title": {
                                 "type": "string"
+                              },
+                              "trust": {
+                                "type": "string",
+                                "enum": [
+                                  "high",
+                                  "medium",
+                                  "low"
+                                ],
+                                "description": "The trust of the source it was filed from"
                               }
                             },
                             "required": [
                               "url",
-                              "title"
+                              "title",
+                              "trust"
                             ],
                             "additionalProperties": false
                           },

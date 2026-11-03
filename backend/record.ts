@@ -457,11 +457,14 @@ export async function record(p: Player, input: RecordInput): Promise<Recorded> {
     const todos = input.todos?.length ? await writeTodos(trx, p, t.id, sessionId, input.todos) : [];
 
     const itemKinds = await itemKindsOf(p, t.game.id, trx);
+    const sources = parseSources(
+      (await seen(trx.selectFrom("games"), p, "games").select("sources").where("id", "=", t.game.id).executeTakeFirstOrThrow()).sources,
+    );
     return {
       sessionId,
       url: sessionPath(sessionId),
       playedOn,
-      playthrough: { ...t, game: { ...t.game, itemKinds }, ...(character || carried !== null ? await characterOf(trx, p, t.id) : {}) },
+      playthrough: { ...t, game: { ...t.game, itemKinds, sources }, ...(character || carried !== null ? await characterOf(trx, p, t.id) : {}) },
       quests,
       items,
       newItemKinds: itemKinds.filter((k) => !kindsBefore.includes(k.key)),

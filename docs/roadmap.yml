@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: source-trust
+    status: done
+    date: 2026-11-03
+    icon: shield-check-outline
+    title: Sources with a trust level
+    title_de: Quellen mit Vertrauensstufe
+    summary: Wikis before single comments. Each source is kept as high, medium or low trust, Claude weighs what it reads by it, and the sources have a tab of their own.
+    summary_de: Wikis vor Einzelkommentaren. Jede Quelle hat ein hohes, mittleres oder geringes Vertrauen, Claude gewichtet danach, und die Quellen haben einen eigenen Reiter.
+    links:
+      - { label: "#85", url: "https://github.com/gamepanion/gamepanion/pull/85" }
   - id: todos
     status: done
     date: 2026-11-03

@@ -57,6 +57,11 @@ export const DEMO_SESSIONS: Parameters<typeof record>[1][] = [
       { kind: "npc", name: "Venigni", description: "Runs the Venigni Works and wants his workers back" },
       { kind: "place", name: "Krat Central Station", description: "Where the night began" },
     ],
+    sources: [
+      { url: "https://wiki.example/lies-of-p", title: "Lies of P Wiki", trust: "high" },
+      { url: "https://guides.example/lies-of-p", title: "A guide site", trust: "medium" },
+      { url: "https://forum.example/weight-classes", title: "A forum thread on weight classes", trust: "low", facts: "Says the weight class changes at 69 %" },
+    ],
     todos: [
       { text: "Buy the Amulet of Courage once I have the ergo", about: { what: "item", name: "Amulet of Courage" } },
       { text: "Come back to the station with a lamp", about: { what: "codex", name: "Krat Central Station" } },
