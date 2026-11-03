@@ -58,6 +58,7 @@ nav:
   - Internals:
       - How it works: internals/how-it-works.md
       - Development: internals/development.md
+      - Brand: internals/brand.md
   - Decisions:
       - AI-first game tracker with a built-in MCP: adr/0001-ai-first-game-tracker-with-built-in-mcp.md
       - On-demand lookups, no crawling (superseded): adr/0002-on-demand-lookups-not-crawling.md
@@ -76,6 +77,7 @@ nav:
       - Passkeys and sign-in links: adr/0015-passkeys-and-sign-in-links.md
       - Background and spoiler settings: adr/0016-background-and-spoilers.md
       - The name Gamepanion: adr/0017-the-name-gamepanion.md
+      - "The brand: a companion, not a book": adr/0018-the-brand-a-companion-not-a-book.md
 
 theme:
   name: material

@@ -5,5 +5,5 @@ A companion for the games you play: you tell it what happened while you play, it
 ## Language
 
 **Gamepanion**:
-The companion the player talks to while they play, through Claude or the in-app chat; it files what they say and gives it back when they return.
+The companion the player talks to while they play, through Claude or the in-app chat; it files what they say and gives it back when they return. Each player has their own: "your Gamepanion".
 _Avoid_: questlog (the old name, ADR 0017), the app, the tracker, almanac, book

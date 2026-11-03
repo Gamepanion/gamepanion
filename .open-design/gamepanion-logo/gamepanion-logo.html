@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamepanion logo sketches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0C0B10; --surface: #17151F; --fg: #F2F0F7; --muted: #A49FB4; --border: #2E2A3A;
+  --accent: #A77BFF; --accent-on: #12082A; --signal: #C6F432; --accent-soft: #C9B4FF;
+  --font-display: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem; --text-lg: 1.125rem; --text-xl: 1.375rem;
+  --text-2xl: 1.875rem; --text-3xl: 3rem; --text-4xl: 5rem;
+  --leading-body: 1.5; --leading-tight: 0.92; --tracking-display: -0.035em;
+  --radius-md: 2px;
+  --l-bg: #F7F6FA; --l-fg: #14121A; --l-accent: #6B3FD6; --l-accent-soft: #7A52E0;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 var(--text-base)/var(--leading-body) var(--font-body); }
+main { max-width: 1200px; margin: 0 auto; padding: 40px 32px 56px; }
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; flex-wrap: wrap; }
+h1 { font: 800 var(--text-2xl)/1 var(--font-display); letter-spacing: -0.02em; margin: 0; }
+.top p { margin: 0; color: var(--muted); max-width: 60ch; }
+.eyebrow { font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+.opt { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; border: 1px solid var(--border); margin-bottom: -1px; }
+.opt > div { padding: 24px; }
+.opt .dark { border-right: 1px solid var(--border); }
+.opt .light { background: var(--l-bg); color: var(--l-fg); }
+.lockup { display: flex; align-items: center; gap: 14px; margin: 6px 0 22px; }
+.lockup svg { flex: none; }
+.wm { font: 800 2.75rem/1 var(--font-display); letter-spacing: -0.035em; }
+.sizes { display: flex; align-items: flex-end; gap: 18px; }
+.sizes span { font: var(--text-xs) var(--font-mono); color: var(--muted); display: block; text-align: center; margin-top: 6px; }
+.light .sizes span { color: #5A556A; }
+.note { color: var(--muted); font-size: var(--text-sm); margin: 18px 0 0; max-width: 56ch; }
+.light .note { color: #5A556A; }
+.tag { display: inline-block; font: 700 var(--text-xs)/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--signal); margin-left: 10px; }
+/* wordmark softening, per option */
+.a .p { color: var(--accent-soft); } .light.a .p, .a .light .p { color: var(--l-accent); }
+.b .p { color: var(--accent); font-weight: 400; } .b .light .p { color: var(--l-accent); }
+.c .p { box-shadow: inset 0 -0.14em 0 var(--accent); } .c .light .p { box-shadow: inset 0 -0.14em 0 var(--l-accent-soft); }
+@media (max-width: 860px) {
+  main { padding: 24px 16px 40px; }
+  .opt { grid-template-columns: 1fr; }
+  .opt .dark { border-right: 0; border-bottom: 1px solid var(--border); }
+  .wm { font-size: 2rem; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- A: speech bubble, G in it, lime offset shadow -->
+    <symbol id="a-full" viewBox="0 0 64 64">
+      <path d="M12 10h44v36H26l-10 10V46h-4z" fill="#C6F432"/>
+      <path d="M8 6h44v36H22L12 52V42H8z" fill="#A77BFF"/>
+      <text x="30" y="35" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="30" fill="#12082A">G</text>
+    </symbol>
+    <symbol id="a-flat" viewBox="0 0 64 64">
+      <path d="M6 6h52v40H24L12 58V46H6z" fill="#A77BFF"/>
+      <text x="32" y="38" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="34" fill="#12082A">G</text>
+    </symbol>
+    <!-- B: outlined bubble, G inside, tail right -->
+    <symbol id="b-full" viewBox="0 0 64 64">
+      <path d="M8 8h48v36H44v12L32 44H8z" fill="none" stroke="#A77BFF" stroke-width="6" stroke-linejoin="miter"/>
+      <text x="32" y="36" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="26" fill="#F2F0F7">G</text>
+    </symbol>
+    <symbol id="b-flat" viewBox="0 0 64 64">
+      <path d="M4 4h56v42H46v14L32 46H4z" fill="#A77BFF"/>
+      <text x="32" y="37" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="32" fill="#12082A">G</text>
+    </symbol>
+    <!-- C: bubble with G and a lime save-point diamond -->
+    <symbol id="c-full" viewBox="0 0 64 64">
+      <path d="M8 8h48v36H24L12 56V44H8z" fill="#A77BFF"/>
+      <text x="27" y="36" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="28" fill="#12082A">G</text>
+      <path d="M46 18l6 6-6 6-6-6z" fill="#C6F432"/>
+    </symbol>
+    <symbol id="c-flat" viewBox="0 0 64 64">
+      <path d="M6 6h52v40H24L12 58V46H6z" fill="#A77BFF"/>
+      <text x="32" y="38" text-anchor="middle" font-family="Atkinson Hyperlegible Next, sans-serif" font-weight="800" font-size="34" fill="#12082A">G</text>
+    </symbol>
+  </defs>
+</svg>
+
+<main>
+  <div class="top">
+    <h1>Gamepanion · logo sketches</h1>
+    <p>Speech-bubble icon (the companion you talk to) and a two-colour wordmark, softened three ways. Slogan: Play on. Your Gamepanion remembers.</p>
+  </div>
+
+  <section class="opt a" aria-label="Option A">
+    <div class="dark">
+      <p class="eyebrow">A · soft tint <span class="tag">recommended</span></p>
+      <div class="lockup"><svg width="64" height="64" role="img" aria-label="Gamepanion icon"><use href="#a-full"/></svg><span class="wm">Game<span class="p">panion</span></span></div>
+      <div class="sizes">
+        <div><svg width="128" height="128" aria-hidden="true"><use href="#a-full"/></svg><span>app 512</span></div>
+        <div><svg width="48" height="48" aria-hidden="true"><use href="#a-full"/></svg><span>48</span></div>
+        <div><svg width="32" height="32" aria-hidden="true"><use href="#a-flat"/></svg><span>32 flat</span></div>
+        <div><svg width="16" height="16" aria-hidden="true"><use href="#a-flat"/></svg><span>16</span></div>
+      </div>
+      <p class="note">"panion" in a pale lavender (#C9B4FF, 10.70:1) instead of full violet: the two colours read as one word, and the full violet stays free for the icon and buttons. Icon: violet bubble, lime offset shadow.</p>
+    </div>
+    <div class="light">
+      <p class="eyebrow" style="color:#5A556A">Light</p>
+      <div class="lockup"><svg width="56" height="56" role="img" aria-label="Gamepanion icon"><use href="#a-flat"/></svg><span class="wm" style="font-size:2.25rem">Game<span class="p" style="color:var(--l-accent)">panion</span></span></div>
+      <p class="note">On light, "panion" is the darker violet #6B3FD6 (5.90:1); the shadow drops.</p>
+    </div>
+  </section>
+
+  <section class="opt b" aria-label="Option B">
+    <div class="dark">
+      <p class="eyebrow">B · light weight</p>
+      <div class="lockup"><svg width="64" height="64" role="img" aria-label="Gamepanion icon"><use href="#b-full"/></svg><span class="wm">Game<span class="p">panion</span></span></div>
+      <div class="sizes">
+        <div><svg width="128" height="128" aria-hidden="true"><use href="#b-full"/></svg><span>app 512</span></div>
+        <div><svg width="48" height="48" aria-hidden="true"><use href="#b-full"/></svg><span>48</span></div>
+        <div><svg width="32" height="32" aria-hidden="true"><use href="#b-flat"/></svg><span>32 flat</span></div>
+        <div><svg width="16" height="16" aria-hidden="true"><use href="#b-flat"/></svg><span>16</span></div>
+      </div>
+      <p class="note">Full violet, but "panion" drops to weight 400: the contrast is in the stroke, not the colour. Icon: an outlined bubble with a white G, filled only at small sizes.</p>
+    </div>
+    <div class="light">
+      <p class="eyebrow" style="color:#5A556A">Light</p>
+      <div class="lockup"><svg width="56" height="56" role="img" aria-label="Gamepanion icon"><use href="#b-flat"/></svg><span class="wm" style="font-size:2.25rem">Game<span class="p" style="color:var(--l-accent);font-weight:400">panion</span></span></div>
+    </div>
+  </section>
+
+  <section class="opt c" aria-label="Option C">
+    <div class="dark">
+      <p class="eyebrow">C · underline</p>
+      <div class="lockup"><svg width="64" height="64" role="img" aria-label="Gamepanion icon"><use href="#c-full"/></svg><span class="wm">Game<span class="p">panion</span></span></div>
+      <div class="sizes">
+        <div><svg width="128" height="128" aria-hidden="true"><use href="#c-full"/></svg><span>app 512</span></div>
+        <div><svg width="48" height="48" aria-hidden="true"><use href="#c-full"/></svg><span>48</span></div>
+        <div><svg width="32" height="32" aria-hidden="true"><use href="#c-flat"/></svg><span>32 flat</span></div>
+        <div><svg width="16" height="16" aria-hidden="true"><use href="#c-flat"/></svg><span>16</span></div>
+      </div>
+      <p class="note">The word stays white; a violet bar under "panion" carries the colour, like a HUD highlight. Icon: bubble with G and a lime save-point diamond (it remembers where you are).</p>
+    </div>
+    <div class="light">
+      <p class="eyebrow" style="color:#5A556A">Light</p>
+      <div class="lockup"><svg width="56" height="56" role="img" aria-label="Gamepanion icon"><use href="#c-flat"/></svg><span class="wm" style="font-size:2.25rem">Game<span class="p" style="box-shadow:inset 0 -0.14em 0 #7A52E0">panion</span></span></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
