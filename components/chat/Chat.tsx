@@ -47,18 +47,40 @@ function recentTurns(turns: Turn[]): Turn[] {
   return turns.slice(from);
 }
 
-// The playthrough whose page is open, from the address the book keeps in step with the page turned to.
+// The playthrough whose page is open (any of its tabs).
 const pageRun = () => window.location.pathname.match(/^\/p\/([^/]+)/)?.[1];
 
-/** The chat for the pages under it: the button at the bottom, and the sheet once it is opened. Nothing when the chat is off. */
-export function ChatProvider({ enabled, voice, playerId, children }: { enabled: boolean; voice: boolean; playerId: string; children: ReactNode }) {
+/**
+ * The chat for the pages under it: the button at the bottom, and the sheet once it is opened. Nothing when the chat is off. The chat
+ * always opens on a playthrough it names in its header (#81): a card's, else the one whose page is open, else on the home page the
+ * Continue card's (`homeRun`); `runs` names them.
+ */
+export function ChatProvider({
+  enabled,
+  voice,
+  playerId,
+  runs,
+  homeRun,
+  children,
+}: {
+  enabled: boolean;
+  voice: boolean;
+  playerId: string;
+  runs: Record<string, string>;
+  homeRun: string | null;
+  children: ReactNode;
+}) {
   const copy = useCopy();
   const [state, setState] = useState<{ about?: About; run?: string } | null>(null);
   const opener = useRef<HTMLElement | null>(null);
-  const open = useCallback((about?: About, run?: string) => {
-    opener.current = document.activeElement as HTMLElement | null;
-    setState({ about, run });
-  }, []);
+  const open = useCallback(
+    (about?: About, run?: string) => {
+      opener.current = document.activeElement as HTMLElement | null;
+      const here = pageRun() ?? (window.location.pathname === "/" ? (homeRun ?? undefined) : undefined);
+      setState({ about, run: about?.playthroughId ?? run ?? here });
+    },
+    [homeRun],
+  );
   const close = useCallback(() => {
     setState(null);
     opener.current?.focus();
@@ -71,7 +93,9 @@ export function ChatProvider({ enabled, voice, playerId, children }: { enabled: 
           <ClaudeMark />
         </button>
       )}
-      {enabled && state && <ChatSheet playerId={playerId} voice={voice} about={state.about} run={state.run} onClose={close} />}
+      {enabled && state && (
+        <ChatSheet playerId={playerId} voice={voice} about={state.about} run={state.run} runName={state.run ? runs[state.run] : undefined} onClose={close} />
+      )}
     </ChatContext.Provider>
   );
 }
@@ -108,7 +132,21 @@ export function ChatOn({ playthroughId, label }: { playthroughId: string; label:
 
 const noSubscribe = () => () => {};
 
-function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId: string; voice: boolean; about?: About; run?: string; onClose: () => void }) {
+function ChatSheet({
+  playerId,
+  voice,
+  about: opened,
+  run,
+  runName,
+  onClose,
+}: {
+  playerId: string;
+  voice: boolean;
+  about?: About;
+  run?: string;
+  runName?: string;
+  onClose: () => void;
+}) {
   const copy = useCopy();
   const language = useLocale();
   const router = useRouter();
@@ -203,7 +241,7 @@ function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId:
     const asked: Turn[] = [...turns, { role: "user", content: text }];
     setTurns(asked);
     if (!offered) setDraft("");
-    const playthroughId = about?.playthroughId ?? run ?? pageRun();
+    const playthroughId = about?.playthroughId ?? run;
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -247,9 +285,12 @@ function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId:
         style={visible ? { top: visible.top, bottom: visible.bottom, height: "auto" } : undefined}
       >
         <header className="flex items-center gap-2 px-4 pt-4 pb-2">
-          <h2 className="flex flex-1 items-center gap-2 text-xl font-bold">
-            <ClaudeMark className="h-7 w-7" />
-            {copy.chatTitle}
+          <h2 className="flex min-w-0 flex-1 items-center gap-2 text-xl font-bold">
+            <ClaudeMark className="h-7 w-7 shrink-0" />
+            <span className="min-w-0">
+              {copy.chatTitle}
+              {runName && <span className="block truncate text-sm font-semibold text-muted">{copy.chatOn(runName)}</span>}
+            </span>
           </h2>
           <button type="button" onClick={reset} className="chat-tool">
             <SquarePen aria-hidden="true" className="h-4 w-4" />
@@ -269,7 +310,27 @@ function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId:
               </button>
             </span>
           )}
-          {turns.length === 0 && <p className="mt-6 text-center text-muted">{copy.chatHello}</p>}
+          {turns.length === 0 && (
+            <div className="mt-4 space-y-3 text-center">
+              <p className="text-muted">{copy.chatHello}</p>
+              <ul className="flex flex-col items-center gap-2" aria-label={copy.chatExamples}>
+                {copy.chatPrompts.map((p) => (
+                  <li key={p.text}>
+                    <button
+                      type="button"
+                      className="chat-example"
+                      onClick={() => {
+                        setDraft(p.text);
+                        field.current?.focus();
+                      }}
+                    >
+                      <span className="text-sm font-semibold text-muted">{p.kind}</span> {p.text}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {turns.map((t, i) =>
             t.role === "user" ? (
               <p key={i} className="chat-bubble chat-mine">

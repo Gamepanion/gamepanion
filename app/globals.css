@@ -238,6 +238,10 @@ h1 {
 .continue-card {
   @apply border-2 border-accent p-5;
 }
+/* An example prompt in the empty chat (#81): choosing it fills the field, it doesn't send. */
+.chat-example {
+  @apply rounded-md border border-rule bg-surface px-3 py-1.5 text-left hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
+}
 /* The first-run checklist (#80): numbered steps, the number in a violet square. */
 .first-run-steps {
   @apply space-y-3;
