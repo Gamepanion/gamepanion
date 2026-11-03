@@ -234,6 +234,10 @@ h1 {
 .run-card-closed {
   @apply opacity-75;
 }
+/* The Continue card at the top of the home page (#79): larger than the others, edged in the accent. */
+.continue-card {
+  @apply border-2 border-accent p-5;
+}
 /* A line of the card: its icon in the margin, violet, then what it says. */
 .run-line {
   @apply flex items-start gap-3;

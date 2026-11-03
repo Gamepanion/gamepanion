@@ -75,6 +75,10 @@ export const de: Copy = {
 
   // Die Seiten: deine Spiele, dann eine Seite je Durchlauf
   contents: "Deine Spiele",
+  continueHeading: "Weiterspielen",
+  continueButton: "Weiter",
+  continueChat: "Claude erzählen",
+  moreTodos: (n: number) => `und ${n} weitere`,
   home: "Start",
   switcherWhere: "Du bist bei",
   switcherMenu: "Gehe zu",
@@ -106,6 +110,7 @@ export const de: Copy = {
     sources: "Quellen",
     settings: "Einstellungen",
   },
+  inTheWay: "Im Weg",
   nextSteps: "Als Nächstes",
   todos: "To-dos",
   noTodos: "Nichts auf deiner Liste. Erzähl Claude, woran du denken willst.",

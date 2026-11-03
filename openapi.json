@@ -4329,6 +4329,20 @@
             },
             "description": "Open first, then waiting on the game"
           },
+          "todos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "description": "The player's open to-dos"
+          },
+          "suggestedTodos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "description": "Open to-dos Claude proposed, not taken yet"
+          },
           "build": {
             "type": "object",
             "properties": {
@@ -4396,32 +4410,18 @@
             ],
             "additionalProperties": false
           },
-          "todos": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Todo"
-            },
-            "description": "The player's open to-dos"
-          },
-          "suggestedTodos": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Todo"
-            },
-            "description": "Open to-dos Claude proposed, not taken yet"
-          },
-          "equipped": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Item"
-            }
-          },
           "bosses": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CodexEntry"
             },
             "description": "Bosses met and not beaten yet"
+          },
+          "equipped": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
           },
           "others": {
             "type": "array",
@@ -4435,11 +4435,11 @@
           "playthrough",
           "lastSession",
           "openQuests",
-          "build",
           "todos",
           "suggestedTodos",
-          "equipped",
+          "build",
           "bosses",
+          "equipped",
           "others"
         ],
         "additionalProperties": false,

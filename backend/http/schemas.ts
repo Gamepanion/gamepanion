@@ -281,11 +281,11 @@ export const BriefingJson = z
     playthrough: PlaythroughJson.nullable(),
     lastSession: SessionSummaryJson.nullable(),
     openQuests: z.array(QuestJson).describe("Open first, then waiting on the game"),
-    build: z.object({ plan: PlanJson.nullable(), goals: z.array(GoalJson), current: SnapshotJson.nullable() }),
     todos: z.array(TodoJson).describe("The player's open to-dos"),
     suggestedTodos: z.array(TodoJson).describe("Open to-dos Claude proposed, not taken yet"),
-    equipped: z.array(ItemJson),
+    build: z.object({ plan: PlanJson.nullable(), goals: z.array(GoalJson), current: SnapshotJson.nullable() }),
     bosses: z.array(CodexJson).describe("Bosses met and not beaten yet"),
+    equipped: z.array(ItemJson),
     others: z.array(PlaythroughJson).describe("The player's other playthroughs"),
   })
   .meta({ id: "Briefing", description: "Where the player was. It never contains a spoiler" });

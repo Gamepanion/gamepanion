@@ -10,6 +10,27 @@ import { sessionsOf, type SessionSummary } from "./sessions";
 import { todosOf, type TodoView } from "./todos";
 import { OPEN_STATUSES, type Player } from "./types";
 
+/**
+ * The parts of a briefing, in the order both MCP's briefing and the playthrough's Overview tab show them (#79): where the player left
+ * off, the next steps, the to-dos, the plan, what is in the way, what is equipped. One read, so the two can't drift.
+ */
+export const BRIEFING_SECTIONS = ["lastSession", "openQuests", "todos", "suggestedTodos", "goals", "bosses", "equipped"] as const;
+export type BriefingSection = (typeof BRIEFING_SECTIONS)[number];
+
+/** The ids a briefing shows, part by part, in order: what the Overview tab renders and the MCP tool returns. */
+export const briefingIds = (b: Briefing): Record<BriefingSection, string[]> => ({
+  lastSession: b.lastSession ? [b.lastSession.id] : [],
+  openQuests: b.openQuests.map((q) => q.id),
+  todos: b.todos.map((t) => t.id),
+  suggestedTodos: b.suggestedTodos.map((t) => t.id),
+  goals: b.build.goals.filter((g) => g.status === "open").map((g) => g.id),
+  bosses: b.bosses.map((x) => x.id),
+  equipped: b.equipped.map((i) => i.id),
+});
+
+/** The playthrough the home page's Continue card is for (#79): the one played most recently among those being played; null for none. */
+export const continuePlaythrough = (runs: PlaythroughView[]): PlaythroughView | null => runs.find((t) => t.status === "playing") ?? null;
+
 export type Briefing = {
   /** Null when the player has no playthrough (of the game asked for). */
   playthrough: PlaythroughView | null;

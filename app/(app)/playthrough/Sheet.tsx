@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   buildOf,
   CODEX_KINDS,
@@ -18,6 +19,8 @@ import {
   type PlaythroughView,
   type QuestView,
   PLAYTHROUGH_TABS,
+  BRIEFING_SECTIONS,
+  briefing,
   TRUST_LEVELS,
   tabPath,
   todoPath,
@@ -67,12 +70,10 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
   const closed = all.filter((q) => q.status !== "open" && q.status !== "blocked");
   const current = build.snapshots[0];
   const codexKinds = CODEX_KINDS.filter((k) => codex.some((e) => e.kind === k));
-  const last = sessions[0];
   const tabs = PLAYTHROUGH_TABS.map((key) => {
     const Icon = PART_ICONS[key];
     return { key, label: copy.tabs[key], href: tabPath(id, key), icon: <Icon aria-hidden="true" /> };
   });
-  const equipped = items.filter((i) => i.equipped);
   const hasNotes = t.game.description || t.game.notes || t.notes;
   return (
     <div className="space-y-4">
@@ -95,65 +96,7 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
         {
           {
             // Where the player left off: the last session, what each open quest waits for, the plan's next goals and what is equipped.
-            overview: (
-              <div className="space-y-6">
-                {last && (
-                  <section>
-                    <Heading icon={CalendarDays}>{copy.lastSession}</Heading>
-                    <SessionCard session={last} />
-                  </section>
-                )}
-                <section>
-                  <Heading icon={Footprints}>{copy.nextSteps}</Heading>
-                  {open.length === 0 ? (
-                    <p className="card text-muted">{copy.noOpenQuests}</p>
-                  ) : (
-                    <ul className="card divide-y divide-rule py-1">
-                      {open.map((q) => (
-                        <li key={q.id}>
-                          <Link href={q.url} className="flex items-center gap-3 py-2 hover:text-accent">
-                            <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
-                            <span className="min-w-0">
-                              <span className="font-semibold">{q.name}</span>
-                              {q.status === "blocked" ? (
-                                <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
-                              ) : (
-                                q.nextStep && <span className="block text-sm">{q.nextStep}</span>
-                              )}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-                {build.goals.some((g) => g.status === "open") && (
-                  <section>
-                    <Heading icon={Crosshair}>{copy.goals}</Heading>
-                    <Goals goals={build.goals.filter((g) => g.status === "open")} run={t.id} />
-                  </section>
-                )}
-                {equipped.length > 0 && (
-                  <section>
-                    <Heading icon={Sword}>{copy.equipped}</Heading>
-                    <ul className="card divide-y divide-rule py-1">
-                      {equipped.map((i) => (
-                        <li key={i.id}>
-                          <Link href={i.url} className="flex items-center gap-3 py-2 hover:text-accent">
-                            <Tile icon={itemIcon(i.kind)} />
-                            <span className="flex-1 font-semibold">
-                              {i.name}
-                              {i.localName && <span className="font-normal text-muted"> · {i.localName}</span>}
-                            </span>
-                            {i.quantity !== null && <span className="tabular-nums">{copy.quantity(i.quantity)}</span>}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
-              </div>
-            ),
+            overview: <Overview player={p} playthrough={t} />,
             todos: <Todos todos={todos} />,
             character: (
               <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
@@ -747,4 +690,101 @@ async function Sources({ game, items, codex }: { game: PlaythroughView["game"]; 
       )}
     </div>
   );
+}
+
+// The Overview (#79): the web version of MCP's briefing, from the same read and in the same order (BRIEFING_SECTIONS): where the player
+// left off, the next steps, the to-dos, the plan, what is in the way and what is equipped. At the playthrough's spoiler setting, never
+// above it: a briefing never asks.
+async function Overview({ player, playthrough: t }: { player: Player; playthrough: PlaythroughView }) {
+  const copy = await serverCopy();
+  const b = await briefing(player, { playthroughId: t.id });
+  const goals = b.build.goals.filter((g) => g.status === "open");
+  const sections: Record<(typeof BRIEFING_SECTIONS)[number], ReactNode> = {
+    lastSession: b.lastSession && (
+      <section key="lastSession">
+        <Heading icon={CalendarDays}>{copy.lastSession}</Heading>
+        <SessionCard session={b.lastSession} />
+      </section>
+    ),
+    openQuests: (
+      <section key="openQuests">
+        <Heading icon={Footprints}>{copy.nextSteps}</Heading>
+        {b.openQuests.length === 0 ? (
+          <p className="card text-muted">{copy.noOpenQuests}</p>
+        ) : (
+          <ul className="card divide-y divide-rule py-1">
+            {b.openQuests.map((q) => (
+              <li key={q.id}>
+                <Link href={q.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                  <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
+                  <span className="min-w-0">
+                    <span className="font-semibold">{q.name}</span>
+                    {q.status === "blocked" ? (
+                      <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
+                    ) : (
+                      q.nextStep && <span className="block text-sm">{q.nextStep}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ),
+    todos: b.todos.length > 0 && (
+      <section key="todos">
+        <Heading icon={PART_ICONS.todos}>{copy.todos}</Heading>
+        <TodoList todos={b.todos} />
+      </section>
+    ),
+    suggestedTodos: b.suggestedTodos.length > 0 && (
+      <section key="suggestedTodos">
+        <Heading icon={Sparkles}>{copy.suggestedTodos}</Heading>
+        <TodoList todos={b.suggestedTodos} suggested />
+      </section>
+    ),
+    goals: goals.length > 0 && (
+      <section key="goals">
+        <Heading icon={Crosshair}>{copy.goals}</Heading>
+        <Goals goals={goals} run={t.id} />
+      </section>
+    ),
+    bosses: b.bosses.length > 0 && (
+      <section key="bosses">
+        <Heading icon={CODEX_ICONS.boss}>{copy.inTheWay}</Heading>
+        <ul className="card divide-y divide-rule py-1">
+          {b.bosses.map((x) => (
+            <li key={x.id}>
+              <Link href={x.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                <Tile icon={CODEX_ICONS.boss} />
+                <span className="flex-1 font-semibold">{x.name}</span>
+                {x.attempts ? <span className="text-sm text-muted tabular-nums">{copy.tries(x.attempts)}</span> : null}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ),
+    equipped: b.equipped.length > 0 && (
+      <section key="equipped">
+        <Heading icon={Sword}>{copy.equipped}</Heading>
+        <ul className="card divide-y divide-rule py-1">
+          {b.equipped.map((i) => (
+            <li key={i.id}>
+              <Link href={i.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                <Tile icon={itemIcon(i.kind)} />
+                <span className="flex-1 font-semibold">
+                  {i.name}
+                  {i.localName && <span className="font-normal text-muted"> · {i.localName}</span>}
+                </span>
+                {i.quantity !== null && <span className="tabular-nums">{copy.quantity(i.quantity)}</span>}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ),
+  };
+  return <div className="space-y-6">{BRIEFING_SECTIONS.map((s) => sections[s])}</div>;
 }

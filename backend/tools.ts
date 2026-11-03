@@ -401,19 +401,20 @@ const PlaythroughRefInput = {
   game: z.string().optional().describe("A game's title: its playthrough played most recently"),
 };
 
+// In the order of BRIEFING_SECTIONS (briefing.ts), the Overview tab's order too.
 const BriefingJson = z.object({
   playthrough: PlaythroughJson.nullable().describe("Null when the player has no playthrough yet (of that game)"),
   lastSession: z.object({ id: z.string(), playedOn: Day, summary: z.string(), notes: z.string().nullable(), url: Url }).nullable(),
   openQuests: z.array(QuestJson.extend({ lastLog: EntryJson.nullable() })).describe("Open first, then blocked"),
+  todos: z.array(TodoJson).describe("The player's open to-dos, in the order they were added"),
+  suggestedTodos: z.array(TodoJson).describe("Open to-dos you proposed that the player hasn't taken yet: mention them apart, as suggestions"),
   build: z.object({
     plan: PlanJson.nullable(),
     goals: z.array(GoalJson).describe("Open goals first, by rank (the player's, then suggestions), then the reached ones"),
     current: SnapshotJson.nullable().describe("The latest snapshot"),
   }),
-  todos: z.array(TodoJson).describe("The player's open to-dos, in the order they were added"),
-  suggestedTodos: z.array(TodoJson).describe("Open to-dos you proposed that the player hasn't taken yet: mention them apart, as suggestions"),
-  equipped: z.array(ItemJson),
   bosses: z.array(CodexJson).describe("Bosses the player met and hasn't beaten yet, with their tries, weaknesses, strategy and counters"),
+  equipped: z.array(ItemJson),
   others: z.array(PlaythroughJson).describe("The player's other playthroughs, most recently played first"),
   tags: z
     .array(z.object({ id: z.string(), name: z.string(), count: z.number() }))

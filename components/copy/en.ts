@@ -72,6 +72,10 @@ export const en = {
 
   // The pages: your games, then a page per playthrough
   contents: "Your games",
+  continueHeading: "Continue",
+  continueButton: "Continue",
+  continueChat: "Tell Claude",
+  moreTodos: (n: number) => `and ${n} more`,
   home: "Home",
   switcherWhere: "You are on",
   switcherMenu: "Go to",
@@ -103,6 +107,7 @@ export const en = {
     sources: "Sources",
     settings: "Settings",
   },
+  inTheWay: "In the way",
   nextSteps: "Next steps",
   todos: "To-dos",
   noTodos: "Nothing on your list. Tell Claude what you want to remember to do.",
