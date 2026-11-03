@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "explorationId": "visual-identity-for-gamepanion-a-companion-for-t",
+  "title": "Visual identity for Gamepanion: a companion for the games…",
+  "brief": "Visual identity for Gamepanion: a companion for the games you play. You tell Claude what happened while you play; Gamepanion files it and shows you only what you have found (spoiler-free). The web app is the human view into what was filed: games, playthroughs, quests, build, items, codex. Drop the old book/almanac/paper look completely. Modern game-app look; the user likes gamelog.gg (dark navy, near-white text, one bright accent, heavy tight sans headlines, small uppercase eyebrows, punchy voice) but Gamepanion must not be mistaken for it, so no electric blue. Dark first, light theme kept. Typeface: Atkinson Hyperlegible Next (accessibility), heavy weights for headlines. No game cover art: games show as generated tiles (initials on a colour derived from the name). Register tabs use the Okabe-Ito colours with their names, never meaning in colour alone. Each tile shows: palette with contrast, type specimen, a game tile row, a quest row with status, a button and a tab strip.",
+  "skillId": "style-tile",
+  "skillMode": "design-system",
+  "axis": "custom",
+  "createdAt": "2026-11-03T09:03:12.994Z",
+  "directions": [
+    {
+      "id": "ember-on-night",
+      "label": "Ember on night",
+      "axis": "custom",
+      "summary": "Closest to the recommendation: deep navy-charcoal ground, one warm ember/amber accent, near-white text. Heavy tight headlines, small uppe…",
+      "spec": "### Ember on night  `(id: ember-on-night)`\n\nClosest to the recommendation: deep navy-charcoal ground, one warm ember/amber accent, near-white text. Heavy tight headlines, small uppercase eyebrows. Calm, warm where Gamelog is cold.\n",
+      "entryPath": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/ember-on-night.html"
+    },
+    {
+      "id": "teal-campfire",
+      "label": "Teal campfire",
+      "axis": "custom",
+      "summary": "Dark slate-green ground with a teal accent and a small ember secondary for highlights. Feels like a companion at a campfire: calm, a litt…",
+      "spec": "### Teal campfire  `(id: teal-campfire)`\n\nDark slate-green ground with a teal accent and a small ember secondary for highlights. Feels like a companion at a campfire: calm, a little cosier, still modern.\n",
+      "entryPath": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/teal-campfire.html"
+    },
+    {
+      "id": "violet-arcade",
+      "label": "Violet arcade",
+      "axis": "custom",
+      "summary": "Near-black ground with a saturated violet accent and a lime secondary used sparingly. More energetic, gamer-coded, crisp edges, bolder co…",
+      "spec": "### Violet arcade  `(id: violet-arcade)`\n\nNear-black ground with a saturated violet accent and a lime secondary used sparingly. More energetic, gamer-coded, crisp edges, bolder contrast.\n",
+      "entryPath": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/violet-arcade.html"
+    },
+    {
+      "id": "quiet-graphite",
+      "label": "Quiet graphite",
+      "axis": "custom",
+      "summary": "Neutral graphite greys, off-white text, a muted gold accent, generous spacing. Restrained and content-first, almost no decoration; brand …",
+      "spec": "### Quiet graphite  `(id: quiet-graphite)`\n\nNeutral graphite greys, off-white text, a muted gold accent, generous spacing. Restrained and content-first, almost no decoration; brand carried by type weight and the icon.\n",
+      "entryPath": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/quiet-graphite.html"
+    }
+  ]
+}

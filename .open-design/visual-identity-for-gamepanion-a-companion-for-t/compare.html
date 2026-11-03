@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Open Design Agent Kit">
+<title>Visual identity for Gamepanion: a companion for the games… — directions</title>
+<style>
+:root { --bg: #f6f6f4; --surface: #fff; --fg: #1b1b1a; --muted: #6b6b66; --border: #e2e2dd; --accent: #2f6fde; --chosen: #1f8a4c; }
+@media (prefers-color-scheme: dark) { :root { --bg: #151514; --surface: #1e1e1c; --fg: #ededea; --muted: #a3a39d; --border: #34342f; --accent: #7aa7ff; --chosen: #4cc283; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1680px; margin: 0 auto; padding: 32px 24px 48px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.meta, .muted { color: var(--muted); }
+.brief { color: var(--muted); max-width: 900px; margin: 8px 0 0; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 28px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
+.card.chosen { border: 2px solid var(--chosen); }
+.card header { display: flex; align-items: center; gap: 10px; }
+.card h2 { font-size: 16px; margin: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badges { display: flex; gap: 6px; margin: 8px 0 12px 36px; }
+.index { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--fg); color: var(--surface); font-weight: 600; font-size: 13px; }
+.badge { font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+.chosen-badge { color: var(--chosen); border-color: var(--chosen); font-weight: 600; }
+.frame { position: relative; aspect-ratio: 3 / 4; overflow: hidden; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+/* One-third scale: each preview gets a desktop-width virtual viewport (~1400px for a 470px card). */
+.frame iframe { position: absolute; top: 0; left: 0; width: 300%; height: 300%; border: 0; transform: scale(0.3333); transform-origin: 0 0; }
+.placeholder { display: grid; place-content: center; gap: 6px; text-align: center; color: var(--muted); background: repeating-linear-gradient(45deg, transparent 0 10px, var(--border) 10px 11px); }
+.summary { margin: 12px 0 4px; }
+.link { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+code { font: 12px/1.4 ui-monospace, Menlo, monospace; color: var(--muted); }
+.built { margin-top: 32px; }
+.built h2 { font-size: 16px; }
+footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Visual identity for Gamepanion: a companion for the games…</h1>
+  <div class="meta">4 directions · Custom</div>
+  <p class="brief">Visual identity for Gamepanion: a companion for the games you play. You tell Claude what happened while you play; Gamepanion files it and shows you only what you have found (spoiler-free). The web app is the human view into what was filed: games, playthroughs, quests, build, items, codex. Drop the old book/almanac/paper look completely. Modern game-app look; the user likes gamelog.gg (dark navy, near-white text, one bright accent, heavy tight sans headlines, small uppercase eyebrows, punchy voice) but Gamepanion must not be mistaken for it, so no electric blue. Dark first, light theme kept. Typeface: Atkinson Hyperlegible Next (accessibility), heavy weights for headlines. No game cover art: games show as generated tiles (initials on a colour derived from the name). Register tabs use the Okabe-Ito colours with their names, never meaning in colour alone. Each tile shows: palette with contrast, type specimen, a game tile row, a quest row with status, a button and a tab strip.</p>
+  <div class="grid">
+<article class="card" data-direction="ember-on-night">
+  <header>
+    <span class="index">A</span>
+    <h2 title="Ember on night">Ember on night</h2>
+  </header>
+  <div class="badges"><span class="badge">Custom</span></div>
+  <div class="frame"><iframe src="ember-on-night.html" title="Ember on night" scrolling="no"></iframe></div>
+  <p class="summary">Closest to the recommendation: deep navy-charcoal ground, one warm ember/amber accent, near-white text. Heavy tight headlines, small uppe…</p>
+  <p class="link"><a href="ember-on-night.html">Open full size</a> <code>.open-design/visual-identity-for-gamepanion-a-companion-for-t/ember-on-night.html</code></p>
+</article>
+<article class="card" data-direction="teal-campfire">
+  <header>
+    <span class="index">B</span>
+    <h2 title="Teal campfire">Teal campfire</h2>
+  </header>
+  <div class="badges"><span class="badge">Custom</span></div>
+  <div class="frame"><iframe src="teal-campfire.html" title="Teal campfire" scrolling="no"></iframe></div>
+  <p class="summary">Dark slate-green ground with a teal accent and a small ember secondary for highlights. Feels like a companion at a campfire: calm, a litt…</p>
+  <p class="link"><a href="teal-campfire.html">Open full size</a> <code>.open-design/visual-identity-for-gamepanion-a-companion-for-t/teal-campfire.html</code></p>
+</article>
+<article class="card" data-direction="violet-arcade">
+  <header>
+    <span class="index">C</span>
+    <h2 title="Violet arcade">Violet arcade</h2>
+  </header>
+  <div class="badges"><span class="badge">Custom</span></div>
+  <div class="frame"><iframe src="violet-arcade.html" title="Violet arcade" scrolling="no"></iframe></div>
+  <p class="summary">Near-black ground with a saturated violet accent and a lime secondary used sparingly. More energetic, gamer-coded, crisp edges, bolder co…</p>
+  <p class="link"><a href="violet-arcade.html">Open full size</a> <code>.open-design/visual-identity-for-gamepanion-a-companion-for-t/violet-arcade.html</code></p>
+</article>
+<article class="card" data-direction="quiet-graphite">
+  <header>
+    <span class="index">D</span>
+    <h2 title="Quiet graphite">Quiet graphite</h2>
+  </header>
+  <div class="badges"><span class="badge">Custom</span></div>
+  <div class="frame"><iframe src="quiet-graphite.html" title="Quiet graphite" scrolling="no"></iframe></div>
+  <p class="summary">Neutral graphite greys, off-white text, a muted gold accent, generous spacing. Restrained and content-first, almost no decoration; brand …</p>
+  <p class="link"><a href="quiet-graphite.html">Open full size</a> <code>.open-design/visual-identity-for-gamepanion-a-companion-for-t/quiet-graphite.html</code></p>
+</article>
+  </div>
+  
+  <footer>Generated by Open Design Agent Kit. Tell your agent which direction you want, e.g. “go with B” or “B, with A’s hero”.</footer>
+</main>
+</body>
+</html>

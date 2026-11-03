@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiet graphite · Gamepanion style tile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600&family=Atkinson+Hyperlegible+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1A1917; --surface: #23221F; --fg: #EDEAE4; --muted: #A39E94; --border: #3A3833;
+  --accent: #C9A85C; --accent-on: #1A150A; --accent-hover: #D8BC78;
+  --success: #009E73; --warn: #E69F00; --danger: #D55E00;
+  --font-display: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1.0625rem; --text-lg: 1.1875rem; --text-xl: 1.375rem;
+  --text-2xl: 1.75rem; --text-3xl: 2.25rem; --text-4xl: 2.75rem;
+  --leading-body: 1.65; --leading-tight: 1.18; --tracking-display: -0.015em;
+  --radius-sm: 3px; --radius-md: 5px; --radius-lg: 8px; --radius-pill: 999px;
+  --elev-raised: 0 1px 2px rgb(0 0 0 / 0.3);
+  --container-max: 1120px; --container-gutter-phone: 20px; --container-gutter-tablet: 40px; --container-gutter-desktop: 64px;
+  --section-y-phone: 40px; --section-y-tablet: 64px; --section-y-desktop: 80px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 var(--text-base)/var(--leading-body) var(--font-body); }
+.tile { max-width: var(--container-max); margin: 0 auto; padding: var(--section-y-desktop) var(--container-gutter-desktop); }
+.top { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); font-size: var(--text-sm); margin-bottom: 72px; }
+.top b { color: var(--fg); font-weight: 600; font-size: var(--text-lg); }
+h1 { font: 600 var(--text-4xl)/var(--leading-tight) var(--font-display); letter-spacing: var(--tracking-display); margin: 0 0 14px; max-width: 22ch; }
+.lead { color: var(--muted); max-width: 56ch; margin: 0 0 64px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
+h2 { font: 500 var(--text-xs)/1 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
+.pal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 16px; margin-bottom: 48px; }
+.pal i { display: block; height: 40px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 8px; }
+.pal span { font-size: var(--text-sm); } .pal small { display: block; color: var(--muted); font: var(--text-xs)/1.4 var(--font-mono); }
+.scale div { display: flex; gap: 16px; align-items: baseline; padding: 5px 0; white-space: nowrap; overflow: hidden; }
+.scale small { width: 52px; flex: none; color: var(--muted); font: var(--text-xs) var(--font-mono); }
+.list { border-top: 1px solid var(--border); }
+.item { display: flex; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.tileg { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: var(--radius-md); font: 600 var(--text-sm)/1 var(--font-display); color: #fff; }
+.item .t { font-weight: 500; } .item .m { color: var(--muted); font-size: var(--text-sm); }
+.item .st { margin-left: auto; font-size: var(--text-sm); color: var(--muted); }
+.item .st.go { color: var(--accent); font-weight: 600; }
+.btns { display: flex; gap: 12px; margin: 40px 0 32px; flex-wrap: wrap; }
+.btn { font: 500 var(--text-sm)/1 var(--font-body); letter-spacing: 0.02em; padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); color: var(--fg); background: transparent; }
+.btn.primary { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+label { display: block; font-size: var(--text-sm); margin-bottom: 8px; color: var(--muted); }
+input { width: 100%; font: var(--text-base) var(--font-body); color: var(--fg); background: transparent; border: 1px solid var(--muted); border-radius: var(--radius-md); padding: 11px 14px; }
+.tag { font-size: var(--text-xs); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 8px; }
+.tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--border); margin-top: 40px; flex-wrap: wrap; }
+.tabs span { font-size: var(--text-sm); padding-bottom: 12px; color: var(--muted); display: inline-flex; gap: 8px; align-items: center; }
+.tabs span::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+.tabs span[aria-selected="true"] { color: var(--fg); box-shadow: inset 0 -2px 0 var(--fg); }
+@media (max-width: 860px) {
+  .tile { padding: var(--section-y-phone) var(--container-gutter-phone); }
+  .two { grid-template-columns: 1fr; gap: 40px; }
+  .top { margin-bottom: 40px; }
+  h1 { font-size: var(--text-3xl); }
+}
+</style>
+</head>
+<body>
+<main class="tile" data-od-style-tile>
+  <div class="top"><b>Gamepanion</b><span>Quiet graphite · restrained, content first</span></div>
+  <h1>Three games in progress. One thing left in the old quarter.</h1>
+  <p class="lead">Warm graphite greys, off-white text, a muted gold used only for the one thing to do next. Lots of room; the brand is the type weight and the icon, nothing else.</p>
+
+  <div class="two">
+    <section>
+      <h2>Palette</h2>
+      <div class="pal">
+        <div><i style="background:#1A1917"></i><span>bg</span><small>#1A1917 · fg 14.63:1</small></div>
+        <div><i style="background:#23221F"></i><span>surface</span><small>#23221F · fg 13.25:1</small></div>
+        <div><i style="background:#EDEAE4"></i><span>fg</span><small>#EDEAE4</small></div>
+        <div><i style="background:#A39E94"></i><span>muted</span><small>#A39E94 · on bg 6.59:1</small></div>
+        <div><i style="background:#3A3833"></i><span>border</span><small>#3A3833 · 1.50:1</small></div>
+        <div><i style="background:#C9A85C"></i><span>accent</span><small>#C9A85C · on bg 7.73:1</small></div>
+        <div><i style="background:#F5F3EF"></i><span>light bg</span><small>#F5F3EF · fg 15.54:1</small></div>
+        <div><i style="background:#7A5F1F"></i><span>light accent</span><small>#7A5F1F · 5.44:1</small></div>
+      </div>
+      <h2>Type · Atkinson Hyperlegible Next 600</h2>
+      <div class="scale">
+        <div><small>4xl 44</small><span style="font:600 var(--text-4xl)/1.1 var(--font-display);letter-spacing:var(--tracking-display)">Clair Obscur</span></div>
+        <div><small>3xl 36</small><span style="font:600 var(--text-3xl)/1.15 var(--font-display);letter-spacing:-0.01em">Your build</span></div>
+        <div><small>2xl 28</small><span style="font:600 var(--text-2xl)/1.2 var(--font-display)">Open quests</span></div>
+        <div><small>xl 22</small><span style="font:500 var(--text-xl)/1.3 var(--font-display)">Act II</span></div>
+        <div><small>lg 19</small><span style="font-size:var(--text-lg)">Session 6, Tuesday</span></div>
+        <div><small>base 17</small><span>Body at 17 with 1.65 leading.</span></div>
+        <div><small>sm 14</small><span style="font-size:var(--text-sm)">Rows and labels</span></div>
+        <div><small>xs 12</small><span style="font-size:var(--text-xs);letter-spacing:0.08em;text-transform:uppercase">Section caps</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Your games</h2>
+      <div class="list">
+        <div class="item"><span class="tileg" style="background:hsl(335 22% 36%)">CO</span><div><div class="t">Clair Obscur</div><div class="m">Act II · 6 sessions</div></div><span class="st go">Continue →</span></div>
+        <div class="item"><span class="tileg" style="background:hsl(4 26% 36%)">LP</span><div><div class="t">Lies of P</div><div class="m">Chapter 5 · 14 sessions</div></div><span class="st">2 open</span></div>
+        <div class="item"><span class="tileg" style="background:hsl(86 22% 30%)">BG</span><div><div class="t">Baldur's Gate 3</div><div class="m">Act I · 3 sessions</div></div><span class="st">Paused</span></div>
+      </div>
+      <div class="tabs" role="tablist">
+        <span role="tab" aria-selected="true" style="--c:#E69F00">Quests</span>
+        <span role="tab" style="--c:#56B4E9">Build</span>
+        <span role="tab" style="--c:#009E73">Items</span>
+        <span role="tab" style="--c:#CC79A7">Codex</span>
+      </div>
+      <div class="list" style="border-top:0">
+        <div class="item"><div><div class="t">The locked door in the old quarter</div><div class="m">Started in session 12</div></div><span class="st">Open</span></div>
+        <div class="item"><div><div class="t" style="color:var(--muted)">A letter for the gatekeeper</div><div class="m">Finished in session 13</div></div><span class="st">Done</span></div>
+      </div>
+      <div class="btns"><button class="btn primary">Where was I?</button><button class="btn">Open threads</button></div>
+      <label for="t4">Add a source</label>
+      <input id="t4" placeholder="A wiki you trust for this game">
+      <p style="margin:16px 0 0;display:flex;gap:8px"><span class="tag">fire</span><span class="tag">boss</span><span class="tag" style="font-family:var(--font-mono)">radius 3 · 5 · 8</span></p>
+    </section>
+  </div>
+</main>
+</body>
+</html>

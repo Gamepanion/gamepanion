@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "Ember on night",
+  "entry": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/ember-on-night.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "standalone",
+    "site",
+    "png",
+    "jpeg",
+    "pdf"
+  ],
+  "createdAt": "2026-11-03T09:06:23.384Z",
+  "updatedAt": "2026-11-03T09:06:23.384Z",
+  "sourceSkillId": "od:design-system:style-tile",
+  "explorationId": "visual-identity-for-gamepanion-a-companion-for-t",
+  "directionId": "ember-on-night"
+}
