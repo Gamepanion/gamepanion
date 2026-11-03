@@ -63,6 +63,8 @@ const authSecret = (): string => {
   return config.secret() ?? bytes.toString("hex");
 };
 
+const UNTRACKED = { ipAddress: "", userAgent: "" };
+
 function options(database: Awaited<ReturnType<typeof openSqlite>>) {
   const publicUrl = config.publicUrl();
   const providers = config.oidcProviders();
@@ -92,6 +94,12 @@ function options(database: Awaited<ReturnType<typeof openSqlite>>) {
         },
         // A deleted player's log goes in the same request (ADR 0004): there is no foreign key across the two files.
         delete: { after: async (user: { id: string }) => deletePlayerLog({ id: user.id }) },
+      },
+      // Better Auth writes the client's address and browser into every session; nothing here reads them, so neither is stored. The
+      // address still reaches its in-memory rate limit, which disableIpTracking would turn off.
+      session: {
+        create: { before: async (session: Record<string, unknown>) => ({ data: { ...session, ...UNTRACKED } }) },
+        update: { before: async (session: Record<string, unknown>) => ({ data: { ...session, ...UNTRACKED } }) },
       },
     },
     plugins: [
@@ -168,6 +176,8 @@ async function open(file: string): Promise<Auth> {
     // Better Auth's own tables, created and extended as its version and plugins need; nothing of Gamepanion's is in this file.
     const { runMigrations } = await getMigrations(options(database));
     await runMigrations();
+    // Sessions from before nothing was stored about the client.
+    database.prepare("UPDATE session SET ipAddress = '', userAgent = '' WHERE ipAddress != '' OR userAgent != ''").run();
     return create(database);
   } catch (e) {
     database.close();
