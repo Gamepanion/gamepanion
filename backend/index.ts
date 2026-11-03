@@ -30,7 +30,7 @@ export { mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, to
 
 // What the pages read, as the signed-in player sees it: through the same gate as the tools, never asking for spoilers unless the
 // player asked on the page.
-export { briefing, type Briefing } from "./briefing";
+export { BRIEFING_SECTIONS, briefing, briefingIds, continuePlaythrough, type Briefing } from "./briefing";
 export { buildOf, type BuildView } from "./builds";
 export { codexOf, type CodexView } from "./codex";
 export { getPlaythrough, listPlaythroughs, type PlaythroughView } from "./games";

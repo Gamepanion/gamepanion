@@ -1,9 +1,22 @@
 import Link from "next/link";
-import { buildOf, codexOf, itemsOf, listPlaythroughs, mcpUrl, questsOf, sessionsOf, type Player, type PlaythroughView } from "@/backend";
+import {
+  briefing,
+  buildOf,
+  continuePlaythrough,
+  codexOf,
+  itemsOf,
+  listPlaythroughs,
+  mcpUrl,
+  questsOf,
+  sessionsOf,
+  type Player,
+  type PlaythroughView,
+} from "@/backend";
 import { serverCopy } from "@/components/copy/server";
 import { CopyField } from "@/components/CopyField";
 import { GameTile } from "@/components/GameTile";
-import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ScrollText } from "lucide-react";
+import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ListTodo, ScrollText } from "lucide-react";
+import { ChatOn } from "@/components/chat/Chat";
 
 // Your games (the home page): every game with its tile, and under it a card for each of its playthroughs that says where the player is:
 // the last session, the next step, the plan's next goals and how much is filed. A card opens its playthrough.
@@ -22,11 +35,15 @@ export async function Home({ player }: { player: Player }) {
         </div>
       </div>
     );
+  // "Where was I?" (#79): the playthrough played most recently among those being played gets the Continue card; the rest below, by game.
+  const current = continuePlaythrough(runs);
+  const rest = runs.filter((t) => t.id !== current?.id);
   // Games in the order of their latest playthrough; each game's playthroughs latest first.
-  const games = [...new Map(runs.map((t) => [t.game.id, t.game])).values()];
+  const games = [...new Map(rest.map((t) => [t.game.id, t.game])).values()];
   return (
     <div className="space-y-6">
       <h1 className="text-3xl">{copy.contents}</h1>
+      {current && <Continue player={player} run={current} />}
       {games.map((g) => (
         <section key={g.id} aria-labelledby={`game-${g.id}`} className="space-y-2">
           <h2 id={`game-${g.id}`} className="flex items-center gap-3 pt-2">
@@ -34,7 +51,7 @@ export async function Home({ player }: { player: Player }) {
             <span className="text-2xl">{g.title}</span>
             {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
           </h2>
-          <ol className="space-y-3">{runs.map((t) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} />))}</ol>
+          <ol className="space-y-3">{rest.map((t) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} />))}</ol>
         </section>
       ))}
     </div>
@@ -117,5 +134,84 @@ async function RunCard({ player, run: t }: { player: Player; run: PlaythroughVie
         </span>
       </Link>
     </li>
+  );
+}
+
+// The Continue card (#79): the playthrough being played most recently, with a short version of its briefing, from the same read as
+// MCP's briefing and the Overview tab: the last session, the next step, the open to-dos and the next goals. It never shows more than the
+// playthrough's spoiler setting.
+async function Continue({ player, run: t }: { player: Player; run: PlaythroughView }) {
+  const copy = await serverCopy();
+  const b = await briefing(player, { playthroughId: t.id });
+  const next = b.openQuests.find((q) => q.status === "open" && q.nextStep) ?? b.openQuests[0];
+  const goals = b.build.goals.filter((g) => g.status === "open" && !g.suggested).slice(0, 2);
+  return (
+    <section aria-labelledby="continue" className="card continue-card space-y-3">
+      <h2 id="continue" className="flex items-center gap-3">
+        <GameTile title={t.game.title} size="lg" />
+        <span>
+          <span className="block text-sm font-semibold text-muted uppercase">{copy.continueHeading}</span>
+          <span className="block text-2xl">
+            {t.game.title} · {t.label}
+          </span>
+        </span>
+      </h2>
+      <p className="run-line">
+        <CalendarDays aria-hidden="true" />
+        {b.lastSession ? (
+          <span>
+            <span className="text-sm text-muted tabular-nums">{copy.lastPlayed(b.lastSession.playedOn)}</span>
+            <span className="block">{b.lastSession.summary}</span>
+          </span>
+        ) : (
+          <span className="text-sm text-muted">{copy.notPlayedYet}</span>
+        )}
+      </p>
+      {next && (
+        <p className="run-line run-next">
+          <Footprints aria-hidden="true" />
+          <span>
+            <span className="block text-sm font-semibold">{next.name}</span>
+            <span className="block text-sm">{next.status === "blocked" ? copy.waitingOnGame : next.nextStep}</span>
+          </span>
+        </p>
+      )}
+      {b.todos.length > 0 && (
+        <div className="run-line">
+          <ListTodo aria-hidden="true" />
+          <span>
+            <span className="block text-sm font-semibold">{copy.todos}</span>
+            <ul className="text-sm">
+              {b.todos.slice(0, 3).map((x) => (
+                <li key={x.id}>{x.text}</li>
+              ))}
+            </ul>
+            {b.todos.length > 3 && <span className="block text-sm text-muted">{copy.moreTodos(b.todos.length - 3)}</span>}
+          </span>
+        </div>
+      )}
+      {goals.length > 0 && (
+        <div className="run-line">
+          <Crosshair aria-hidden="true" />
+          <span>
+            <span className="block text-sm font-semibold">{copy.goals}</span>
+            <ul className="text-sm">
+              {goals.map((g) => (
+                <li key={g.id}>
+                  {g.kind === "stat" && g.stat ? `${g.stat.name} ${g.target}` : g.kind === "level" ? copy.level(g.target ?? 0) : (g.item?.name ?? g.text)}
+                  {g.current !== null && g.target !== null && <span className="text-muted tabular-nums"> · {copy.goalProgress(g.current, g.target)}</span>}
+                </li>
+              ))}
+            </ul>
+          </span>
+        </div>
+      )}
+      <div className="flex flex-wrap gap-3 pt-1">
+        <Link href={t.url} className="button-primary inline-flex items-center gap-2">
+          {copy.continueButton}
+        </Link>
+        <ChatOn playthroughId={t.id} label={copy.continueChat} />
+      </div>
+    </section>
   );
 }

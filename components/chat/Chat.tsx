@@ -17,7 +17,7 @@ import { canRecord, useVoice } from "./useVoice";
 export type About = { kind: AboutKind; id: string; name: string; playthroughId: string };
 type Turn = { role: "user" | "assistant"; content: string; links?: ChatLink[]; filed?: boolean };
 
-const ChatContext = createContext<{ enabled: boolean; open: (about?: About) => void }>({ enabled: false, open: () => {} });
+const ChatContext = createContext<{ enabled: boolean; open: (about?: About, run?: string) => void }>({ enabled: false, open: () => {} });
 
 // One chat per player on this device. Storage can be blocked or throw (private windows); the chat then lasts while the page is open.
 const keyOf = (playerId: string) => `gamepanion.chat.${playerId}`;
@@ -53,11 +53,11 @@ const pageRun = () => window.location.pathname.match(/^\/p\/([^/]+)/)?.[1];
 /** The chat for the pages under it: the button at the bottom, and the sheet once it is opened. Nothing when the chat is off. */
 export function ChatProvider({ enabled, voice, playerId, children }: { enabled: boolean; voice: boolean; playerId: string; children: ReactNode }) {
   const copy = useCopy();
-  const [state, setState] = useState<{ about?: About } | null>(null);
+  const [state, setState] = useState<{ about?: About; run?: string } | null>(null);
   const opener = useRef<HTMLElement | null>(null);
-  const open = useCallback((about?: About) => {
+  const open = useCallback((about?: About, run?: string) => {
     opener.current = document.activeElement as HTMLElement | null;
-    setState({ about });
+    setState({ about, run });
   }, []);
   const close = useCallback(() => {
     setState(null);
@@ -71,7 +71,7 @@ export function ChatProvider({ enabled, voice, playerId, children }: { enabled: 
           <ClaudeMark />
         </button>
       )}
-      {enabled && state && <ChatSheet playerId={playerId} voice={voice} about={state.about} onClose={close} />}
+      {enabled && state && <ChatSheet playerId={playerId} voice={voice} about={state.about} run={state.run} onClose={close} />}
     </ChatContext.Provider>
   );
 }
@@ -94,9 +94,21 @@ export function TalkAbout({ kind, id, name, playthroughId, small = false }: Abou
   );
 }
 
+/** A button that opens the chat on a playthrough, such as the Continue card's. Nothing when the chat is off. */
+export function ChatOn({ playthroughId, label }: { playthroughId: string; label: string }) {
+  const { enabled, open } = useContext(ChatContext);
+  if (!enabled) return null;
+  return (
+    <button type="button" className="button-secondary inline-flex items-center gap-2" onClick={() => open(undefined, playthroughId)}>
+      <MessageSquareText aria-hidden="true" className="size-4" />
+      {label}
+    </button>
+  );
+}
+
 const noSubscribe = () => () => {};
 
-function ChatSheet({ playerId, voice, about: opened, onClose }: { playerId: string; voice: boolean; about?: About; onClose: () => void }) {
+function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId: string; voice: boolean; about?: About; run?: string; onClose: () => void }) {
   const copy = useCopy();
   const language = useLocale();
   const router = useRouter();
@@ -190,7 +202,7 @@ function ChatSheet({ playerId, voice, about: opened, onClose }: { playerId: stri
     const asked: Turn[] = [...turns, { role: "user", content: text }];
     setTurns(asked);
     if (!offered) setDraft("");
-    const playthroughId = about?.playthroughId ?? pageRun();
+    const playthroughId = about?.playthroughId ?? run ?? pageRun();
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

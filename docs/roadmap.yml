@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: continue
+    status: done
+    date: 2026-11-03
+    icon: play-circle-outline
+    title: Continue where you left off
+    title_de: Weiterspielen, wo du aufgehört hast
+    summary: The home page opens with a Continue card for the game you are playing, and a playthrough's Overview is its briefing, from the same read as Claude's.
+    summary_de: Die Startseite beginnt mit einer Weiterspielen-Karte für das Spiel, das du gerade spielst, und der Überblick eines Durchlaufs ist sein Briefing, aus derselben Abfrage wie Claudes.
+    links:
+      - { label: "#86", url: "https://github.com/gamepanion/gamepanion/pull/86" }
   - id: source-trust
     status: done
     date: 2026-11-03
