@@ -94,9 +94,9 @@ export function Group({ icon: Icon, label, count, children }: { icon: LucideIcon
 }
 
 /** The tile at the start of a card: what kind of thing the card is. */
-export function Tile({ icon: Icon, muted = false }: { icon: LucideIcon; muted?: boolean }) {
+export function Tile({ icon: Icon, muted = false, done = false }: { icon: LucideIcon; muted?: boolean; done?: boolean }) {
   return (
-    <span className={`tile ${muted ? "tile-muted" : ""}`}>
+    <span className={`tile ${muted ? "tile-muted" : ""} ${done ? "tile-done" : ""}`}>
       <Icon aria-hidden="true" />
     </span>
   );

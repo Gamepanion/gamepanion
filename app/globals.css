@@ -296,7 +296,11 @@ h1 {
   @apply h-full bg-accent;
 }
 .goal-reached {
-  @apply opacity-60;
+  @apply opacity-75;
+}
+/* What is done (a reached goal, a finished quest) is marked in the signal colour: lime in dark, violet in light (brand.md). */
+.goal-reached .goal-fill {
+  @apply bg-signal;
 }
 .goal-suggested .goal-track {
   @apply border border-dashed border-rule bg-transparent;
@@ -320,6 +324,11 @@ h1 {
 }
 .tile svg {
   @apply h-[1.125rem] w-[1.125rem];
+}
+.tile-done {
+  border-color: color-mix(in oklab, var(--signal) 45%, var(--surface));
+  background: color-mix(in oklab, var(--signal) 14%, var(--surface));
+  color: var(--signal);
 }
 .tile-muted {
   @apply border-rule bg-surface-2 text-muted;

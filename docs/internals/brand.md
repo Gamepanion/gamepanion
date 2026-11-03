@@ -42,7 +42,7 @@ Dark first; the light theme follows the system setting.
 | Muted | `#A49FB4` (7.65:1) | `#5A556A` (6.63:1) | captions, metadata |
 | Border | `#2E2A3A` | | structure only |
 | Accent violet | `#A77BFF` (6.46:1) | `#6B3FD6` (5.90:1) | primary button, one headline phrase, the offset shadow: at most two uses per screen |
-| Signal lime | `#C6F432` (15.30:1) | violet | what is done (the docs roadmap's shipped steps); sparingly, never next to violet in the same element. On light it falls back to violet, since lime has no contrast there |
+| Signal lime | `#C6F432` (15.30:1) | violet | what is done: a finished quest's tile and status, a reached goal's bar, the docs roadmap's shipped steps; sparingly, never next to violet in the same element. On light it falls back to violet, since lime has no contrast there |
 
 * **The register's tabs** keep the Okabe-Ito colours and always their names, whole: Overview reddish purple `#CC79A7`, Character orange `#E69F00`, Quests blue `#0072B2`, Items yellow `#F0E442`, Codex sky blue `#56B4E9`, Sessions vermillion `#D55E00`, Notes bluish green `#009E73`, Settings grey. Below a wide screen they take two rows, icon over name, so no name is cut.
 * **Violet budget on a screen:** the wordmark, the primary button, and one more (the current page marker, a goal bar, or a headline phrase). Icons in lists are muted.

@@ -373,12 +373,14 @@ async function Quests({ quests, run }: { quests: QuestView[]; run: string }) {
       {quests.map((q) => (
         <li key={q.id} id={`quest-${q.id}`} className="card" {...tagData(q.tags)}>
           <div className="card-head">
-            <Tile icon={QUEST_ICONS[q.status]} muted={q.status !== "open"} />
+            <Tile icon={QUEST_ICONS[q.status]} muted={q.status !== "open" && q.status !== "done"} done={q.status === "done"} />
             <span className="flex-1 font-semibold">
               {q.name}
               {q.localName && <span className="font-normal text-muted"> · {q.localName}</span>}
             </span>
-            <span className="shrink-0 text-sm text-muted">{q.status === "blocked" ? copy.waitingOnGame : copy.questStatus[q.status]}</span>
+            <span className={`shrink-0 text-sm ${q.status === "done" ? "font-semibold text-signal" : "text-muted"}`}>
+              {q.status === "blocked" ? copy.waitingOnGame : copy.questStatus[q.status]}
+            </span>
             <TalkAbout kind="quest" id={q.id} name={q.name} playthroughId={run} />
           </div>
           {(q.giver || q.location) && <p className="text-sm text-muted">{[q.giver, q.location].filter(Boolean).join(" · ")}</p>}
