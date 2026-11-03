@@ -453,6 +453,20 @@ const migrations: Record<string, Migration> = {
         .execute();
     },
   },
+  "011_player_keys": {
+    // ADR 0021: a player's own Anthropic API key for the in-app chat, encrypted (AES-256-GCM) with GAMEPANION_KEY_ENCRYPTION_KEY. Only
+    // the last four characters are kept in the clear, to show which key is stored.
+    async up(db: Kysely<any>) {
+      await db.schema
+        .createTable("player_keys")
+        .addColumn("player_id", "text", (c) => c.primaryKey())
+        .addColumn("ciphertext", "text", (c) => c.notNull())
+        .addColumn("last4", "text", (c) => c.notNull())
+        .addColumn("created_at", "bigint", (c) => c.notNull())
+        .addColumn("updated_at", "bigint", (c) => c.notNull())
+        .execute();
+    },
+  },
 };
 
 export const NEWER = "the database was made by a newer Gamepanion than this one; upgrade Gamepanion, do not point an older one at it";

@@ -120,15 +120,16 @@ test("links are the rows a result names with a url", () => {
   expect(linksOf({ changes: [{ name: "Saber", url: "/p/x#item-1" }, { name: "no url" }], next: ["…"] })).toEqual([{ name: "Saber", url: "/p/x#item-1" }]);
 });
 
-test("the routes: 404 without a model, a bearer token or no session is refused", async () => {
+test("the routes: a bearer token or no session is refused, with or without a model", async () => {
   // Looking for a session opens the sign-in database: a fresh one, not the default /data.
   vi.stubEnv("DATA_DIR", mkdtempSync(join(tmpdir(), "gamepanion-")));
   const post = (path: string, headers: Record<string, string> = {}, body = "{}") => new Request(`http://localhost${path}`, { method: "POST", headers, body });
-  expect((await chatRoute(post("/api/chat"))).status).toBe(404);
+  // Who asks is checked first: whether there is a model depends on the player (their own key, ADR 0021).
+  expect((await chatRoute(post("/api/chat"))).status).toBe(401);
   setChatModelForTests(scripted());
   expect((await chatRoute(post("/api/chat", { authorization: "Bearer x" }))).status).toBe(401);
   expect((await chatRoute(post("/api/chat"))).status).toBe(401);
-  expect((await voiceRoute(post("/api/chat/voice"))).status).toBe(404);
+  expect((await voiceRoute(post("/api/chat/voice"))).status).toBe(401);
   setTranscriberForTests({ transcribe: async () => ({ text: "hi" }) });
   expect((await voiceRoute(post("/api/chat/voice", { "content-type": "audio/webm" }))).status).toBe(401);
 });

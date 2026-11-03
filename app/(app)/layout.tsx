@@ -41,7 +41,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <SignOutButton />
         </div>
       </header>
-      <ChatProvider enabled={chatEnabled()} voice={voiceEnabled()} playerId={player.id}>
+      <ChatProvider enabled={await chatEnabled(player)} voice={await voiceEnabled(player)} playerId={player.id}>
         <Follow>{children}</Follow>
       </ChatProvider>
     </div>

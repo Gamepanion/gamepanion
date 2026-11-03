@@ -230,7 +230,16 @@ test("an MCP client signs the player in and calls the tools as them; nothing els
 
   // The tools, as the player who signed in.
   const list = await (await rpc("tools/list", {}, bearer)).json();
-  expect(list.result.tools.map((t: { name: string }) => t.name)).toEqual(["record", "briefing", "open_threads", "item", "codex", "correct", "missed"]);
+  expect(list.result.tools.map((t: { name: string }) => t.name)).toEqual([
+    "record",
+    "briefing",
+    "open_threads",
+    "item",
+    "codex",
+    "correct",
+    "chat_key",
+    "missed",
+  ]);
   const filed = await (
     await rpc(
       "tools/call",

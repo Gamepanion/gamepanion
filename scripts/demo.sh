@@ -7,6 +7,8 @@ export PORT="${PORT:-3123}"
 export PUBLIC_URL="${PUBLIC_URL:-http://localhost:$PORT}"
 export DATA_DIR="${DATA_DIR:-./data/demo}"
 export GAMEPANION_SECRET="${GAMEPANION_SECRET:-demo-only-secret-never-use-this-for-real-data}"
+# Players' own keys (ADR 0021) are on in the demo, with a key that is public and good for nothing else.
+export GAMEPANION_KEY_ENCRYPTION_KEY="${GAMEPANION_KEY_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}"
 export GAMEPANION_SIGNUP_ALLOW="${GAMEPANION_SIGNUP_ALLOW:-demo@example.com}"
 # Email codes are on but never sent: the session script catches its own code, and nobody else signs in here.
 export GAMEPANION_SMTP_URL="${GAMEPANION_SMTP_URL:-smtp://mail.invalid}"

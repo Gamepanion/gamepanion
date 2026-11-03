@@ -9,6 +9,7 @@ type Json = ColumnType<string, string | undefined, string>;
 type Defaulted = ColumnType<string, string | undefined, string>;
 
 export interface Schema {
+  player_keys: { player_id: string; ciphertext: string; last4: string; created_at: number; updated_at: number };
   todos: {
     id: string;
     player_id: string;

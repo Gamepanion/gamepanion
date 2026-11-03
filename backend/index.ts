@@ -38,7 +38,8 @@ export { itemsOf, type ItemView } from "./items";
 export { questsOf, type QuestView } from "./quests";
 export { todosOf, type TodoView } from "./todos";
 export { getSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
-export { NotFoundError } from "./errors";
+export { InvalidInputError, NotFoundError } from "./errors";
+export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";
 export {
   BACKGROUND_LEVELS,
   CODEX_KINDS,

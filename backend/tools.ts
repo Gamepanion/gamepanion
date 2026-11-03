@@ -37,6 +37,8 @@ import {
 } from "./types";
 import { BackgroundJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
+import { keyStorageEnabled } from "./keys";
+import { accountKeyPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -806,6 +808,27 @@ export const TOOLS: Tool[] = [
     handler: async (p, { changes }) => {
       const cs = await correct(p, changes);
       return ok(CorrectedJson, { changes: cs }, correctNext(cs, changes));
+    },
+  }),
+  tool({
+    name: "chat_key",
+    description:
+      "The page where the player stores their own Anthropic API key for Gamepanion's in-app chat. Call it when the player wants the in-app chat to run on their own key, or the chat said their key was refused. It returns only the link: the key is pasted there, never into this chat.",
+    input: z.object({}),
+    output: z.object({ url: Url.describe("The account page's key section"), keyStorage: z.boolean().describe("Whether this instance stores players' keys") }),
+    annotations: { readOnlyHint: true },
+    handler: async () => {
+      const on = keyStorageEnabled();
+      return ok(
+        z.object({ url: Url, keyStorage: z.boolean() }),
+        { url: accountKeyPath(), keyStorage: on },
+        on
+          ? [
+              "Give the player this link and tell them to paste their Anthropic API key there, on the account page. Never ask for the key in this chat and never repeat one they paste here: if they do, tell them to remove it from the conversation and paste it on the page instead.",
+              "A claude.ai subscription has no API key: they need an account with prepaid credits at console.anthropic.com.",
+            ]
+          : ["This Gamepanion instance doesn't store players' keys; its in-app chat runs on the instance's own key, if it has one. Tell the player."],
+      );
     },
   }),
   tool({

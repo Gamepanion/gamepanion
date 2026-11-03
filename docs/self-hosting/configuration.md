@@ -29,6 +29,7 @@ To update: `docker compose pull && docker compose up -d`. `:main` follows the ma
 | `GAMEPANION_OIDC_<NAME>_LABEL` | the name | The button's text: "Continue with `<LABEL>`". |
 | `GAMEPANION_ANTHROPIC_API_KEY` | unset: no chat | A Claude API key: turns on the chat in the web app ([ADR 0013](../adr/0013-in-app-chat.md)). The instance owner pays for its messages. |
 | `GAMEPANION_ANTHROPIC_MODEL` | `claude-opus-5-5` | The model the chat uses. |
+| `GAMEPANION_KEY_ENCRYPTION_KEY` | unset: players can't store a key | 32 bytes as 64 hex characters (`openssl rand -hex 32`). With it, a player can store their own Anthropic API key on the account page, encrypted with this key, and the chat runs on it for them, also on an instance without `GAMEPANION_ANTHROPIC_API_KEY` ([ADR 0021](../adr/0021-players-own-keys.md)). Keep it: a new one makes the stored keys unreadable and players paste theirs again. |
 | `GAMEPANION_CHAT_DAILY_LIMIT` | `100` | How many chat messages a player may send a day. |
 | `GAMEPANION_TRANSCRIBE_URL` | unset: typing only | A Whisper server for speaking into the chat, with the OpenAI-compatible `/v1/audio/transcriptions`, such as [speaches](https://speaches.ai). No trailing slash. |
 | `GAMEPANION_TRANSCRIBE_MODEL` | `deepdml/faster-whisper-large-v3-turbo-ct2` | The model the Whisper server runs. |

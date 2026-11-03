@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: own-key
+    status: done
+    date: 2026-11-03
+    icon: key-chain-variant
+    title: The chat on your own Anthropic key
+    title_de: Der Chat mit deinem eigenen Anthropic-Schlüssel
+    summary: Paste your Anthropic API key on the account page; it is stored encrypted, never shown again, and the in-app chat runs on it.
+    summary_de: Trag deinen Anthropic-API-Schlüssel auf der Kontoseite ein; er wird verschlüsselt gespeichert, nie wieder angezeigt, und der Chat in der App läuft damit.
+    links:
+      - { label: "ADR 0021", url: "https://docs.gamepanion.app/adr/0021-players-own-keys/" }
+      - { label: "#87", url: "https://github.com/gamepanion/gamepanion/pull/87" }
   - id: continue
     status: done
     date: 2026-11-03

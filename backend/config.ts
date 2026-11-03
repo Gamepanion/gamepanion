@@ -102,6 +102,14 @@ export const config = {
     const n = Number.parseInt(env("GAMEPANION_CHAT_DAILY_LIMIT").trim(), 10);
     return Number.isInteger(n) && n > 0 ? n : 100;
   },
+  // Players' own Anthropic keys (#76, ADR 0021): stored encrypted with this key, 32 bytes as 64 hex characters (openssl rand -hex 32).
+  // Unset: players can't store a key, and the chat runs on GAMEPANION_ANTHROPIC_API_KEY alone.
+  keyEncryptionKey: (): Buffer | undefined => {
+    const v = env("GAMEPANION_KEY_ENCRYPTION_KEY").trim();
+    if (!v) return undefined;
+    if (!/^[0-9a-fA-F]{64}$/.test(v)) throw new Error("GAMEPANION_KEY_ENCRYPTION_KEY must be 32 bytes as 64 hex characters (openssl rand -hex 32)");
+    return Buffer.from(v, "hex");
+  },
   // Speaking into the chat: a Whisper server with the OpenAI-compatible POST /v1/audio/transcriptions (such as speaches); no trailing
   // slash. Unset: the chat takes typing only.
   transcribeUrl: (): string | undefined => env("GAMEPANION_TRANSCRIBE_URL").trim().replace(/\/+$/, "") || undefined,

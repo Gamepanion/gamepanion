@@ -26,6 +26,26 @@ export const de: Copy = {
   refused: (provider: string | null, code: string) => `${provider ?? "Der Anmeldedienst"} hat die Anmeldung abgelehnt: ${code}`,
   signOut: "Abmelden",
 
+  // Die Kontoseite: dein eigener Anthropic-Schlüssel für den Chat in der App (ADR 0021)
+  keyTitle: "Dein Anthropic-Schlüssel",
+  keyLead:
+    "Der Chat in der App kann mit deinem eigenen Anthropic-API-Schlüssel laufen. Er wird verschlüsselt gespeichert und nie wieder angezeigt, nur seine letzten vier Zeichen.",
+  keyNote: "Ein claude.ai-Abo hat keinen API-Schlüssel: Du brauchst ein Konto mit Guthaben auf console.anthropic.com.",
+  keyOff: "Dieses Gamepanion speichert keine Schlüssel von Spielern. Sein Chat läuft mit dem eigenen Schlüssel der Instanz, falls sie einen hat.",
+  keyField: "API-Schlüssel",
+  keyStored: (last4: string) => `Ein Schlüssel mit der Endung ${last4} ist gespeichert. Der Chat läuft damit.`,
+  keyNone: "Kein Schlüssel gespeichert. Der Chat läuft mit dem Schlüssel der Instanz, falls sie einen hat.",
+  keyTest: "Schlüssel testen",
+  keySave: "Schlüssel speichern",
+  keyReplace: "Schlüssel ersetzen",
+  keyRemove: "Schlüssel entfernen",
+  keyWorks: "Der Schlüssel funktioniert.",
+  keyRejected: "Anthropic hat diesen Schlüssel abgelehnt.",
+  keyUnreachable: "Anthropic war nicht erreichbar. Versuch es gleich noch einmal.",
+  keyInvalid: "Das sieht nicht nach einem Anthropic-API-Schlüssel aus (sk-ant-…).",
+  keySaved: "Gespeichert.",
+  keyRemoved: "Entfernt.",
+
   // Die Kontoseite: wer angemeldet ist, und wie man sich anmeldet
   account: "Konto",
   signedInAs: "Angemeldet als",
@@ -199,6 +219,8 @@ export const de: Copy = {
   chatLimit: "Das war für heute die letzte Nachricht. Morgen geht der Chat wieder.",
   chatUnavailable: "Claude ist gerade nicht erreichbar. Versuch es gleich noch einmal.",
   chatRefused: "Darauf hat Claude nicht geantwortet. Sag es vielleicht anders.",
+  ownKeyRejected: "Anthropic hat deinen API-Schlüssel abgelehnt: Er ist vielleicht falsch, widerrufen oder ohne Guthaben.",
+  ownKeySettings: "Schlüssel prüfen",
   chatTooLong: "Das wurde zu lang für eine Nachricht. Starte einen neuen Chat und frag kürzer.",
   filedThenFailed: (error: string) => `Etwas wurde eingetragen (siehe Links), dann: ${error}`,
   voiceRecord: "Nachricht sprechen",

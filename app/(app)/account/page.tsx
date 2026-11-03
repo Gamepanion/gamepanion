@@ -1,7 +1,8 @@
 import { Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { passkeysOf, profileOf, signInMethods } from "@/backend";
+import { keyStatus, keyStorageEnabled, passkeysOf, profileOf, signInMethods } from "@/backend";
+import { KeySection } from "@/components/KeySection";
 import { AccountCard, EmailCode } from "@/components/Account";
 import { Passkeys } from "@/components/Passkeys";
 import { serverCopy, serverLocale } from "@/components/copy/server";
@@ -13,9 +14,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 // The player's account: the account card (their name, renamed in place, and address; #61), then every way they sign in:
-// email codes (and moving to another address), the providers they linked, their passkeys (ADR 0015).
+// email codes (and moving to another address), the providers they linked, their passkeys (ADR 0015); then their own Anthropic key for
+// the in-app chat (ADR 0021).
 export default async function AccountPage() {
-  await pagePlayer();
+  const player = await pagePlayer();
+  const key = await keyStatus(player);
   const h = await headers();
   const copy = await serverCopy();
   const date = new Intl.DateTimeFormat(await serverLocale(), { dateStyle: "medium" });
@@ -31,29 +34,32 @@ export default async function AccountPage() {
         <div className="lg:sticky lg:top-6">
           <AccountCard name={profile.name} email={profile.email} />
         </div>
-        <section aria-labelledby="sign-in-ways">
-          <h2 id="sign-in-ways" className="section-title">
-            <span className="seal">
-              <ShieldCheck aria-hidden="true" />
-            </span>
-            {copy.signInWays}
-          </h2>
-          <ul className="card divide-y divide-rule p-0">
-            {methods.emailCode && <EmailCode email={profile.email} />}
-            {profile.linked.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 px-4 py-3">
-                <span className="seal">
-                  <Link2 aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{p.label}</p>
-                  <p className="text-sm text-muted">{copy.linkedProvider}</p>
-                </div>
-              </li>
-            ))}
-            <Passkeys list={list} />
-          </ul>
-        </section>
+        <div className="space-y-8">
+          <section aria-labelledby="sign-in-ways">
+            <h2 id="sign-in-ways" className="section-title">
+              <span className="seal">
+                <ShieldCheck aria-hidden="true" />
+              </span>
+              {copy.signInWays}
+            </h2>
+            <ul className="card divide-y divide-rule p-0">
+              {methods.emailCode && <EmailCode email={profile.email} />}
+              {profile.linked.map((p) => (
+                <li key={p.id} className="flex items-center gap-3 px-4 py-3">
+                  <span className="seal">
+                    <Link2 aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">{p.label}</p>
+                    <p className="text-sm text-muted">{copy.linkedProvider}</p>
+                  </div>
+                </li>
+              ))}
+              <Passkeys list={list} />
+            </ul>
+          </section>
+          <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} />
+        </div>
       </div>
     </div>
   );

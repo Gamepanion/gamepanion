@@ -125,6 +125,7 @@ function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId:
     chat_unavailable: copy.chatUnavailable,
     chat_refused: copy.chatRefused,
     chat_too_long: copy.chatTooLong,
+    own_key_rejected: copy.ownKeyRejected,
   };
 
   useEffect(() => {
@@ -311,6 +312,14 @@ function ChatSheet({ playerId, voice, about: opened, run, onClose }: { playerId:
         {error && (
           <p role="alert" className="mx-4 rounded-lg border border-error px-3 py-2 text-sm text-error">
             {error}
+            {error === copy.ownKeyRejected && (
+              <>
+                {" "}
+                <Link href="/account#key" className="font-semibold underline" onClick={onClose}>
+                  {copy.ownKeySettings}
+                </Link>
+              </>
+            )}
           </p>
         )}
         <form
