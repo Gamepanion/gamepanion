@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: next-links
+    status: done
+    date: 2026-11-03
+    icon: link-variant
+    title: Claude links the right page
+    title_de: Claude verlinkt die richtige Seite
+    summary: What the tools tell Claude to do next links the page that fits, the session, the Overview, the Settings tab, the key settings or the first steps.
+    summary_de: Was die Werkzeuge Claude als Nächstes sagen, verlinkt die passende Seite, die Session, den Überblick, den Einstellungen-Reiter, die Schlüssel-Einstellungen oder die ersten Schritte.
+    links:
+      - { label: "#90", url: "https://github.com/gamepanion/gamepanion/pull/90" }
   - id: chat-on-a-playthrough
     status: done
     date: 2026-11-03
