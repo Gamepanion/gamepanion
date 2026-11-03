@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: references
+    status: done
+    date: 2026-11-03
+    icon: bookmark-multiple-outline
+    title: References and sources
+    title_de: Referenzen und Quellen
+    summary: A game's references are the guide sites Claude looks things up on, each with a trust level; the page found for an item is its source. When pages disagree, the more trusted site wins.
+    summary_de: Die Referenzen eines Spiels sind die Guide-Seiten, auf denen Claude nachschlägt, jede mit einer Vertrauensstufe; die für einen Gegenstand gefundene Seite ist seine Quelle. Widersprechen sich Seiten, gilt die vertrauenswürdigere.
+    links:
+      - { label: "#96", url: "https://github.com/gamepanion/gamepanion/pull/96" }
   - id: hosted-ai
     status: done
     date: 2026-11-03

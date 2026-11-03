@@ -43,7 +43,7 @@ export const PART_ICONS: Record<string, LucideIcon> = {
   codex: BookOpen,
   sessions: CalendarDays,
   notes: NotebookPen,
-  sources: Link2,
+  references: Link2,
   settings: SlidersHorizontal,
 };
 

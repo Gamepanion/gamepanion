@@ -192,7 +192,6 @@ export interface Schema {
     spoiler: string;
     source_url: string | null;
     source_title: string | null;
-    source_trust: string | null;
     created_at: number;
   };
   item_uses: { item_id: string; codex_id: string; player_id: string; effect: string; note: string | null; created_at: number };

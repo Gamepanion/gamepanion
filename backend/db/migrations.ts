@@ -498,6 +498,12 @@ const migrations: Record<string, Migration> = {
       }
     },
   },
+  "013_sources_without_trust": {
+    // #95: trust belongs to a game's references, not to the page a background line was taken from; 010's column goes.
+    async up(db: Kysely<any>) {
+      await db.schema.alterTable("background").dropColumn("source_trust").execute();
+    },
+  },
 };
 
 export const NEWER = "the database was made by a newer Gamepanion than this one; upgrade Gamepanion, do not point an older one at it";

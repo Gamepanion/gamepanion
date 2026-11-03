@@ -24,7 +24,7 @@ export const Spoiler = z.enum(SPOILER_LEVELS);
 export const TrustInput = z
   .enum(TRUST_LEVELS)
   .describe(
-    "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own",
+    "How far the reference can be trusted: high for official guides and wikis (Fextralife), medium for large guide sites, low for forums, Steam discussions, single comments and one person's video. Default medium; left out on a reference already kept, it keeps its own",
   );
 export const TagNames = z
   .array(z.string().trim().min(1).max(40))
@@ -43,7 +43,6 @@ export const BackgroundLines = z
         .object({
           url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"),
           title: z.string().trim().min(1).max(200),
-          trust: TrustInput.optional().describe("The source's trust; default the trust the game's source with this link has, else medium"),
         })
         .optional()
         .describe("The page it comes from; leave it out for what you know yourself"),
@@ -66,6 +65,12 @@ export const SourceInput = z.object({
     .max(2000)
     .optional()
     .describe("For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text"),
+});
+
+/** A site kept for a game, where you look things up (#95): a source with how far it is trusted. */
+export const ReferenceInput = SourceInput.extend({
+  title: z.string().optional().describe("The site's name, such as Fextralife: Lies of P wiki"),
+  facts: z.string().max(2000).optional().describe("What the site is good for, or what you learned there about the game as a whole"),
   trust: TrustInput.optional(),
 });
 
@@ -309,10 +314,12 @@ export const RecordInput = z.object({
     .array(CodexInput)
     .optional()
     .describe("Bosses, enemies, NPCs and places the player met in this session, or what they learned about them: weaknesses, a strategy, a boss beaten"),
-  sources: z
-    .array(SourceInput)
+  references: z
+    .array(ReferenceInput)
     .optional()
-    .describe("Sites the player trusts for this game (a wiki, a guide), where you look things up when they ask; merged by link"),
+    .describe(
+      "Sites kept for this game (an official guide or wiki, a guide site, a forum), where you look things up when they ask, each with its trust; merged by link. A page you took one item's facts from is that item's source, not a reference",
+    ),
   notes: z
     .object({ game: Notes.optional(), playthrough: Notes.optional(), session: Notes.optional() })
     .optional()
@@ -364,7 +371,7 @@ export const ChangeInput = z.object({
   about: TodoAbout.nullable().optional().describe("todo: what it is about, a quest, item or codex entry; null points it at nothing"),
   spoiler: Spoiler.optional().describe("entry, item, goal, codex, background or todo: none once the player has found what it names"),
   source: z
-    .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200), trust: TrustInput.optional() })
+    .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200) })
     .nullable()
     .optional()
     .describe("background: the page the line comes from; null clears it"),
@@ -375,10 +382,11 @@ export const ChangeInput = z.object({
   values: z.record(z.string(), z.number()).optional().describe("snapshot: the stats to fix, by key; the others stay"),
   equipped: z.boolean().optional().describe("item"),
   verdict: Nullable(z.string(), "item: how it fits the build, with where you know it from"),
-  sources: z
-    .array(SourceInput)
+  sources: z.array(SourceInput).optional().describe("item or codex: the pages its facts come from. The whole list: a link left out is dropped"),
+  references: z
+    .array(ReferenceInput)
     .optional()
-    .describe("game: the sites the player trusts; item or codex: where its facts come from. The whole list: a link left out is dropped"),
+    .describe("game: the sites kept for it, each with its trust. The whole list: a link left out is dropped; one kept keeps its trust unless given"),
   characterName: Nullable(z.string(), "playthrough: the character's name"),
   characterClass: Nullable(z.string(), "playthrough: the character's class, in English"),
   characterLocalClass: Nullable(z.string(), "playthrough: the class in the game's own language"),

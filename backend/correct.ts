@@ -11,7 +11,7 @@ import { fileItemKind, setItemKinds, statNames, type ItemKindInput } from "./gam
 import { writeUses, type AgainstInput } from "./codex";
 import { goalLabel, reachGoals } from "./goals";
 import { norm } from "./names";
-import { mergeSources, parseSources } from "./sources";
+import { mergeReferences, mergeSources, parseReferences, parseSources } from "./sources";
 import { seen } from "./spoilers";
 import { addBackground, type BackgroundInput } from "./background";
 import { gameOfRow, mergeTag, removeTag, renameTag, setTags } from "./tags";
@@ -35,18 +35,23 @@ import {
   type PlaythroughStatus,
   type QuestStatus,
   type SpoilerLevel,
-  type Trust,
 } from "./types";
-import type { SourceInput } from "./types";
+import type { ReferenceInput, SourceInput } from "./types";
 import { codexPath, itemPath, playthroughPath, questPath, sessionPath, tabPath } from "./urls";
 import { removeTodo, todoRow, unlinkTodo, writeTodos, type TodoTarget } from "./todos";
 
-// The new list replaces the old one; a link that stays keeps the day it was first added, and its trust unless a new one is given.
+// The new list replaces the old one; a link that stays keeps the day it was first added.
 const replaceSources = (before: string, next: SourceInput[] | undefined) => {
   if (!next) return undefined;
   const old = parseSources(before);
+  return JSON.stringify(mergeSources([], next, today()).map((s) => ({ ...s, on: old.find((o) => o.url === s.url)?.on ?? s.on })));
+};
+// A game's references: the same, and a link that stays keeps its trust unless a new one is given (#95).
+const replaceReferences = (before: string, next: ReferenceInput[] | undefined) => {
+  if (!next) return undefined;
+  const old = parseReferences(before);
   return JSON.stringify(
-    mergeSources([], next, today()).map((s) => {
+    mergeReferences([], next, today()).map((s) => {
       const was = old.find((o) => o.url === s.url);
       const given = next.findLast((n) => n.url.trim() === s.url)?.trust;
       return { ...s, on: was?.on ?? s.on, trust: given ?? was?.trust ?? s.trust };
@@ -85,8 +90,10 @@ export type Correction = {
   values?: Record<string, number>;
   equipped?: boolean;
   verdict?: string | null;
-  /** A game's or an item's sources, all of them: a link left out is dropped. */
+  /** An item's or a codex entry's sources, all of them: a link left out is dropped. */
   sources?: SourceInput[];
+  /** A game's references, all of them, each with its trust (#95). */
+  references?: ReferenceInput[];
   /** A playthrough's character. */
   characterName?: string | null;
   characterClass?: string | null;
@@ -120,7 +127,7 @@ export type Correction = {
   /** Lines of background for an item, codex entry or quest (ADR 0016), added to those it has. */
   addBackground?: BackgroundInput[];
   /** A background line's source; null clears it. */
-  source?: { url: string; title: string; trust?: Trust } | null;
+  source?: { url: string; title: string } | null;
   /** A to-do's words in the game's own language; null clears them. */
   localText?: string | null;
   /** What a to-do is about; null points it at nothing. */
@@ -129,7 +136,7 @@ export type Correction = {
 
 // The fields each target takes; any other field in a change is a refusal, so a typo doesn't pass silently.
 const FIELDS: Record<Target, readonly (keyof Correction)[]> = {
-  game: ["title", "platform", "description", "notes", "sources", "itemKinds"],
+  game: ["title", "platform", "description", "notes", "references", "itemKinds"],
   playthrough: ["label", "language", "status", "characterName", "characterClass", "characterLocalClass", "notes", "background", "spoilers"],
   session: ["summary", "playedOn", "notes"],
   quest: ["name", "localName", "giver", "location", "status", "description", "notes", "tags", "addBackground"],
@@ -308,7 +315,6 @@ async function background(trx: Trx, p: Player, c: Correction): Promise<Corrected
     spoiler: oneOf<SpoilerLevel>("spoiler", c.spoiler, SPOILER_LEVELS),
     source_url: c.source === undefined ? undefined : (c.source?.url ?? null),
     source_title: c.source === undefined ? undefined : (c.source?.title ?? null),
-    source_trust: c.source === undefined ? undefined : c.source ? (c.source.trust ?? "medium") : null,
   });
   if (Object.keys(set).length) await seen(trx.updateTable("background"), p, "background", "full").set(set).where("id", "=", c.id).execute();
   return done(c, t ?? row.text, null, null);
@@ -354,7 +360,7 @@ async function game(trx: Trx, p: Player, c: Correction): Promise<Corrected> {
     platform: nullable(c.platform),
     description: nullable(c.description),
     notes: nullable(c.notes),
-    sources: replaceSources(row.sources, c.sources),
+    sources: replaceReferences(row.sources, c.references),
   });
   if (Object.keys(set).length) await seen(trx.updateTable("games"), p, "games").set(set).where("id", "=", c.id).execute();
   if (c.itemKinds) await setItemKinds(trx, p, c.id, c.itemKinds, "replace");
