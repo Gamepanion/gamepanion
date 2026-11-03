@@ -13,6 +13,7 @@ import { record } from "./record";
 import { getSession, latestSession, sessionsOf } from "./sessions";
 import { seen } from "./spoilers";
 import { A_FIRST, A_SECOND, seed, type Seed } from "./testing/fixtures";
+import { search } from "./search";
 import { todosOf } from "./todos";
 import { TOOLS, toolByName } from "./tools";
 
@@ -180,4 +181,10 @@ test("the first-run check sees only the player's own latest session", async () =
   expect(await latestSession(s.b)).toBeNull();
   const r = await record(s.b, { game: "Elden Ring", summary: "Back.", transcript: "Started again." });
   expect(await latestSession(s.b)).toEqual({ id: r.sessionId, url: r.url });
+});
+
+test("full-text search never finds another player's rows (ADR 0022)", async () => {
+  expect(await search(s.b, s.liesOfP, "puppet saber")).toEqual([]);
+  clean(await search(s.b, s.eldenRing, "puppet saber venigni antonia", { reveal: "full" }));
+  expect((await search(s.b, s.eldenRing, "moonveil")).map((c) => c.name)).toEqual(["Moonveil"]);
 });

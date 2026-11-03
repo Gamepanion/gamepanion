@@ -37,6 +37,7 @@ import {
 } from "./types";
 import { BackgroundJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
+import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
@@ -277,6 +278,20 @@ const questJson = (q: QuestView): z.input<typeof QuestJson> => q;
 
 // ---- record ---------------------------------------------------------------------------------------------------------------------
 
+// What full-text search finds for each row a record just started (ADR 0022): names the player may have meant instead.
+const alike = (rows: { id: string; name: string }[], similar: Map<string, Candidate[]>) => {
+  const lines = rows
+    .filter((x) => similar.get(x.id)?.length)
+    .map(
+      (x) =>
+        `${x.name} could be ${similar
+          .get(x.id)!
+          .map((c) => `${c.name} (id ${c.id})`)
+          .join(" or ")}`,
+    );
+  return lines.length ? ` Similar names already there: ${lines.join("; ")}.` : "";
+};
+
 const RecordedJson = z.object({
   sessionId: z.string(),
   url: Url,
@@ -321,7 +336,7 @@ function backgroundNext(r: Recorded): string | null {
   return `The player's background setting for ${t.game.title} ${t.label} is ${level}: add ${DEPTH[level]} of what was filed just now: ${rows.join(", ")}. Look it up yourself on their sources for the game${t.game.sources.length ? ` (by trust: ${sourcesByTrust(t)})` : ""}, or say it is your own knowledge, then file it with correct (that what and id, addBackground): each line in your own words, with its source (a line from a low source says it is one person's claim), and an honest spoiler level (hint when it names what the player hasn't reached, full when it gives away an outcome, a fate or a story event). Lines a row has already are skipped. Tell the player in a line what you added, and read out nothing above their spoiler setting (${t.settings.spoilers}). They change how much you add on the playthrough's Settings tab: ${inText(tabPath(t.id, "settings"))}.`;
 }
 
-function recordNext(r: Recorded): Next {
+function recordNext(r: Recorded, similar: Map<string, Candidate[]> = new Map()): Next {
   const next: Next = [];
   const t = r.playthrough;
   if (t.createdGame)
@@ -342,7 +357,7 @@ function recordNext(r: Recorded): Next {
   const fresh = r.quests.filter((q) => q.created);
   if (fresh.length && !t.createdPlaythrough)
     next.push(
-      `New quests: ${fresh.map((q) => q.name).join(", ")}. If one is another name of a quest already open, ask the player, and file it under that quest's id instead.`,
+      `New quests: ${fresh.map((q) => q.name).join(", ")}. If one is another name of a quest already open, ask the player, and file it under that quest's id instead.${alike(fresh, similar)}`,
     );
   for (const q of r.quests.filter((x) => x.status === "done" && x.statusBefore !== "done"))
     next.push(`${q.name} is now done: say so, and if the player only advanced it, set it back to open with record.`);
@@ -355,7 +370,7 @@ function recordNext(r: Recorded): Next {
   const freshCodex = r.codex.filter((x) => x.created);
   if (freshCodex.length && !t.createdPlaythrough)
     next.push(
-      `New in the codex: ${freshCodex.map((x) => `${x.name} (${x.kind})`).join(", ")}. If one is another name of an entry already there, ask the player and correct it.`,
+      `New in the codex: ${freshCodex.map((x) => `${x.name} (${x.kind})`).join(", ")}. If one is another name of an entry already there, ask the player and correct it.${alike(freshCodex, similar)}`,
     );
   if (r.codex.some((x) => x.spoiler !== "none")) next.push("Some codex entries are marked as spoilers: briefings leave them out.");
   const bg = backgroundNext(r);
@@ -500,6 +515,10 @@ const threadsNext = (t: PlaythroughView | null, reveal: SpoilerLevel, quests: Qu
 
 // ---- item -----------------------------------------------------------------------------------------------------------------------
 
+const CandidatesJson = z
+  .array(z.object({ kind: z.enum(SEARCH_KINDS), id: z.string(), name: z.string(), url: Url }))
+  .describe("When the name matched nothing exactly and several entries could be meant: ask the player which one, then call again with its name");
+
 const ItemLookupJson = z.object({
   playthrough: PlaythroughJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
@@ -513,6 +532,7 @@ const ItemLookupJson = z.object({
     current: SnapshotJson.nullable().describe("The latest snapshot"),
   }),
   equipped: z.array(ItemDetailJson).describe("What the player has equipped now, to compare with"),
+  candidates: CandidatesJson,
 });
 
 // Where Claude looks things up (ADR 0008): Gamepanion never fetches a page; it says where the player wants Claude to look, and keeps what
@@ -529,10 +549,22 @@ function lookupNext(t: PlaythroughView): string {
     : `Gamepanion has no sources for ${t.game.title} yet. If the player wants to know more than Gamepanion holds, suggest a site you know for this game (a wiki first), look it up there with your web tools, and ask whether to keep it as a source (record or correct with game sources, with its trust: high for a wiki or official page, medium for a guide site, low for a forum or single comment). Only about what they have found; file the facts in your own words with the link.`;
 }
 
-function itemNext(t: PlaythroughView | null, name: string | undefined, items: ItemView[], reveal: SpoilerLevel, more = false): Next {
+// Several entries the player's words could mean (ADR 0022): never a pick, a question.
+const askWhich = (name: string, candidates: Candidate[]) =>
+  `Nothing is called ${name} exactly, and several could be meant: ${candidates.map((c) => c.name).join("; ")}. Ask the player which one they mean, then call again with that name. Don't pick one yourself.`;
+
+function itemNext(
+  t: PlaythroughView | null,
+  name: string | undefined,
+  items: ItemView[],
+  reveal: SpoilerLevel,
+  more = false,
+  candidates: Candidate[] = [],
+): Next {
   if (!t) return ["The player has no such playthrough yet. Ask what they are playing."];
   const next: Next = [];
-  if (name && !items.length)
+  if (name && candidates.length > 1) next.push(askWhich(name, candidates));
+  else if (name && !items.length)
     next.push(
       `The player hasn't filed an item called ${name} in ${t.game.title} ${t.label}. If they just found it, file it with record (items). Don't describe it from your own knowledge of the game unless they ask.`,
     );
@@ -558,10 +590,19 @@ const CodexLookupJson = z.object({
     .describe("The tags in use in this playthrough, most used first: reuse them when you file tags"),
   build: z.object({ plan: PlanJson.nullable(), current: SnapshotJson.nullable().describe("The latest snapshot") }),
   equipped: z.array(ItemDetailJson).describe("What the player has equipped now"),
+  candidates: CandidatesJson,
 });
 
-function codexNext(t: PlaythroughView | null, name: string | undefined, entries: CodexView[], reveal: SpoilerLevel, more = false): Next {
+function codexNext(
+  t: PlaythroughView | null,
+  name: string | undefined,
+  entries: CodexView[],
+  reveal: SpoilerLevel,
+  more = false,
+  candidates: Candidate[] = [],
+): Next {
   if (!t) return ["The player has no such playthrough yet. Ask what they are playing."];
+  if (name && candidates.length > 1) return [askWhich(name, candidates)];
   if (name && !entries.length)
     return [
       `The player hasn't filed ${name} in the codex of ${t.game.title} ${t.label}. If they just met it, file it with record (codex, with its kind). Don't describe it from your own knowledge unless they ask.`,
@@ -662,6 +703,17 @@ export const TOOLS: Tool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     handler: async (p, args) => {
       const r = await record(p, args);
+      // For each quest, item or codex entry this record started, the ones already there its name resembles.
+      const fresh = [
+        ...r.quests.filter((x) => x.created).map((x) => ({ ...x, kind: "quest" as const })),
+        ...r.codex.filter((x) => x.created).map((x) => ({ ...x, kind: "codex" as const })),
+      ];
+      const created = fresh.map((x) => x.id);
+      const similar = new Map(
+        await Promise.all(
+          fresh.map(async (x) => [x.id, await search(p, r.playthrough.id, x.name, { kinds: [x.kind], reveal: "none", except: created, limit: 3 })] as const),
+        ),
+      );
       const body = {
         sessionId: r.sessionId,
         url: r.url,
@@ -679,7 +731,7 @@ export const TOOLS: Tool[] = [
         todos: r.todos,
         carriedTodos: r.carriedTodos,
       };
-      return ok(RecordedJson, body, recordNext(r));
+      return ok(RecordedJson, body, recordNext(r, similar));
     },
   }),
   tool({
@@ -746,15 +798,18 @@ export const TOOLS: Tool[] = [
       if (!t)
         return ok(
           ItemLookupJson,
-          { playthrough: null, reveal, items: [], tags: [], build: { plan: null, goals: [], current: null }, equipped: [] },
+          { playthrough: null, reveal, items: [], tags: [], build: { plan: null, goals: [], current: null }, equipped: [], candidates: [] },
           itemNext(t, name, [], reveal),
         );
-      const [items, build, equipped, tags] = await Promise.all([
+      const [found, build, equipped, tags] = await Promise.all([
         itemsOf(p, t.id, { name, tag, reveal }),
         buildOf(p, t.id, 1),
         itemsOf(p, t.id, { equippedOnly: true, reveal: t.settings.spoilers }),
         tagsInPlaythrough(p, t.id),
       ]);
+      // No name contains the player's words: what full-text search finds (ADR 0022); one is used, several are asked about.
+      const candidates = name && !found.length ? await search(p, t.id, name, { kinds: ["item"], reveal }) : [];
+      const items = candidates.length === 1 ? (await itemsOf(p, t.id, { tag, reveal })).filter((i) => i.id === candidates[0].id) : found;
       const body = {
         playthrough: t,
         reveal,
@@ -762,8 +817,9 @@ export const TOOLS: Tool[] = [
         tags,
         build: { plan: build.plan, goals: build.goals.map(goalJson), current: build.snapshots[0] ?? null },
         equipped,
+        candidates: candidates.length > 1 ? candidates : [],
       };
-      return ok(ItemLookupJson, body, itemNext(t, name, items, reveal, await moreAbove(p, t.id, reveal, ["item"])));
+      return ok(ItemLookupJson, body, itemNext(t, name, items, reveal, await moreAbove(p, t.id, reveal, ["item"]), candidates));
     },
   }),
   tool({
@@ -785,17 +841,27 @@ export const TOOLS: Tool[] = [
       if (!t)
         return ok(
           CodexLookupJson,
-          { playthrough: null, reveal, entries: [], tags: [], build: { plan: null, current: null }, equipped: [] },
+          { playthrough: null, reveal, entries: [], tags: [], build: { plan: null, current: null }, equipped: [], candidates: [] },
           codexNext(t, name, [], reveal),
         );
-      const [entries, build, equipped, tags] = await Promise.all([
+      const [found, build, equipped, tags] = await Promise.all([
         codexOf(p, t.id, { name, kind, tag, reveal }),
         buildOf(p, t.id, 1),
         itemsOf(p, t.id, { equippedOnly: true, reveal: t.settings.spoilers }),
         tagsInPlaythrough(p, t.id),
       ]);
-      const body = { playthrough: t, reveal, entries, tags, build: { plan: build.plan, current: build.snapshots[0] ?? null }, equipped };
-      return ok(CodexLookupJson, body, codexNext(t, name, entries, reveal, await moreAbove(p, t.id, reveal, ["codex"])));
+      const candidates = name && !found.length ? await search(p, t.id, name, { kinds: ["codex"], reveal }) : [];
+      const entries = candidates.length === 1 ? (await codexOf(p, t.id, { kind, tag, reveal })).filter((e) => e.id === candidates[0].id) : found;
+      const body = {
+        playthrough: t,
+        reveal,
+        entries,
+        tags,
+        build: { plan: build.plan, current: build.snapshots[0] ?? null },
+        equipped,
+        candidates: candidates.length > 1 ? candidates : [],
+      };
+      return ok(CodexLookupJson, body, codexNext(t, name, entries, reveal, await moreAbove(p, t.id, reveal, ["codex"]), candidates));
     },
   }),
   tool({

@@ -467,6 +467,37 @@ const migrations: Record<string, Migration> = {
         .execute();
     },
   },
+  "012_search": {
+    // ADR 0022: full-text search (FTS5) over the names, local names and descriptions of quests, items and codex entries, to find what the
+    // player means when their words differ from the stored name. Kept in step by triggers on every write; every row carries its player
+    // and playthrough, and what a search finds is read again through the gate (backend/search.ts).
+    async up(db: Kysely<any>) {
+      await sql`create virtual table search_index using fts5(
+        player_id unindexed, playthrough_id unindexed, what unindexed, row_id unindexed, name, local_name, description,
+        tokenize = 'unicode61 remove_diacritics 2'
+      )`.execute(db);
+      for (const [table, what] of [
+        ["quests", "quest"],
+        ["items", "item"],
+        ["codex", "codex"],
+      ]) {
+        const row = (r: string) =>
+          sql`${sql.raw(r)}.player_id, ${sql.raw(r)}.playthrough_id, ${sql.lit(what)}, ${sql.raw(r)}.id, ${sql.raw(r)}.name, coalesce(${sql.raw(r)}.local_name, ''), coalesce(${sql.raw(r)}.description, '')`;
+        const columns = sql.raw("player_id, playthrough_id, what, row_id, name, local_name, description");
+        await sql`insert into search_index (${columns}) select ${row(table)} from ${sql.table(table)}`.execute(db);
+        await sql`create trigger ${sql.raw(`${table}_search_insert`)} after insert on ${sql.table(table)} begin
+          insert into search_index (${columns}) values (${row("new")});
+        end`.execute(db);
+        await sql`create trigger ${sql.raw(`${table}_search_update`)} after update of name, local_name, description on ${sql.table(table)} begin
+          delete from search_index where what = ${sql.lit(what)} and row_id = old.id;
+          insert into search_index (${columns}) values (${row("new")});
+        end`.execute(db);
+        await sql`create trigger ${sql.raw(`${table}_search_delete`)} after delete on ${sql.table(table)} begin
+          delete from search_index where what = ${sql.lit(what)} and row_id = old.id;
+        end`.execute(db);
+      }
+    },
+  },
 };
 
 export const NEWER = "the database was made by a newer Gamepanion than this one; upgrade Gamepanion, do not point an older one at it";

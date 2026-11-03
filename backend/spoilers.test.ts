@@ -10,6 +10,7 @@ import { buildOf } from "./builds";
 import { goalsOf } from "./goals";
 import { record } from "./record";
 import { FULL, HINT, SPOILER_ITEM, SPOILER_SOURCE, seed, type Seed } from "./testing/fixtures";
+import { search } from "./search";
 import { todosOf } from "./todos";
 import { toolByName } from "./tools";
 
@@ -140,4 +141,9 @@ test("a suggested to-do marked as a spoiler stays out of the briefing, open_thre
   expect(JSON.stringify(await questsOf(s.a, s.liesOfP))).not.toContain(HINT);
   expect((await todosOf(s.a, s.liesOfP, { reveal: "hint" })).map((t) => t.text)).toEqual([HINT]);
   expect(JSON.stringify(await toolByName("open_threads")!.run(s.a, { playthroughId: s.liesOfP, reveal: "hint" }))).toContain(HINT);
+});
+
+test("full-text search shows nothing above the read's spoiler level (ADR 0022)", async () => {
+  expect(JSON.stringify(await search(s.a, s.liesOfP, "workshop key", { kinds: ["item"] }))).not.toContain(SPOILER_ITEM);
+  expect((await search(s.a, s.liesOfP, "workshop key", { kinds: ["item"], reveal: "full" })).map((c) => c.name)).toEqual([SPOILER_ITEM]);
 });
