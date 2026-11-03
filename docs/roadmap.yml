@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: chat-picture
+    status: done
+    date: 2026-11-03
+    icon: message-text-outline
+    title: A chat that shows what Gamepanion is
+    title_de: Ein Chat, der zeigt, was Gamepanion ist
+    summary: On the sign-in page and the docs landing, a chat between you and Claude, with arrows where Claude files into Gamepanion and gets it back.
+    summary_de: Auf der Anmeldeseite und der Startseite der Doku ein Chat zwischen dir und Claude, mit Pfeilen, wo Claude in Gamepanion ablegt und es zurückholt.
+    links:
+      - { label: "#98", url: "https://github.com/gamepanion/gamepanion/pull/98" }
   - id: references
     status: done
     date: 2026-11-03

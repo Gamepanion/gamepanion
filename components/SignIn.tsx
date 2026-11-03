@@ -2,7 +2,7 @@
 import type { RefusedSignIn } from "@/backend";
 import type { Copy } from "./copy";
 import { LoginForm } from "./LoginForm";
-import { PlaythroughCard } from "./PlaythroughCard";
+import { ChatExample } from "./ChatExample";
 import { Wordmark } from "./Wordmark";
 
 type Methods = { emailCode: boolean; providers: { id: string; label: string }[] };
@@ -33,15 +33,11 @@ export function SignIn({ copy, methods, next, refused }: { copy: Copy; methods: 
   );
 }
 
-// What Gamepanion files, before signing in (#77): one playthrough card from invented data (no real game, nothing above "none" for
-// spoilers), marked as an example in words and for screen readers, with nothing on it to click or tab to.
+// What Gamepanion is, before signing in (#77, #97): a chat with Claude, filed into Gamepanion. Nothing on it to click or tab to.
 function Example({ copy, className }: { copy: Copy; className: string }) {
   return (
-    <figure aria-label={copy.exampleFigure} className={className}>
-      <figcaption className="eyebrow mb-2 text-muted">{copy.exampleLabel}</figcaption>
-      <div inert>
-        <PlaythroughCard data={copy.exampleCard} copy={copy} />
-      </div>
-    </figure>
+    <div inert className={className}>
+      <ChatExample copy={copy} />
+    </div>
   );
 }

@@ -7,21 +7,18 @@ export const de: Copy = {
   sloganPlay: "Spiel weiter.",
   sloganRemembers: "Dein Gamepanion merkt es sich.",
 
-  exampleLabel: "Beispiel",
-  exampleFigure: "Beispiel eines abgelegten Durchlaufs",
-  exampleCard: {
-    game: "Lanterns of Saltmere",
-    label: "NG",
-    status: "playing",
-    characterClass: "Gezeitenruferin",
-    last: { playedOn: "2026-11-02", summary: "Die versunkene Kapelle erreicht und das zweite Leuchtfeuer entzündet." },
-    next: { name: "Die Schuld des Fährmanns", text: "Bring dem Fährmann drei Flussperlen", blocked: false },
-    moreOpen: 2,
-    goals: [
-      { id: "resolve", name: "Entschlossenheit 30", current: 22, target: 30 },
-      { id: "level", name: "Stufe 25", current: 18, target: 25 },
-    ],
-    counts: { quests: 3, items: 14, codex: 7 },
+  chatExample: {
+    label: "Beispiel: Du erzählst Claude, was passiert ist, Claude legt es in deinem Gamepanion ab und gibt es dir später zurück",
+    you: "Du",
+    claude: "Claude",
+    uses: "Claude nutzt Gamepanion:",
+    lines: [
+      { who: "you", text: "Das zweite Leuchtfeuer in der versunkenen Kapelle brennt. Der Fährmann will drei Flussperlen." },
+      { who: "claude", text: "Abgelegt: Das zweite Leuchtfeuer brennt, und Die Schuld des Fährmanns ist offen.", tool: "record" },
+      { who: "later", text: "Zwei Tage später" },
+      { who: "you", text: "Wo war ich?" },
+      { who: "claude", text: "In der versunkenen Kapelle. Als Nächstes: drei Flussperlen für den Fährmann.", tool: "briefing" },
+    ] as { who: "you" | "claude" | "later"; text: string; tool?: string }[],
   },
 
   imprint: "Impressum",
