@@ -416,3 +416,191 @@
   --md-mermaid-sequence-number-bg-color: var(--gp-accent);
   --md-mermaid-sequence-number-fg-color: var(--md-default-bg-color);
 }
+
+/* What Gamepanion is, in one picture (#97), as on the web app's sign-in page (components/ChatExample.tsx): a chat between you and
+   Claude, Gamepanion on a rail beside it, and an arrow from each of Claude's messages that used it, labelled with the tool. */
+/* Material centres a figure and its text; this one is a grid, left-aligned. */
+.md-typeset figure.gp-chat {
+  display: grid;
+  width: 100%;
+  max-width: 34rem;
+  text-align: left;
+  align-items: stretch;
+}
+.gp-chat {
+  --rail: 8.5rem;
+  --pad: 1rem;
+  --gp-rule: color-mix(in oklab, var(--gp-fg) 14%, transparent);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--rail);
+  max-width: 36rem;
+  margin: 1.2rem 0 1rem !important;
+  font-size: 0.75rem;
+}
+.gp-chat__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.gp-chat__window {
+  border: 1px solid var(--gp-rule);
+  border-radius: 2px;
+  background: var(--gp-bg);
+}
+.gp-chat__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--gp-rule);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.gp-chat__claude-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+/* Material's lists are flow-root; this one is a column with room between the messages. */
+.md-typeset figure.gp-chat ol.gp-chat__log {
+  list-style: none;
+  margin: 0;
+  padding: 1rem var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.md-typeset .gp-chat__log > li {
+  margin: 0;
+}
+.gp-chat__msg {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.gp-chat__msg--claude {
+  flex-direction: row-reverse;
+}
+.gp-chat__avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--gp-rule);
+  border-radius: 999px;
+  background: var(--gp-surface);
+}
+.gp-chat__avatar svg {
+  width: 1rem;
+  height: 1rem;
+}
+.gp-chat__msg--you .gp-chat__avatar svg {
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .gp-chat__bubble {
+  position: relative;
+  margin: 0;
+  max-width: 72%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  line-height: 1.35;
+}
+.gp-chat__bubble::after {
+  content: "";
+  position: absolute;
+  bottom: 0.625rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  transform: rotate(45deg);
+}
+.gp-chat__msg--you .gp-chat__bubble {
+  background: var(--gp-accent);
+  color: var(--gp-accent-on);
+}
+.gp-chat__msg--you .gp-chat__bubble::after {
+  left: -5px;
+  background: var(--gp-accent);
+}
+.gp-chat__msg--claude .gp-chat__bubble {
+  border: 1px solid var(--gp-rule);
+  background: var(--gp-surface);
+}
+.gp-chat__msg--claude .gp-chat__bubble::after {
+  right: -6px;
+  border-top: 1px solid var(--gp-rule);
+  border-right: 1px solid var(--gp-rule);
+  background: var(--gp-surface);
+}
+.md-typeset .gp-chat__later {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+.gp-chat__call {
+  position: absolute;
+  left: calc(100% + var(--pad) + 1px);
+  bottom: 0.9rem;
+  width: calc(var(--rail) / 2);
+  height: 0;
+  display: flex;
+  justify-content: center;
+  border-top: 2px solid var(--gp-accent);
+}
+.gp-chat__call::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: -1px;
+  border-block: 5px solid transparent;
+  border-left: 8px solid var(--gp-accent);
+}
+.gp-chat__tool {
+  position: absolute;
+  bottom: 0.25rem;
+  padding: 0 0.25rem;
+  border-radius: 0.125rem;
+  background: var(--gp-bg);
+  font-family: var(--md-code-font-family);
+  font-weight: 600;
+  color: var(--gp-accent);
+}
+.gp-chat__rail {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.gp-chat__rail::before {
+  content: "";
+  position: absolute;
+  top: 3.5rem;
+  bottom: 1rem;
+  left: 50%;
+  border-left: 2px dashed color-mix(in oklab, var(--gp-accent) 40%, transparent);
+}
+.gp-chat__app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+}
+.md-typeset .gp-chat__app img {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+@media (max-width: 30rem) {
+  .gp-chat {
+    --rail: 6.75rem;
+    --pad: 0.75rem;
+  }
+}

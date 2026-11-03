@@ -5,21 +5,18 @@ export const en = {
   sloganPlay: "Play on.",
   sloganRemembers: "Your Gamepanion remembers.",
 
-  exampleLabel: "Example",
-  exampleFigure: "Example of a filed playthrough",
-  exampleCard: {
-    game: "Lanterns of Saltmere",
-    label: "NG",
-    status: "playing",
-    characterClass: "Tidecaller",
-    last: { playedOn: "2026-11-02", summary: "Reached the drowned chapel and lit the second beacon." },
-    next: { name: "The Ferryman's Debt", text: "Bring the ferryman three river pearls", blocked: false },
-    moreOpen: 2,
-    goals: [
-      { id: "resolve", name: "Resolve 30", current: 22, target: 30 },
-      { id: "level", name: "Level 25", current: 18, target: 25 },
-    ],
-    counts: { quests: 3, items: 14, codex: 7 },
+  chatExample: {
+    label: "Example: you tell Claude what happened, Claude files it in your Gamepanion, and later gives it back",
+    you: "You",
+    claude: "Claude",
+    uses: "Claude uses Gamepanion:",
+    lines: [
+      { who: "you", text: "Lit the second beacon in the drowned chapel. The ferryman wants three river pearls." },
+      { who: "claude", text: "Filed: the second beacon is lit, and The Ferryman's Debt is open.", tool: "record" },
+      { who: "later", text: "Two days later" },
+      { who: "you", text: "Where was I?" },
+      { who: "claude", text: "At the drowned chapel. Next: three river pearls for the ferryman.", tool: "briefing" },
+    ] as { who: "you" | "claude" | "later"; text: string; tool?: string }[],
   },
 
   imprint: "Imprint",
