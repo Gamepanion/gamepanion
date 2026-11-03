@@ -42,9 +42,10 @@ Dark first; the light theme follows the system setting.
 | Muted | `#A49FB4` (7.65:1) | `#5A556A` (6.63:1) | captions, metadata |
 | Border | `#2E2A3A` | | structure only |
 | Accent violet | `#A77BFF` (6.46:1) | `#6B3FD6` (5.90:1) | primary button, one headline phrase, the offset shadow: at most two uses per screen |
-| Signal lime | `#C6F432` (15.30:1) | | "done", section eyebrows; sparingly, never next to violet in the same element |
+| Signal lime | `#C6F432` (15.30:1) | violet | what is done (the docs roadmap's shipped steps); sparingly, never next to violet in the same element. On light it falls back to violet, since lime has no contrast there |
 
-* **The register's tabs** keep the Okabe-Ito colours and always their names: Quests orange `#E69F00`, Build sky blue `#56B4E9`, Items bluish green `#009E73`, Codex reddish purple `#CC79A7`.
+* **The register's tabs** keep the Okabe-Ito colours and always their names, whole: Overview reddish purple `#CC79A7`, Character orange `#E69F00`, Quests blue `#0072B2`, Items yellow `#F0E442`, Codex sky blue `#56B4E9`, Sessions vermillion `#D55E00`, Notes bluish green `#009E73`, Settings grey. Below a wide screen they take two rows, icon over name, so no name is cut.
+* **Violet budget on a screen:** the wordmark, the primary button, and one more (the current page marker, a goal bar, or a headline phrase). Icons in lists are muted.
 * **Status** pairs a word or icon with its colour (○ Open, ✓ Done); colour is never the only meaning.
 
 ## Type
@@ -55,8 +56,8 @@ Dark first; the light theme follows the system setting.
 
 ## Shape and imagery
 
-* Sharp corners (0, 2 and 4 px); round only for avatars.
-* Elevation is a hard offset shadow, 4 px right and down, in violet for cards and in the text colour for the primary button. No blurred glows, no gradients.
+* Sharp corners (0, 2 and 4 px); round only for avatars and the chat button, which carries Claude's round mark.
+* Elevation is a hard offset shadow, 4 px right and down, in violet for the account card and the chat button, in the text colour for the primary button. No blurred shadows or glows, no gradients.
 * **Games are generated tiles:** their initials in Atkinson 800 on a colour from a hash of the name (45% saturation, 30% lightness, so white initials keep 4.5:1 on every hue). No cover art.
 * Icons are simple line icons with a 2 px stroke.
 

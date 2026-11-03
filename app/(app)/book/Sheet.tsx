@@ -335,7 +335,7 @@ async function Goals({ goals, run }: { goals: Awaited<ReturnType<typeof buildOf>
                   g.text
                 )}
               </span>
-              <span className="shrink-0 text-sm text-muted tabular-nums">
+              <span className="ml-auto shrink-0 text-sm text-muted tabular-nums">
                 {g.status === "reached" && g.reachedOn
                   ? copy.reachedOn(g.reachedOn)
                   : g.suggested

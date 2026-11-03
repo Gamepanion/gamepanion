@@ -31,7 +31,7 @@ async function Contents({ player, runs }: { player: Player; runs: PlaythroughVie
   if (!runs.length)
     return (
       <div className="space-y-4">
-        <h1 className="plate text-2xl font-bold">{copy.contents}</h1>
+        <h1 className="text-3xl">{copy.contents}</h1>
         <div className="card space-y-2">
           <p>{copy.nothingYet}</p>
           <p className="text-sm text-muted">{copy.connectBefore}</p>
@@ -44,12 +44,12 @@ async function Contents({ player, runs }: { player: Player; runs: PlaythroughVie
   const games = [...new Map(runs.map((t) => [t.game.id, t.game])).values()];
   return (
     <div className="space-y-6">
-      <h1 className="plate text-2xl font-bold">{copy.contents}</h1>
+      <h1 className="text-3xl">{copy.contents}</h1>
       {games.map((g) => (
         <section key={g.id} aria-labelledby={`game-${g.id}`} className="space-y-2">
-          <h2 id={`game-${g.id}`} className="plate flex items-center gap-3">
+          <h2 id={`game-${g.id}`} className="flex items-center gap-3 pt-2">
             <GameTile title={g.title} />
-            <span className="text-3xl font-bold tracking-tight">{g.title}</span>
+            <span className="text-2xl">{g.title}</span>
             {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
           </h2>
           <ol className="space-y-3">{runs.map((t, i) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} page={i + 1} />))}</ol>
@@ -112,7 +112,7 @@ async function RunCard({ player, run: t, page }: { player: Player; run: Playthro
         {playing && goals.length > 0 && (
           <span className="run-line mt-3">
             <Crosshair aria-hidden="true" />
-            <span className="grid flex-1 gap-3 sm:grid-cols-2">
+            <span className={`grid flex-1 gap-3 ${goals.length > 1 ? "sm:grid-cols-2" : ""}`}>
               {goals.map((goal) => (
                 <span key={goal.id} className="block">
                   <span className="flex items-baseline justify-between gap-2 text-sm">

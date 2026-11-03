@@ -130,7 +130,7 @@ h1 {
 
 @layer components {
   .field {
-    @apply w-full rounded-md border border-muted bg-surface px-3 py-2 text-ink outline-none focus:border-accent;
+    @apply w-full rounded-md border border-muted bg-surface px-3 py-2 text-ink outline-none focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink focus-visible:outline-solid;
   }
   .button-primary {
     @apply rounded-md bg-accent px-4 py-2 text-sm font-extrabold tracking-[0.06em] text-on-accent uppercase disabled:opacity-60;
@@ -173,6 +173,8 @@ h1 {
   }
   .account-input:focus-visible {
     border-bottom-color: var(--accent);
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
   }
   .account-input::placeholder {
     @apply font-normal text-muted italic;
@@ -224,19 +226,32 @@ h1 {
 }
 /* The page markers: one bar per page, like a level select, the one in view wider and in the accent. */
 .ribbons {
-  @apply glass absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-1.5 overflow-hidden border border-rule px-3 py-2;
+  @apply glass absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center overflow-hidden border border-rule px-1;
 }
+/* Each marker is a 44px target; the bar is drawn inside it. */
 .ribbon {
-  @apply h-1.5 w-3 shrink-0 bg-rule transition-[width,background-color] duration-200;
+  @apply flex h-11 w-7 shrink-0 items-center justify-center;
 }
-.ribbon[aria-current="page"] {
+.ribbon::before {
+  @apply block h-1.5 w-3 bg-rule transition-[width,background-color] duration-200;
+  content: "";
+}
+.ribbon[aria-current="page"]::before {
   @apply w-6 bg-accent;
+}
+@media (pointer: coarse) {
+  .ribbon {
+    @apply w-11;
+  }
+}
+.ribbon:focus-visible {
+  @apply outline-2 -outline-offset-2 outline-ink;
 }
 /* The arrows at the sides, for a mouse; a phone swipes. */
 .page-arrow {
   @apply glass absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md border border-rule text-2xl leading-none text-ink hover:border-accent disabled:opacity-0;
 }
-@media (pointer: fine) {
+@media (pointer: fine) and (min-width: 64rem) {
   .page-arrow {
     display: flex;
   }
@@ -250,24 +265,23 @@ h1 {
   @apply opacity-75;
 }
 .run-ribbon {
-  @apply absolute -top-2 right-4 flex min-w-8 justify-center bg-accent px-1.5 py-1 text-sm font-extrabold text-on-accent tabular-nums;
-  box-shadow: 2px 2px 0 var(--ink);
+  @apply absolute top-3 right-4 flex min-w-7 justify-center border border-rule px-1.5 py-0.5 text-xs font-extrabold text-muted tabular-nums;
 }
 .run-ribbon-closed {
-  @apply bg-muted text-surface;
+  @apply opacity-70;
 }
 /* A line of the card: its icon in the margin, violet, then what it says. */
 .run-line {
   @apply flex items-start gap-3;
 }
 .run-line > svg {
-  @apply mt-0.5 h-5 w-5 shrink-0 text-accent;
+  @apply mt-0.5 h-5 w-5 shrink-0 text-muted;
 }
 .run-next {
   @apply rounded-lg bg-surface-2/60 py-2 pr-3 pl-2;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ribbon {
+  .ribbon::before {
     transition: none;
   }
 }
@@ -322,7 +336,12 @@ h1 {
   @apply block h-full w-full;
 }
 .flag[aria-pressed="true"] {
-  @apply opacity-100 ring-2 ring-accent ring-offset-1 ring-offset-surface;
+  @apply opacity-100 ring-2 ring-ink ring-offset-1 ring-offset-surface;
+}
+@media (pointer: coarse) {
+  .flag {
+    @apply my-[-0.875rem] box-content border-y-[0.875rem] border-transparent;
+  }
 }
 .flag:focus-visible {
   @apply outline-2 outline-offset-2 outline-ink;
@@ -364,7 +383,7 @@ h1 {
   gap: 0.25rem 0.1875rem;
   border-bottom: 3px solid var(--edge);
 }
-@media (min-width: 40rem) {
+@media (min-width: 64rem) {
   .register-tabs {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     position: sticky;
@@ -406,8 +425,8 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* On a phone the icon sits above the name, so the German names fit four to a row. */
-@media (max-width: 39.99rem) {
+/* Below a wide screen the icon sits above the name, four to a row, so every name (German too) fits whole. */
+@media (max-width: 63.99rem) {
   .register-tab {
     flex-direction: column;
     gap: 0.125rem;
@@ -513,7 +532,7 @@ h1 {
   @apply mx-auto grid min-h-dvh max-w-5xl content-center items-center gap-10 px-4 py-10 lg:grid-cols-[1.1fr_1fr] lg:px-8;
 }
 .slogan {
-  @apply text-5xl leading-[0.92] font-extrabold uppercase sm:text-6xl lg:text-7xl;
+  @apply text-[clamp(2rem,11.5vw,4.5rem)] leading-[0.92] font-extrabold uppercase;
   letter-spacing: -0.035em;
 }
 .slogan em {
@@ -534,7 +553,7 @@ h1 {
 /* The tag row (ADR 0014): one strip with the tab's colour as its edge, like the group bands below it. Its chips are shaped like luggage
    tags, notched with a punched hole, since they hang on things across the groups. */
 .tag-row {
-  @apply flex flex-wrap items-center gap-x-1.5 gap-y-2 rounded-r-xl bg-surface py-2 pr-2 pl-2.5 shadow-sm;
+  @apply flex flex-wrap items-center gap-x-1.5 gap-y-2 rounded-r-xl bg-surface py-2 pr-2 pl-2.5;
   border-left: 4px solid color-mix(in oklab, var(--c, var(--accent)) 75%, var(--ink));
 }
 .tag-row-label {
@@ -584,7 +603,7 @@ h1 {
    colour, a thick edge of it on the left, the name large and bold, the count in a white pill. Distinct from the white cards below it by
    colour, shape and size, so it reads as where a group starts. */
 .group-heading {
-  @apply mt-2 mb-3 flex items-center gap-2.5 rounded-r-xl py-2.5 pr-3 pl-3 text-xl font-bold text-ink shadow-sm;
+  @apply mt-2 mb-3 flex items-center gap-2.5 rounded-r-xl py-2.5 pr-3 pl-3 text-xl font-bold text-ink;
   background: color-mix(in oklab, var(--c, var(--accent)) 45%, var(--surface));
   border-left: 6px solid color-mix(in oklab, var(--c, var(--accent)) 75%, var(--ink));
 }
@@ -625,7 +644,8 @@ h1 {
    on the surface on the left, the rows it changed as chips that open them. The button to open it, Claude's mark on a round button, sits at the bottom right of every page, and a
    small one on every card opens it about that card. */
 .chat-fab {
-  @apply fixed right-4 bottom-4 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full border border-rule bg-surface shadow-lg hover:border-accent lg:right-8 lg:bottom-6;
+  @apply fixed right-4 bottom-4 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full border border-rule bg-surface hover:border-accent lg:right-8 lg:bottom-6;
+  box-shadow: 4px 4px 0 var(--accent);
 }
 .chat-fab svg {
   @apply h-8 w-8;
@@ -657,7 +677,7 @@ h1 {
   @apply absolute inset-0 bg-black/35;
 }
 .chat-sheet {
-  @apply absolute inset-x-0 bottom-0 mx-auto flex h-[85dvh] max-w-2xl flex-col rounded-t-3xl border border-b-0 border-rule bg-paper shadow-2xl;
+  @apply absolute inset-x-0 bottom-0 mx-auto flex h-[85dvh] max-w-2xl flex-col rounded-t-3xl border border-b-0 border-rule bg-paper;
 }
 .chat-tool {
   @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm hover:bg-surface-2;
