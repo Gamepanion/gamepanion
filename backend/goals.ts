@@ -11,6 +11,7 @@ import { InvalidInputError, NotFoundError } from "./errors";
 import { getPlaythrough, statNames } from "./games";
 import { norm } from "./names";
 import { seen } from "./spoilers";
+import { resolveByWords } from "./search";
 import { GOAL_STATUSES, type GoalKind, type GoalStatus, type Player, type SpoilerLevel, type StatName } from "./types";
 import { itemPath, sessionPath } from "./urls";
 
@@ -226,11 +227,14 @@ export async function writeGoals(
     } else if (g.kind === "item") {
       const name = g.item?.trim();
       if (!name) throw new InvalidInputError("goals: an item goal needs item (its id or its exact name)");
-      const found = await seen(trx.selectFrom("items"), p, "items", "full")
+      const exact = await seen(trx.selectFrom("items"), p, "items", "full")
         .select("id")
         .where("playthrough_id", "=", t.id)
         .where((eb) => eb.or([eb("id", "=", name), eb("norm", "=", norm(name))]))
         .executeTakeFirst();
+      // Else the one item the player's words find (ADR 0022).
+      const byWords = exact ? null : await resolveByWords(trx, p, t.id, "item", name);
+      const found = exact ?? (byWords ? { id: byWords } : undefined);
       if (!found) throw new NotFoundError(`goals: no item ${name} in this playthrough; file it with items first`);
       itemId = found.id;
     } else if (!text) throw new InvalidInputError("goals: a note goal needs text");

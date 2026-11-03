@@ -83,6 +83,7 @@ nav:
           - "A switcher and tabs, not sideways pages": adr/0019-a-switcher-and-tabs-not-pages.md
           - A to-do list of its own: adr/0020-a-to-do-list-of-its-own.md
           - "Players' own Anthropic keys": adr/0021-players-own-keys.md
+          - "One SQLite file, with full-text search": adr/0022-one-sqlite-file-with-full-text-search.md
 
 theme:
   name: material

@@ -38,6 +38,8 @@ The quests that are open or waiting on the game, each with its whole log, and th
 
 The player's items in one playthrough: one by `name` (part of it is enough, in English or the game's own language), or all of them, with the build plan, the latest stats and what is equipped, so Claude can say whether a new find fits. `tag` keeps only the items that carry it ("what do I have against fire?"); `tags` lists the tags in use. Items marked as spoilers show only with a `reveal`. A name the player hasn't filed returns nothing, and `next` asks Claude to file it with `record` rather than describe it from its own knowledge.
 
+When no item's name contains the words, full-text search over names, local names and descriptions takes over ([ADR 0022](../adr/0022-one-sqlite-file-with-full-text-search.md)): one match is used; several come back as `candidates`, and `next` asks Claude to ask the player which one. `codex` does the same.
+
 Gamepanion never fetches a page ([ADR 0008](../adr/0008-claude-looks-things-up.md)). When the player wants to know more, `next` tells Claude to look it up with its own web tools on the game's sources, only about what the player has found, and to file the facts in its own words with the link. Without sources, it tells Claude to suggest a site and ask whether to keep it.
 
 ## codex

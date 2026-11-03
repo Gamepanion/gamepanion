@@ -9,6 +9,16 @@ type Json = ColumnType<string, string | undefined, string>;
 type Defaulted = ColumnType<string, string | undefined, string>;
 
 export interface Schema {
+  /** The FTS5 index of quests, items and codex entries (ADR 0022); written only by triggers. */
+  search_index: {
+    player_id: string;
+    playthrough_id: string;
+    what: string;
+    row_id: string;
+    name: string;
+    local_name: string;
+    description: string;
+  };
   player_keys: { player_id: string; ciphertext: string; last4: string; created_at: number; updated_at: number };
   todos: {
     id: string;

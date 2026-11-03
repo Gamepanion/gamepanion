@@ -9,6 +9,7 @@ import { InvalidInputError, NotFoundError } from "./errors";
 import { getPlaythrough } from "./games";
 import { norm } from "./names";
 import { seen } from "./spoilers";
+import { resolveByWords } from "./search";
 import { TODO_STATUSES, type Player, type SpoilerLevel, type TodoStatus } from "./types";
 import { codexPath, itemPath, questPath, sessionPath } from "./urls";
 
@@ -125,11 +126,14 @@ async function resolveAbout(trx: Transaction<Schema>, p: Player, playthroughId: 
   const key = about.id?.trim() || about.name?.trim();
   if (!key) throw new InvalidInputError("todos: about needs the id or the exact name of what it is about");
   const table = TABLE[about.what];
-  const row = await seen(trx.selectFrom(table), p, table, "full")
+  const exact = await seen(trx.selectFrom(table), p, table, "full")
     .select("id")
     .where("playthrough_id", "=", playthroughId)
     .where((eb) => (about.id ? eb("id", "=", about.id) : eb("norm", "=", norm(key))))
     .executeTakeFirst();
+  // A name that isn't exact: the one row the player's words find (ADR 0022), never a guess between several.
+  const byWords = exact || about.id ? null : await resolveByWords(trx, p, playthroughId, about.what, key);
+  const row = exact ?? (byWords ? { id: byWords } : undefined);
   if (!row) throw new NotFoundError(`todos: no ${about.what} ${key} in this playthrough; file it first`);
   return row.id;
 }

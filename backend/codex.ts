@@ -12,6 +12,7 @@ import { addNote } from "./notes";
 import { seen } from "./spoilers";
 import { mergeSources, parseSources } from "./sources";
 import { todosAbout, type TodoRef } from "./todos";
+import { resolveByWords } from "./search";
 import { backgroundOf, type BackgroundInput, type BackgroundLine } from "./background";
 import { tagsOf } from "./tags";
 import { CODEX_KINDS, EFFECTS, type CodexKind, type CodexStatus, type Effect, type Player, type Source, type SourceInput, type SpoilerLevel } from "./types";
@@ -311,7 +312,12 @@ export type AgainstInput = { target: string; effect?: Effect; note?: string };
 /** Links an item to what it is rated against (good by default), each by codex id or exact name; a link that is there gets the new effect and note. */
 export async function writeUses(trx: Transaction<Schema>, p: Player, playthroughId: string, itemId: string, against: AgainstInput[]) {
   for (const a of against) {
-    const target = await findCodex(trx, p, playthroughId, a.target.trim());
+    // The exact name first; else the one entry the player's words find (ADR 0022), never a guess between several.
+    const byWords = async () => {
+      const id = await resolveByWords(trx, p, playthroughId, "codex", a.target);
+      return id ? findCodex(trx, p, playthroughId, id) : undefined;
+    };
+    const target = (await findCodex(trx, p, playthroughId, a.target.trim())) ?? (await byWords());
     if (!target) throw new NotFoundError(`against: no ${a.target} in the codex of this playthrough; file it under codex first (with its kind)`);
     const note = a.note?.trim() || null;
     const there = await seen(trx.selectFrom("item_uses"), p, "item_uses")

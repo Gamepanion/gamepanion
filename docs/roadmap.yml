@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: full-text-search
+    status: done
+    date: 2026-11-03
+    icon: text-search
+    title: One SQLite file, with full-text search
+    title_de: Eine SQLite-Datei, mit Volltextsuche
+    summary: Gamepanion stays on one SQLite file; full-text search finds the quest, item or codex entry the player means when their words differ from its name, and asks when several fit.
+    summary_de: Gamepanion bleibt bei einer SQLite-Datei; eine Volltextsuche findet die Quest, den Gegenstand oder den Kodex-Eintrag, den du meinst, wenn deine Worte vom Namen abweichen, und fragt nach, wenn mehrere passen.
+    links:
+      - { label: "ADR 0022", url: "https://docs.gamepanion.app/adr/0022-one-sqlite-file-with-full-text-search/" }
+      - { label: "#92", url: "https://github.com/gamepanion/gamepanion/pull/92" }
   - id: sign-in-example
     status: done
     date: 2026-11-03
