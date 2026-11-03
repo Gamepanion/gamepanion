@@ -5,7 +5,7 @@ import { createCreem } from "./creem";
 import { createFake } from "./fake";
 import type { PaymentProvider } from "./types";
 
-export type { PaymentEvent, PaymentProvider, Period, Plan } from "./types";
+export type { PaymentEvent, PaymentProvider, Period, Plan, Tier } from "./types";
 export { WebhookRejectedError } from "./types";
 export { fakeCancelled, fakeSignature } from "./fake";
 

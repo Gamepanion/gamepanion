@@ -61,6 +61,7 @@ export function ChatProvider({
   playerId,
   runs,
   homeRun,
+  needsKey = false,
   children,
 }: {
   enabled: boolean;
@@ -68,6 +69,8 @@ export function ChatProvider({
   playerId: string;
   runs: Record<string, string>;
   homeRun: string | null;
+  /** Where the instance sells: no key of the player's and no hosted-AI plan, so the chat only says what it needs (ADR 0024). */
+  needsKey?: boolean;
   children: ReactNode;
 }) {
   const copy = useCopy();
@@ -94,7 +97,15 @@ export function ChatProvider({
         </button>
       )}
       {enabled && state && (
-        <ChatSheet playerId={playerId} voice={voice} about={state.about} run={state.run} runName={state.run ? runs[state.run] : undefined} onClose={close} />
+        <ChatSheet
+          playerId={playerId}
+          voice={voice}
+          about={state.about}
+          run={state.run}
+          runName={state.run ? runs[state.run] : undefined}
+          needsKey={needsKey}
+          onClose={close}
+        />
       )}
     </ChatContext.Provider>
   );
@@ -138,6 +149,7 @@ function ChatSheet({
   about: opened,
   run,
   runName,
+  needsKey = false,
   onClose,
 }: {
   playerId: string;
@@ -145,6 +157,7 @@ function ChatSheet({
   about?: About;
   run?: string;
   runName?: string;
+  needsKey?: boolean;
   onClose: () => void;
 }) {
   const copy = useCopy();
@@ -164,6 +177,9 @@ function ChatSheet({
     chat_refused: copy.chatRefused,
     chat_too_long: copy.chatTooLong,
     own_key_rejected: copy.ownKeyRejected,
+    needs_key: copy.needsKey,
+    quota_used: copy.quotaUsed,
+    rate_limited: copy.rateLimited,
   };
 
   useEffect(() => {
@@ -310,7 +326,19 @@ function ChatSheet({
               </button>
             </span>
           )}
-          {turns.length === 0 && (
+          {needsKey && (
+            <p role="note" className="mt-4 rounded-lg border border-rule px-3 py-2 text-center">
+              {copy.needsKey}{" "}
+              <Link href="/account#key" className="font-semibold text-accent underline" onClick={onClose}>
+                {copy.addOwnKey}
+              </Link>{" "}
+              ·{" "}
+              <Link href="/subscribe" className="font-semibold text-accent underline" onClick={onClose}>
+                {copy.seePlans}
+              </Link>
+            </p>
+          )}
+          {!needsKey && turns.length === 0 && (
             <div className="mt-4 space-y-3 text-center">
               <p className="text-muted">{copy.chatHello}</p>
               <ul className="flex flex-col items-center gap-2" aria-label={copy.chatExamples}>
@@ -373,7 +401,7 @@ function ChatSheet({
         {error && (
           <p role="alert" className="mx-4 rounded-lg border border-error px-3 py-2 text-sm text-error">
             {error}
-            {error === copy.ownKeyRejected && (
+            {(error === copy.ownKeyRejected || error === copy.needsKey || error === copy.quotaUsed) && (
               <>
                 {" "}
                 <Link href="/account#key" className="font-semibold underline" onClick={onClose}>

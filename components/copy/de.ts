@@ -53,6 +53,16 @@ export const de: Copy = {
   frozenSubscribe: "Wieder abonnieren",
   frozenChoose: "Aktives Spiel wählen",
 
+  addOwnKey: "Schlüssel eintragen",
+  needsKey: "Der Chat hier läuft mit deinem eigenen Anthropic-Schlüssel, oder mit Gamepanions KI im Abo mit KI.",
+  quotaUsed: "Die KI-Nutzung dieses Monats ist aufgebraucht. Am Ersten geht es von vorn los; dein eigener Anthropic-Schlüssel funktioniert solange.",
+  rateLimited: "Das war viel auf einmal. Warte eine Minute und schick es dann noch einmal.",
+  standardLead: "Jedes Spiel, mit all seinen Durchläufen.",
+  hostedAiTitle: "Mit Gamepanions KI",
+  hostedAiLead: "Jedes Spiel, und der Chat hier mit Gamepanions eigener KI, auch gesprochen, im Rahmen eines monatlichen Kontingents.",
+  startTalking: "Leg los",
+  startTalkingLead: "Dein Abo enthält Gamepanions KI: Öffne den Chat mit dem Knopf unten und erzähl, was du spielst.",
+
   // Sign-in
   signInTitle: "Bei Gamepanion anmelden",
   signInLead: "Deine Quests, dein Build und deine Gegenstände, so wie du sie Claude erzählt hast.",
@@ -268,7 +278,8 @@ export const de: Copy = {
     { kind: "Korrigieren", text: "Das Schwert war das +2" },
   ],
   chatOn: (run: string) => `Zu ${run}`,
-  chatHello: "Hier ist Claude, eine KI. Erzähl, was passiert ist, frag, wo du warst, oder korrigiere, was abgelegt ist.",
+  chatHello:
+    "Hier ist Claude, eine KI. Erzähl, was passiert ist, frag, wo du warst, oder korrigiere, was abgelegt ist. Prüf, was sie über das Spiel sagt: Sie kann sich irren.",
   newChat: "Neuer Chat",
   closeChat: "Chat schließen",
   message: "Nachricht",

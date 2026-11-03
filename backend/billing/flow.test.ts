@@ -74,7 +74,8 @@ test("the route answers 400 for a bad signature and 404 without a provider", asy
 });
 
 test("the checkout goes back to /subscribe, carrying the player", async () => {
-  expect((await startCheckout(p, "year")).url).toMatch(/\/subscribe\?checkout_id=fake_p1$/);
+  expect((await startCheckout(p, "year")).url).toMatch(/\/subscribe\?checkout_id=fake_standard_p1$/);
+  expect((await startCheckout(p, "month", "hostedAi")).url).toMatch(/checkout_id=fake_hostedAi_p1$/);
 });
 
 test("deleting a player's log forgets their billing rows", async () => {
@@ -84,8 +85,8 @@ test("deleting a player's log forgets their billing rows", async () => {
 });
 
 test("pricingPlans computes the yearly saving from the two plans, yearly first", async () => {
-  const { plans, yearlySavingPercent } = await pricingPlans();
-  expect(plans.map((x) => x.period)).toEqual(["year", "month"]);
-  expect(yearlySavingPercent).toBe(17);
-  expect(yearlySaving([{ period: "month", name: "m", amount: 499, currency: "EUR", taxIncluded: true }])).toBeNull();
+  const { plans, yearlySavingPercent, hostedAiSavingPercent } = await pricingPlans();
+  expect(plans.map((x) => `${x.tier} ${x.period}`)).toEqual(["standard year", "standard month", "hostedAi year", "hostedAi month"]);
+  expect([yearlySavingPercent, hostedAiSavingPercent]).toEqual([17, 17]);
+  expect(yearlySaving([{ period: "month", tier: "standard", name: "m", amount: 499, currency: "EUR", taxIncluded: true }])).toBeNull();
 });

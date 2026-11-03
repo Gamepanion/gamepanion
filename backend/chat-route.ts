@@ -9,7 +9,8 @@ import { config } from "./config";
 import { NotFoundError } from "./errors";
 import { processState } from "./state";
 import { transcriber } from "./transcribe";
-import { playerKey } from "./keys";
+import { keyStorageEnabled, playerKey } from "./keys";
+import { countUsage, HOSTED_RULES, operatorAi, quotaLeft, takeRate } from "./hosted-ai";
 
 const MAX_CHARS = 200_000;
 // All turns of one message together: a long session fits, a runaway history doesn't (each tool round resends it).
@@ -40,23 +41,55 @@ export const setChatClientForTests = (f: ((apiKey: string) => ChatModel) | null)
   state.factory = f;
 };
 
-// The model a player's message runs on (ADR 0021): on their own key when they stored one, else on the instance's as before. A player's
-// key that Anthropic refuses is never replaced by the instance's.
-export async function chatModelFor(p: Player): Promise<ChatModel | null> {
+/**
+ * What a player's message runs on (ADR 0021, 0024): their own key when they stored one (never counted, and a refused one is never
+ * replaced by the instance's); else the instance's, where they may use it (everyone without a payment provider; with one, only on the
+ * hosted-AI plan, `counted` against its quota); else `needsKey`: the chat says what it needs. Null: no chat at all.
+ */
+export async function chatPlan(p: Player): Promise<{ model: ChatModel; counted: boolean } | { needsKey: true } | null> {
   const make = state.factory ?? anthropicModel;
   const own = await playerKey(p);
-  if (own) return { ...make(own), own: true };
-  if (state.override) return state.override;
-  const key = config.anthropicKey();
-  return key ? make(key) : null;
+  if (own) return { model: { ...make(own), own: true }, counted: false };
+  const instance = state.override ?? (config.anthropicKey() ? make(config.anthropicKey()!) : null);
+  const ai = await operatorAi(p);
+  if (instance && ai.allowed) return { model: instance, counted: ai.counted };
+  // Where the instance sells, a player without the hosted-AI plan or a key of their own is told what the chat needs.
+  return config.paymentProvider() && (instance || keyStorageEnabled()) ? { needsKey: true } : null;
 }
 
-/** Whether the app offers the chat to `p`: the instance has a key, or they stored their own. */
-export const chatEnabled = async (p: Player): Promise<boolean> => !!state.override || !!config.anthropicKey() || !!(await playerKey(p));
-/** Whether the chat offers speaking a message: the chat is on and a transcription server is set up. */
-export const voiceEnabled = async (p: Player): Promise<boolean> => !!transcriber() && (await chatEnabled(p));
+/** The model a player's message runs on; null without one (see chatPlan). */
+export async function chatModelFor(p: Player): Promise<ChatModel | null> {
+  const plan = await chatPlan(p);
+  return plan && "model" in plan ? plan.model : null;
+}
 
-const STATUS = { chat_limit: 429, chat_unavailable: 502, chat_refused: 200, chat_too_long: 200, own_key_rejected: 200 } as const;
+/** Whether the app offers the chat to `p`; `needsKey`: it opens to say what it needs. */
+export async function chatEnabled(p: Player): Promise<boolean> {
+  return (await chatPlan(p)) !== null;
+}
+export async function chatNeedsKey(p: Player): Promise<boolean> {
+  const plan = await chatPlan(p);
+  return !!plan && "needsKey" in plan;
+}
+/** Whether the chat offers speaking a message: a transcription server is set up, and the chat runs (on the hosted-AI plan, where the
+ * instance sells). */
+export async function voiceEnabled(p: Player): Promise<boolean> {
+  if (!transcriber()) return false;
+  const plan = await chatPlan(p);
+  if (!plan || !("model" in plan)) return false;
+  return !config.paymentProvider() || plan.counted;
+}
+
+const STATUS = {
+  chat_limit: 429,
+  chat_unavailable: 502,
+  chat_refused: 200,
+  chat_too_long: 200,
+  own_key_rejected: 200,
+  needs_key: 200,
+  quota_used: 200,
+  rate_limited: 429,
+} as const;
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 
 // The body, or null when it is longer than `max` bytes: read in chunks, so a lying or missing Content-Length can't make it bigger.
@@ -90,8 +123,15 @@ export async function chatRoute(req: Request): Promise<Response> {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
   const who = await caller(req);
   if ("error" in who) return who.error;
-  const m = await chatModelFor(who.p);
-  if (!m) return json({ error: "not found", code: "not_found" }, 404);
+  return chatFor(who.p, req);
+}
+
+/** A chat message from a signed-in player: the route after the caller is known (tests call it as a player). */
+export async function chatFor(player: Player, req: Request): Promise<Response> {
+  const who = { p: player };
+  const plan = await chatPlan(who.p);
+  if (!plan) return json({ error: "not found", code: "not_found" }, 404);
+  if ("needsKey" in plan) return json({ code: "needs_key" }, STATUS.needs_key);
   const bytes = await readCapped(req, 4 * MAX_TOTAL_CHARS);
   if (!bytes) return json({ error: "The conversation is too long", code: "invalid_request" }, 413);
   let parsed: z.infer<typeof Body>;
@@ -103,7 +143,17 @@ export async function chatRoute(req: Request): Promise<Response> {
     return json({ error: "The request body must be JSON", code: "invalid_request" }, 400);
   }
   try {
-    const reply = await chat(who.p, parsed.turns, parsed.context ?? {}, m);
+    // On the hosted-AI plan: the per-minute rate, the monthly quota, a shorter reply and the guardrails (ADR 0024).
+    if (plan.counted && !takeRate(who.p)) return json({ code: "rate_limited" }, STATUS.rate_limited);
+    if (plan.counted && (await quotaLeft(who.p)).tokens <= 0) return json({ code: "quota_used" }, STATUS.quota_used);
+    const reply = await chat(
+      who.p,
+      parsed.turns,
+      parsed.context ?? {},
+      plan.model,
+      new Date(),
+      plan.counted ? { maxTokens: config.aiReplyTokens(), extraRules: HOSTED_RULES, onUsage: (tokens) => countUsage(who.p, { tokens }) } : {},
+    );
     return "code" in reply ? json(reply, STATUS[reply.code]) : json(reply);
   } catch (e) {
     if (e instanceof NotFoundError) return json({ error: e.message, code: "not_found" }, 404);
@@ -120,8 +170,19 @@ export async function voiceRoute(req: Request): Promise<Response> {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
   const who = await caller(req);
   if ("error" in who) return who.error;
-  const t = (await chatModelFor(who.p)) ? transcriber() : null;
+  return voiceFor(who.p, req);
+}
+
+/** A spoken message from a signed-in player: the route after the caller is known (tests call it as a player). */
+export async function voiceFor(player: Player, req: Request): Promise<Response> {
+  const who = { p: player };
+  const t = (await voiceEnabled(who.p)) ? transcriber() : null;
   if (!t) return json({ error: "not found", code: "not_found" }, 404);
+  const plan = await chatPlan(who.p);
+  const counted = !!plan && "model" in plan && plan.counted;
+  // The recording's length, as the browser measured it: what counts against the hosted-AI quota's minutes.
+  const seconds = Math.min(900, Math.max(1, Math.ceil(Number(req.headers.get("x-audio-seconds")) || 1)));
+  if (counted && (await quotaLeft(who.p)).seconds < seconds) return json({ error: "The month's transcription minutes are used up", code: "quota_used" }, 429);
   const bytes = await readCapped(req, MAX_VOICE);
   if (!bytes) return json({ error: "The recording is too long", code: "voice_too_long" }, 413);
   if (!bytes.byteLength) return json({ error: "The recording is empty", code: "voice_empty" }, 400);
@@ -129,5 +190,6 @@ export async function voiceRoute(req: Request): Promise<Response> {
   if (!type.startsWith("audio/")) return json({ error: "Send the recording as audio/*", code: "invalid_request" }, 400);
   const heard = await t.transcribe(bytes, type);
   if ("error" in heard) return json({ error: heard.error, code: "voice_unavailable" }, 502);
+  if (counted) await countUsage(who.p, { seconds });
   return json({ text: heard.text });
 }

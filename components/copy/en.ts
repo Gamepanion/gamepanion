@@ -51,6 +51,16 @@ export const en = {
   frozenSubscribe: "Subscribe again",
   frozenChoose: "Choose your active game",
 
+  addOwnKey: "Add your key",
+  needsKey: "The chat here runs on your own Anthropic key, or on Gamepanion's AI with the hosted-AI plan.",
+  quotaUsed: "This month's AI use is used up. It starts afresh on the first; your own Anthropic key works meanwhile.",
+  rateLimited: "That was a lot at once. Wait a minute, then send it again.",
+  standardLead: "Every game, with all its playthroughs.",
+  hostedAiTitle: "With Gamepanion's AI",
+  hostedAiLead: "Every game, and the chat here on Gamepanion's own AI, with speaking into it, within a monthly allowance.",
+  startTalking: "Start talking",
+  startTalkingLead: "Your plan includes Gamepanion's AI: open the chat with the button at the bottom and tell it what you're playing.",
+
   // Sign-in
   signInTitle: "Sign in to Gamepanion",
   signInLead: "Your quests, build and items, as you told them to Claude.",
@@ -256,7 +266,7 @@ export const en = {
   // The in-app chat (ADR 0013)
   askClaude: "Ask Claude",
   chatTitle: "Claude",
-  chatHello: "This is Claude, an AI. Tell it what happened, ask where you were, or fix what is filed.",
+  chatHello: "This is Claude, an AI. Tell it what happened, ask where you were, or fix what is filed. Check what it says about the game: it can be wrong.",
   chatExamples: "Examples",
   chatPrompts: [
     { kind: "Tell", text: "I just beat the boss in the bell tower" },

@@ -3,7 +3,7 @@
 // active. Checked locally on every filing, so a slow or absent provider never stops a subscriber.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { join } from "node:path";
-import type { Kysely } from "kysely";
+import type { ColumnType, Kysely } from "kysely";
 import { Migrator, type Migration } from "kysely/migration";
 import { config } from "../config";
 import { connect } from "../db/connect";
@@ -11,6 +11,8 @@ import { processState } from "../state";
 
 export type Subscription = {
   providerRef: string;
+  /** What was bought (#56): the subscription, or with the instance's AI. */
+  tier: "standard" | "hostedAi";
   playerId: string;
   customerRef: string | null;
   status: "active" | "lapsed";
@@ -19,7 +21,16 @@ export type Subscription = {
 };
 
 interface BillingSchema {
-  subscriptions: { provider_ref: string; player_id: string; customer_ref: string | null; status: string; valid_until: number | null; updated_at: number };
+  subscriptions: {
+    provider_ref: string;
+    player_id: string;
+    customer_ref: string | null;
+    status: string;
+    valid_until: number | null;
+    updated_at: number;
+    tier: ColumnType<string, string | undefined, string>;
+  };
+  ai_usage: { player_id: string; month: string; tokens: number; seconds: number };
   active_game: { player_id: string; game_id: string; chosen_at: number };
 }
 
@@ -44,10 +55,29 @@ const migrations: Record<string, Migration> = {
         .execute();
     },
   },
+  "002_hosted_ai": {
+    // #56, ADR 0024: which tier a subscription is, and what a player used of the instance's AI per calendar month (tokens, and seconds
+    // of speech transcribed). Nothing of what was said.
+    async up(db: Kysely<any>) {
+      await db.schema
+        .alterTable("subscriptions")
+        .addColumn("tier", "text", (c) => c.notNull().defaultTo("standard"))
+        .execute();
+      await db.schema
+        .createTable("ai_usage")
+        .addColumn("player_id", "text", (c) => c.notNull())
+        .addColumn("month", "text", (c) => c.notNull())
+        .addColumn("tokens", "integer", (c) => c.notNull().defaultTo(0))
+        .addColumn("seconds", "integer", (c) => c.notNull().defaultTo(0))
+        .addPrimaryKeyConstraint("ai_usage_pk", ["player_id", "month"])
+        .execute();
+    },
+  },
 };
 
-const view = (r: BillingSchema["subscriptions"]): Subscription => ({
+const view = (r: { [K in keyof BillingSchema["subscriptions"]]: K extends "tier" ? string : BillingSchema["subscriptions"][K] }): Subscription => ({
   providerRef: r.provider_ref,
+  tier: r.tier === "hostedAi" ? "hostedAi" : "standard",
   playerId: r.player_id,
   customerRef: r.customer_ref,
   status: r.status as Subscription["status"],
@@ -61,12 +91,13 @@ const later = (a: number | null, b: number | null) => (a === null || b === null 
 function store(d: Kysely<BillingSchema>) {
   return {
     /** A subscription started: one row per reference, however often the event arrives. */
-    async upsertStarted(e: { providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null }) {
+    async upsertStarted(e: { providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null; tier?: Subscription["tier"] }) {
       const before = await d.selectFrom("subscriptions").selectAll().where("provider_ref", "=", e.providerRef).executeTakeFirst();
       const row = {
         player_id: e.playerId,
         customer_ref: e.customerRef ?? before?.customer_ref ?? null,
         status: "active",
+        tier: e.tier ?? before?.tier ?? "standard",
         valid_until: before ? later(before.valid_until, e.validUntil) : e.validUntil,
         updated_at: Date.now(),
       };
@@ -111,8 +142,27 @@ function store(d: Kysely<BillingSchema>) {
         .onConflict((oc) => oc.column("player_id").doUpdateSet(row))
         .execute();
     },
+    /** What the player used of the instance's AI in `month` (YYYY-MM). */
+    async usageOf(playerId: string, month: string): Promise<{ tokens: number; seconds: number }> {
+      const r = await d.selectFrom("ai_usage").select(["tokens", "seconds"]).where("player_id", "=", playerId).where("month", "=", month).executeTakeFirst();
+      return r ?? { tokens: 0, seconds: 0 };
+    },
+    /** Counts use of the instance's AI against `month`. */
+    async addUsage(playerId: string, month: string, used: { tokens?: number; seconds?: number }) {
+      await d
+        .insertInto("ai_usage")
+        .values({ player_id: playerId, month, tokens: used.tokens ?? 0, seconds: used.seconds ?? 0 })
+        .onConflict((oc) =>
+          oc.columns(["player_id", "month"]).doUpdateSet((eb) => ({
+            tokens: eb("ai_usage.tokens", "+", used.tokens ?? 0),
+            seconds: eb("ai_usage.seconds", "+", used.seconds ?? 0),
+          })),
+        )
+        .execute();
+    },
     /** Deleting an account: the player's rows go, nobody else's. */
     async forgetPlayer(playerId: string) {
+      await d.deleteFrom("ai_usage").where("player_id", "=", playerId).execute();
       await d.deleteFrom("subscriptions").where("player_id", "=", playerId).execute();
       await d.deleteFrom("active_game").where("player_id", "=", playerId).execute();
     },

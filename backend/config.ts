@@ -71,6 +71,12 @@ function timeZone(): string {
   return tz;
 }
 
+// A positive whole number from the environment, or `fallback` when unset or not one.
+const positive = (name: string, fallback: number): number => {
+  const n = Number.parseInt(env(name).trim(), 10);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
+};
+
 export const config = {
   // Where gamepanion.sqlite, auth.sqlite and the generated secret live.
   dataDir: () => env("DATA_DIR") || "/data",
@@ -120,7 +126,14 @@ export const config = {
     if (v === "" || v === "fake" || v === "creem") return v;
     throw new Error(`GAMEPANION_PAYMENT_PROVIDER=${v} is not a payment provider; use creem`);
   },
-  creem: (): { apiKey: string; productId: string; yearlyProductId: string; webhookSecret: string } => {
+  creem: (): {
+    apiKey: string;
+    productId: string;
+    yearlyProductId: string;
+    hostedAiProductId: string;
+    hostedAiYearlyProductId: string;
+    webhookSecret: string;
+  } => {
     const v = (name: string) => env(name).trim();
     const missing = ["GAMEPANION_CREEM_API_KEY", "GAMEPANION_CREEM_PRODUCT_ID", "GAMEPANION_CREEM_WEBHOOK_SECRET"].filter((n) => !v(n));
     if (missing.length) throw new Error(`GAMEPANION_PAYMENT_PROVIDER=creem needs ${missing.join(", ")}`);
@@ -128,6 +141,8 @@ export const config = {
       apiKey: v("GAMEPANION_CREEM_API_KEY"),
       productId: v("GAMEPANION_CREEM_PRODUCT_ID"),
       yearlyProductId: v("GAMEPANION_CREEM_YEARLY_PRODUCT_ID"),
+      hostedAiProductId: v("GAMEPANION_CREEM_HOSTED_AI_PRODUCT_ID"),
+      hostedAiYearlyProductId: v("GAMEPANION_CREEM_HOSTED_AI_YEARLY_PRODUCT_ID"),
       webhookSecret: v("GAMEPANION_CREEM_WEBHOOK_SECRET"),
     };
   },
@@ -142,6 +157,12 @@ export const config = {
       .split(",")
       .map((n) => n.trim().toLowerCase())
       .filter(Boolean),
+  // The hosted-AI tier (#56, ADR 0024): what a player on it may use of the instance's AI per calendar month, and the guardrails. Usage
+  // on a player's own key never counts.
+  aiMonthlyTokens: (): number => positive("GAMEPANION_AI_MONTHLY_TOKENS", 2_000_000),
+  aiMonthlyMinutes: (): number => positive("GAMEPANION_AI_MONTHLY_MINUTES", 60),
+  aiPerMinute: (): number => positive("GAMEPANION_AI_PER_MINUTE", 6),
+  aiReplyTokens: (): number => positive("GAMEPANION_AI_REPLY_TOKENS", 4000),
   // The operator's pages (#48): Markdown files, `{lang}` replaced by the page's language (en, de), falling back to English. No file, no page.
   operatorFile: (page: "imprint" | "privacy" | "terms" | "pricing"): string | undefined => env(`GAMEPANION_${page.toUpperCase()}_FILE`).trim() || undefined,
   // Unset, empty or not a level → info.

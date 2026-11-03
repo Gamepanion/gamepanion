@@ -85,6 +85,7 @@ nav:
           - "Players' own Anthropic keys": adr/0021-players-own-keys.md
           - "One SQLite file, with full-text search": adr/0022-one-sqlite-file-with-full-text-search.md
           - "A subscription, one game free": adr/0023-a-subscription-one-game-free.md
+          - The hosted-AI tier: adr/0024-the-hosted-ai-tier.md
 
 theme:
   name: material

@@ -3,14 +3,16 @@
 // to end a subscription. Nothing here knows about games or what players filed; backend/billing/flow.ts is the only caller.
 
 export type Period = "month" | "year";
+/** What is sold (#56, ADR 0024): the subscription, or the subscription with the in-app chat on the instance's own AI. */
+export type Tier = "standard" | "hostedAi";
 
 /** A plan as the provider holds it: the price in minor units, tax included or not. */
-export type Plan = { period: Period; name: string; amount: number; currency: string; taxIncluded: boolean };
+export type Plan = { period: Period; tier: Tier; name: string; amount: number; currency: string; taxIncluded: boolean };
 
 /** What a webhook says about a subscription. `providerRef` is the provider's subscription id; `validUntil` when the paid period ends (ms). */
 export type PaymentEvent =
   /** Bought: the player whose id the checkout carried subscribes from now on. */
-  | { type: "started"; providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null }
+  | { type: "started"; providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null; tier?: Tier }
   /** Paid again: the period is extended. */
   | { type: "renewed"; providerRef: string; validUntil: number | null }
   /** The buyer cancelled: it stays active until `validUntil`. */
@@ -31,7 +33,7 @@ export interface PaymentProvider {
   /** The plans sold, monthly then yearly. Never throws: a provider that can't be read gives what it gave last, or none. */
   plans(): Promise<Plan[]>;
   /** The URL to send the player to; they come back to `successUrl`. `period` picks the product; throws when there is none for it. */
-  createCheckout(o: { period: Period; playerId: string; email: string | null; successUrl: string }): Promise<{ url: string }>;
+  createCheckout(o: { period: Period; tier?: Tier; playerId: string; email: string | null; successUrl: string }): Promise<{ url: string }>;
   /** Verifies the signature over the raw body and returns its events (none for a kind Gamepanion doesn't use). Throws WebhookRejectedError. */
   parseWebhook(rawBody: string, headers: Headers): Promise<PaymentEvent[]>;
   /** The signed-in player's own customer portal: cancelling, the payment method, invoices. */
