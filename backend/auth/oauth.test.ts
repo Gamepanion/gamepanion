@@ -476,3 +476,14 @@ test("a player moves to another address with a code sent there; they stay the sa
   await move("ada@example.com", moved);
   expect((await ctx.internalAdapter.findUserByEmail("ada@example.com"))?.user.id).toBe(before!.id);
 });
+
+test("a session keeps neither the client's address nor its browser", async () => {
+  const who = { "user-agent": "Mozilla/5.0 (Test)", "x-forwarded-for": "203.0.113.7" };
+  await fetch(`${base}/api/auth/email-otp/send-verification-otp`, json({ email: "ada@example.com", type: "sign-in" }, who));
+  const signed = await fetch(`${base}/api/auth/sign-in/email-otp`, json({ email: "ada@example.com", otp: codes.get("ada@example.com") }, who));
+  expect(signed.status).toBe(200);
+  const ctx = await (await auth()).$context;
+  const sessions = await ctx.adapter.findMany<{ ipAddress: string | null; userAgent: string | null }>({ model: "session" });
+  expect(sessions.length).toBeGreaterThan(0);
+  for (const s of sessions) expect([s.ipAddress ?? "", s.userAgent ?? ""]).toEqual(["", ""]);
+});
