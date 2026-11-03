@@ -16,6 +16,7 @@ import {
   Hammer,
   Hourglass,
   KeyRound,
+  Link2,
   ListTodo,
   MapPin,
   NotebookPen,
@@ -42,6 +43,7 @@ export const PART_ICONS: Record<string, LucideIcon> = {
   codex: BookOpen,
   sessions: CalendarDays,
   notes: NotebookPen,
+  sources: Link2,
   settings: SlidersHorizontal,
 };
 

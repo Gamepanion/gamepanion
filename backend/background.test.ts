@@ -37,7 +37,7 @@ test("a line shows only as far as the read reveals, even on a row everyone sees"
     id: expect.any(String),
     text: "A light blade that scales with Motivity.",
     spoiler: "none",
-    source: { url: "https://wiki.example/saber", title: "Wiki" },
+    source: { url: "https://wiki.example/saber", title: "Wiki", trust: "medium" },
   });
 });
 
@@ -99,7 +99,7 @@ test("correct sets a playthrough's settings, and fixes or removes a line; anothe
     { what: "background", id, text: "Scales with Motivity.", spoiler: "hint", source: { url: "https://wiki.example/saber", title: "Wiki" } },
   ]);
   expect((await itemsOf(s.a, s.liesOfP, { reveal: "hint" })).find((i) => i.id === item)!.background).toEqual([
-    { id, text: "Scales with Motivity.", spoiler: "hint", source: { url: "https://wiki.example/saber", title: "Wiki" } },
+    { id, text: "Scales with Motivity.", spoiler: "hint", source: { url: "https://wiki.example/saber", title: "Wiki", trust: "medium" } },
   ]);
   await expect(correct(s.b, [{ what: "background", id, remove: true }])).rejects.toThrow(NotFoundError);
   await correct(s.a, [{ what: "background", id, remove: true }]);

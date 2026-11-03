@@ -45,6 +45,7 @@ export {
   EFFECTS,
   OPEN_STATUSES,
   SPOILER_LEVELS,
+  TRUST_LEVELS,
   type BackgroundLevel,
   type ItemKind,
   type Player,

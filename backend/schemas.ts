@@ -16,10 +16,16 @@ import {
   SPOILER_LEVELS,
   BACKGROUND_LEVELS,
   TODO_STATUSES,
+  TRUST_LEVELS,
 } from "./types";
 import { TODO_TARGETS } from "./todos";
 
 export const Spoiler = z.enum(SPOILER_LEVELS);
+export const TrustInput = z
+  .enum(TRUST_LEVELS)
+  .describe(
+    "How far the source can be trusted: high for wikis and official pages, medium for large guide sites, low for forums, single comments and one person's video. Default medium; left out on a source already kept, it keeps its own",
+  );
 export const TagNames = z
   .array(z.string().trim().min(1).max(40))
   .max(10)
@@ -34,7 +40,11 @@ export const BackgroundLines = z
         "Default none. hint when it names a place, person or item the player hasn't reached; full when it gives away an outcome, a fate or a story event",
       ),
       source: z
-        .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200) })
+        .object({
+          url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"),
+          title: z.string().trim().min(1).max(200),
+          trust: TrustInput.optional().describe("The source's trust; default the trust the game's source with this link has, else medium"),
+        })
         .optional()
         .describe("The page it comes from; leave it out for what you know yourself"),
     }),
@@ -56,6 +66,7 @@ export const SourceInput = z.object({
     .max(2000)
     .optional()
     .describe("For an item: the facts you took from the page, in your own words (scaling, weight, where found), never its text"),
+  trust: TrustInput.optional(),
 });
 
 // ADR 0011: the player's own thoughts, in their words, never yours; added to the notes a row has.
@@ -353,7 +364,7 @@ export const ChangeInput = z.object({
   about: TodoAbout.nullable().optional().describe("todo: what it is about, a quest, item or codex entry; null points it at nothing"),
   spoiler: Spoiler.optional().describe("entry, item, goal, codex, background or todo: none once the player has found what it names"),
   source: z
-    .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200) })
+    .object({ url: z.string().regex(/^https?:\/\/\S+$/, "an http or https URL"), title: z.string().trim().min(1).max(200), trust: TrustInput.optional() })
     .nullable()
     .optional()
     .describe("background: the page the line comes from; null clears it"),

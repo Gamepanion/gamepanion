@@ -15,6 +15,7 @@ import {
   PLAYTHROUGH_STATUSES,
   QUEST_STATUSES,
   TODO_STATUSES,
+  TRUST_LEVELS,
 } from "../types";
 import { TODO_TARGETS } from "../todos";
 import { ERROR_CODES } from "./errors";
@@ -27,7 +28,10 @@ export const BackgroundJson = z
       id: z.string().describe("For correct (background)"),
       text: z.string(),
       spoiler: z.enum(SPOILER_LEVELS).describe("Each line has its own; only lines this read may show are here"),
-      source: z.object({ url: z.string(), title: z.string() }).nullable().describe("The page it comes from; null for Claude's own knowledge"),
+      source: z
+        .object({ url: z.string(), title: z.string(), trust: z.enum(TRUST_LEVELS).describe("The trust of the source it was filed from") })
+        .nullable()
+        .describe("The page it comes from; null for Claude's own knowledge"),
     }),
   )
   .describe("Background Claude added (ADR 0016), oldest first");
@@ -67,6 +71,9 @@ export const SourceJson = z
     title: z.string().nullable(),
     facts: z.string().nullable().describe("What was taken from the page, for an item"),
     on: Day.nullable().describe("When it was added"),
+    trust: z
+      .enum(TRUST_LEVELS)
+      .describe("How far it can be trusted: high (wikis, official pages), medium (large guide sites), low (forums, single comments, one person's video)"),
   })
   .meta({ id: "Source", description: "A page outside Gamepanion, which Gamepanion never fetches (ADR 0008)" });
 

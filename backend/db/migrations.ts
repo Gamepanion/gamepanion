@@ -443,6 +443,16 @@ const migrations: Record<string, Migration> = {
         end`.execute(db);
     },
   },
+  "010_source_trust": {
+    // #58: a background line filed from a source keeps how far that source is trusted (high, medium, low). The sources themselves are
+    // JSON on their rows and carry it there.
+    async up(db: Kysely<any>) {
+      await db.schema
+        .alterTable("background")
+        .addColumn("source_trust", "text", (c) => c.check(sql`source_trust is null or ${oneOf("source_trust", ["high", "medium", "low"])}`))
+        .execute();
+    },
+  },
 };
 
 export const NEWER = "the database was made by a newer Gamepanion than this one; upgrade Gamepanion, do not point an older one at it";

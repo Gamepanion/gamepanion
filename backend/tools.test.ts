@@ -329,7 +329,7 @@ test("record keeps the game's sources and an item's facts with their links; item
     ],
     items: [{ name: "Puppet Saber", sources: [{ url: "https://lies.example/wiki/Puppet_Saber", facts: "Motivity C, Technique C" }] }],
   });
-  expect(next(out)).toMatch(/Lies of P has 2 sources the player trusts now/);
+  expect(next(out)).toMatch(/Lies of P has 2 sources kept now, by trust/);
   const t = await getPlaythrough(s.a, s.liesOfP);
   // The same link (a trailing slash aside) is refreshed, not added twice.
   expect(t.game.sources.map((x) => [x.title, x.on])).toEqual([
@@ -337,9 +337,11 @@ test("record keeps the game's sources and an item's facts with their links; item
     ["Guides", "2026-10-23"],
   ]);
   const saber = (await itemsOf(s.a, s.liesOfP, { name: "saber" }))[0];
-  expect(saber.sources).toEqual([{ url: "https://lies.example/wiki/Puppet_Saber", title: null, facts: "Motivity C, Technique C", on: "2026-10-23" }]);
+  expect(saber.sources).toEqual([
+    { url: "https://lies.example/wiki/Puppet_Saber", title: null, facts: "Motivity C, Technique C", on: "2026-10-23", trust: "medium" },
+  ]);
   const looked = await run("item", s.a, { name: "saber" });
-  expect(next(looked)).toMatch(/look it up yourself with your web tools, on their sources for Lies of P: Lies Wiki \(new\)/);
+  expect(next(looked)).toMatch(/look it up yourself with your web tools, on their sources for Lies of P, by trust: Lies Wiki \(new\)/);
   expect(next(looked)).toMatch(/never the page's text/);
 });
 

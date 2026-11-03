@@ -35,16 +35,23 @@ import {
   type PlaythroughStatus,
   type QuestStatus,
   type SpoilerLevel,
+  type Trust,
 } from "./types";
 import type { SourceInput } from "./types";
 import { codexPath, itemPath, playthroughPath, questPath, sessionPath, tabPath } from "./urls";
 import { removeTodo, todoRow, unlinkTodo, writeTodos, type TodoTarget } from "./todos";
 
-// The new list replaces the old one; a link that stays keeps the day it was first added.
+// The new list replaces the old one; a link that stays keeps the day it was first added, and its trust unless a new one is given.
 const replaceSources = (before: string, next: SourceInput[] | undefined) => {
   if (!next) return undefined;
   const old = parseSources(before);
-  return JSON.stringify(mergeSources([], next, today()).map((s) => ({ ...s, on: old.find((o) => o.url === s.url)?.on ?? s.on })));
+  return JSON.stringify(
+    mergeSources([], next, today()).map((s) => {
+      const was = old.find((o) => o.url === s.url);
+      const given = next.findLast((n) => n.url.trim() === s.url)?.trust;
+      return { ...s, on: was?.on ?? s.on, trust: given ?? was?.trust ?? s.trust };
+    }),
+  );
 };
 
 /** What a correction can name. */
@@ -113,7 +120,7 @@ export type Correction = {
   /** Lines of background for an item, codex entry or quest (ADR 0016), added to those it has. */
   addBackground?: BackgroundInput[];
   /** A background line's source; null clears it. */
-  source?: { url: string; title: string } | null;
+  source?: { url: string; title: string; trust?: Trust } | null;
   /** A to-do's words in the game's own language; null clears them. */
   localText?: string | null;
   /** What a to-do is about; null points it at nothing. */
@@ -301,6 +308,7 @@ async function background(trx: Trx, p: Player, c: Correction): Promise<Corrected
     spoiler: oneOf<SpoilerLevel>("spoiler", c.spoiler, SPOILER_LEVELS),
     source_url: c.source === undefined ? undefined : (c.source?.url ?? null),
     source_title: c.source === undefined ? undefined : (c.source?.title ?? null),
+    source_trust: c.source === undefined ? undefined : c.source ? (c.source.trust ?? "medium") : null,
   });
   if (Object.keys(set).length) await seen(trx.updateTable("background"), p, "background", "full").set(set).where("id", "=", c.id).execute();
   return done(c, t ?? row.text, null, null);
