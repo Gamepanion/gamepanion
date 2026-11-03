@@ -200,75 +200,35 @@ h1 {
   }
 }
 
-/* The pages (components/Pages.tsx): side by side, one screen wide each, snapped into place by the browser, each scrolling up and
-   down on its own. The contain stops a swipe past the last page from turning into the browser's back gesture where it can; iOS Safari's
-   swipe from the very edge stays the browser's, which is why the pages keep their side gutter. */
-.pages {
-  display: flex;
-  height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
+/* The playthrough switcher in the header (components/Switcher.tsx, ADR 0019): a button saying where you are, and its menu. */
+.switcher-button {
+  @apply flex w-full max-w-full min-w-0 items-center gap-2 rounded-md border border-rule bg-surface px-2 py-1.5 text-left font-semibold hover:border-accent sm:w-auto;
 }
-.pages::-webkit-scrollbar {
-  display: none;
+.switcher-button:focus-visible,
+.switcher-item:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
 }
-.page {
-  flex: 0 0 100%;
-  min-width: 0;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  @apply px-4 pt-6 pb-20 lg:px-14;
+.switcher-menu {
+  @apply absolute top-full left-0 z-30 mt-1 max-h-[70dvh] w-full min-w-64 overflow-y-auto rounded-md border border-rule bg-paper p-1 shadow-lg sm:w-80;
 }
-/* The page markers: one bar per page, like a level select, the one in view wider and in the accent. */
-.ribbons {
-  @apply glass absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center overflow-hidden border border-rule px-1;
+.switcher-item {
+  @apply flex w-full items-center gap-2 rounded px-3 py-2 text-left hover:bg-surface-2 focus:bg-surface-2;
 }
-/* Each marker is a 44px target; the bar is drawn inside it. */
-.ribbon {
-  @apply flex h-11 w-7 shrink-0 items-center justify-center;
+.switcher-item[aria-current="page"] {
+  @apply font-semibold;
 }
-.ribbon::before {
-  @apply block h-1.5 w-3 bg-rule transition-[width,background-color] duration-200;
-  content: "";
+.switcher-game {
+  @apply mt-1 flex items-center gap-2 border-t border-rule px-2 pt-2 pb-1 text-sm font-semibold text-muted;
 }
-.ribbon[aria-current="page"]::before {
-  @apply w-6 bg-accent;
+.switcher-fold {
+  @apply mt-1 border-t border-rule text-sm text-muted;
 }
-@media (pointer: coarse) {
-  .ribbon {
-    @apply w-11;
-  }
-}
-.ribbon:focus-visible {
-  @apply outline-2 -outline-offset-2 outline-ink;
-}
-/* The arrows at the sides, for a mouse; a phone swipes. */
-.page-arrow {
-  @apply glass absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md border border-rule text-2xl leading-none text-ink hover:border-accent disabled:opacity-0;
-}
-@media (pointer: fine) and (min-width: 64rem) {
-  .page-arrow {
-    display: flex;
-  }
-}
-/* A playthrough on the first page: a card with a badge at its top right carrying its number, violet while it is played, muted once it is
-   finished or dropped (and the card quieter). Its next step is set off on a tinted strip. */
+/* A playthrough on the home page: a card, quieter once it is finished or dropped. Its next step is set off on a tinted strip. */
 .run-card {
   @apply relative transition-colors hover:border-accent;
 }
 .run-card-closed {
   @apply opacity-75;
-}
-.run-ribbon {
-  @apply absolute top-3 right-4 flex min-w-7 justify-center border border-rule px-1.5 py-0.5 text-xs font-extrabold text-muted tabular-nums;
-}
-.run-ribbon-closed {
-  @apply opacity-70;
 }
 /* A line of the card: its icon in the margin, violet, then what it says. */
 .run-line {
@@ -279,11 +239,6 @@ h1 {
 }
 .run-next {
   @apply rounded-lg bg-surface-2/60 py-2 pr-3 pl-2;
-}
-@media (prefers-reduced-motion: reduce) {
-  .ribbon::before {
-    transition: none;
-  }
 }
 /* The plan (goals, ADR 0009): an ordered list, each goal with a bar that fills in violet as the stat gets there, like an XP bar. Reached goals stay, quieter; a suggestion is set apart by a dotted rule until the player agrees. */
 .goal {
@@ -358,8 +313,8 @@ h1 {
 
 /* The register (components/Register.tsx): coloured tabs along the top of a playthrough's page, like a game menu's.
    Each tab is the surface tinted in its colour with the colour's edge on top; the open one stands taller and fuller, and its colour runs on as
-   the rule under the strip, as a divider's tab runs into its sheet. On a phone the tabs take two rows; from a tablet up they are one row
-   that stays at the top while the part scrolls. */
+   the rule under the strip, as a divider's tab runs into its sheet. Room for ten: on a phone two rows of five; from a tablet up one row,
+   which on a wide screen stays at the top while the part scrolls. */
 .register {
   --c: var(--tab-overview);
 }
@@ -387,14 +342,18 @@ h1 {
 .register-tabs {
   --edge: color-mix(in oklab, var(--c) 80%, var(--ink));
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: end;
   gap: 0.25rem 0.1875rem;
   border-bottom: 3px solid var(--edge);
 }
+@media (min-width: 40rem) {
+  .register-tabs {
+    grid-template-columns: repeat(var(--tabs, 8), minmax(0, 1fr));
+  }
+}
 @media (min-width: 64rem) {
   .register-tabs {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
     position: sticky;
     top: -1.5rem;
     z-index: 5;
@@ -434,7 +393,7 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Below a wide screen the icon sits above the name, four to a row, so every name (German too) fits whole. */
+/* Below a wide screen the icon sits above the name, so every name (German too) fits whole or nearly. */
 @media (max-width: 63.99rem) {
   .register-tab {
     flex-direction: column;
@@ -447,7 +406,7 @@ h1 {
   background: color-mix(in oklab, var(--t) 30%, var(--surface));
 }
 /* The open tab differs in more than colour: taller, a thicker edge, bold, and its name underlined. */
-.register-tab[aria-selected="true"] {
+.register-tab[aria-current="page"] {
   background: color-mix(in oklab, var(--t) 42%, var(--surface));
   border-top-width: 7px;
   padding-top: 0.625rem;

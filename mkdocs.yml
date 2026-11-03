@@ -80,6 +80,7 @@ nav:
           - Background and spoiler settings: adr/0016-background-and-spoilers.md
           - The name Gamepanion: adr/0017-the-name-gamepanion.md
           - "The brand: a companion, not a book": adr/0018-the-brand-a-companion-not-a-book.md
+          - "A switcher and tabs, not sideways pages": adr/0019-a-switcher-and-tabs-not-pages.md
 
 theme:
   name: material

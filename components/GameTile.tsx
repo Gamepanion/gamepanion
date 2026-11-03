@@ -19,13 +19,11 @@ export function hueOf(title: string): number {
   return h;
 }
 
-export function GameTile({ title, size = "md" }: { title: string; size?: "md" | "lg" }) {
+const SIZES = { sm: "h-7 w-7 text-xs", md: "h-10 w-10 text-base", lg: "h-14 w-14 text-xl" };
+
+export function GameTile({ title, size = "md" }: { title: string; size?: keyof typeof SIZES }) {
   return (
-    <span
-      aria-hidden="true"
-      className={`game-tile ${size === "lg" ? "h-14 w-14 text-xl" : "h-10 w-10 text-base"}`}
-      style={{ background: `hsl(${hueOf(title)} 45% 30%)` }}
-    >
+    <span aria-hidden="true" className={`game-tile shrink-0 ${SIZES[size]}`} style={{ background: `hsl(${hueOf(title)} 45% 30%)` }}>
       {initials(title)}
     </span>
   );

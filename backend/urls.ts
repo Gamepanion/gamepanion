@@ -2,16 +2,24 @@
 // leaves, so the pages, which read the domain in-process, get links they can use as they are.
 import { config } from "./config";
 
-/** A playthrough: its briefing, open quests, build and items. */
+/**
+ * The tabs of a playthrough's page, in their order; each has an address of its own (ADR 0019). Overview is the playthrough's own address.
+ */
+export const PLAYTHROUGH_TABS = ["overview", "quests", "character", "items", "codex", "sessions", "notes", "settings"] as const;
+export type PlaythroughTab = (typeof PLAYTHROUGH_TABS)[number];
+
+/** A playthrough: its Overview, where the player left off. */
 export const playthroughPath = (id: string) => `/p/${id}`;
+/** One tab of a playthrough's page. */
+export const tabPath = (id: string, tab: PlaythroughTab) => (tab === "overview" ? playthroughPath(id) : `${playthroughPath(id)}/${tab}`);
 /** A play session: its transcript and what was filed from it. */
 export const sessionPath = (id: string) => `/s/${id}`;
-/** A quest's row on its playthrough's page. */
-export const questPath = (playthroughId: string, id: string) => `${playthroughPath(playthroughId)}#quest-${id}`;
-/** A codex entry's row on its playthrough's page. */
-export const codexPath = (playthroughId: string, id: string) => `${playthroughPath(playthroughId)}#codex-${id}`;
-/** An item's row on its playthrough's page. */
-export const itemPath = (playthroughId: string, id: string) => `${playthroughPath(playthroughId)}#item-${id}`;
+/** A quest's row on its playthrough's Quests tab. */
+export const questPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "quests")}#quest-${id}`;
+/** A codex entry's row on its playthrough's Codex tab. */
+export const codexPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "codex")}#codex-${id}`;
+/** An item's row on its playthrough's Items tab. */
+export const itemPath = (playthroughId: string, id: string) => `${tabPath(playthroughId, "items")}#item-${id}`;
 
 /** A copy of `body` with every `url` that is a path prefixed with `base`. */
 export function absoluteUrls<T>(base: string, body: T): T {

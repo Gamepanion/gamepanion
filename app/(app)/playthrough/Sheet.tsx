@@ -12,8 +12,11 @@ import {
   type CodexView,
   type ItemView,
   type Player,
+  type PlaythroughTab,
   type PlaythroughView,
   type QuestView,
+  PLAYTHROUGH_TABS,
+  tabPath,
 } from "@/backend";
 import { serverCopy } from "@/components/copy/server";
 import { Notes } from "@/components/Notes";
@@ -33,9 +36,9 @@ const siteOf = (url: string) => {
   }
 };
 
-// One playthrough's page of the book: its title, then the register (components/Register.tsx), where the player left off
+// One playthrough's page: its title, then the register (components/Register.tsx) open at one tab, Overview (where the player left off)
 // first. It shows as much as the player's spoiler setting for the run (ADR 0016), and marks what is a hint or a spoiler (values V1).
-export async function Sheet({ player: p, playthrough: t }: { player: Player; playthrough: PlaythroughView }) {
+export async function Sheet({ player: p, playthrough: t, tab }: { player: Player; playthrough: PlaythroughView; tab: PlaythroughTab }) {
   const copy = await serverCopy();
   const id = t.id;
   const reveal = t.settings.spoilers;
@@ -59,9 +62,9 @@ export async function Sheet({ player: p, playthrough: t }: { player: Player; pla
   const current = build.snapshots[0];
   const codexKinds = CODEX_KINDS.filter((k) => codex.some((e) => e.kind === k));
   const last = sessions[0];
-  const tabs = (["overview", "character", "quests", "items", "codex", "sessions", "notes", "settings"] as const).map((key) => {
+  const tabs = PLAYTHROUGH_TABS.map((key) => {
     const Icon = PART_ICONS[key];
-    return { key, label: copy.tabs[key], icon: <Icon aria-hidden="true" /> };
+    return { key, label: copy.tabs[key], href: tabPath(id, key), icon: <Icon aria-hidden="true" /> };
   });
   const equipped = items.filter((i) => i.equipped);
   const hasNotes = t.game.description || t.game.notes || t.notes || t.game.sources.length > 0;
@@ -81,218 +84,226 @@ export async function Sheet({ player: p, playthrough: t }: { player: Player; pla
         )}
       </div>
 
-      {/* The rest behind the register's tabs; hints open on the quests, where they are. */}
-      <Register tabs={tabs} start="overview" label={copy.tabs.label}>
-        {/* Where the player left off: the last session, what each open quest waits for, the plan's next goals and what is equipped. */}
-        <div className="space-y-6">
-          {last && (
-            <section>
-              <Heading icon={CalendarDays}>{copy.lastSession}</Heading>
-              <SessionCard session={last} />
-            </section>
-          )}
-          <section>
-            <Heading icon={Footprints}>{copy.nextSteps}</Heading>
-            {open.length === 0 ? (
-              <p className="card text-muted">{copy.noOpenQuests}</p>
-            ) : (
-              <ul className="card divide-y divide-rule py-1">
-                {open.map((q) => (
-                  <li key={q.id}>
-                    <a href={`#quest-${q.id}`} className="flex items-center gap-3 py-2 hover:text-accent">
-                      <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
-                      <span className="min-w-0">
-                        <span className="font-semibold">{q.name}</span>
-                        {q.status === "blocked" ? (
-                          <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
-                        ) : (
-                          q.nextStep && <span className="block text-sm">{q.nextStep}</span>
-                        )}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-          {build.goals.some((g) => g.status === "open") && (
-            <section>
-              <Heading icon={Crosshair}>{copy.goals}</Heading>
-              <Goals goals={build.goals.filter((g) => g.status === "open")} run={t.id} />
-            </section>
-          )}
-          {equipped.length > 0 && (
-            <section>
-              <Heading icon={Sword}>{copy.equipped}</Heading>
-              <ul className="card divide-y divide-rule py-1">
-                {equipped.map((i) => (
-                  <li key={i.id}>
-                    <a href={`#item-${i.id}`} className="flex items-center gap-3 py-2 hover:text-accent">
-                      <Tile icon={itemIcon(i.kind)} />
-                      <span className="flex-1 font-semibold">
-                        {i.name}
-                        {i.localName && <span className="font-normal text-muted"> · {i.localName}</span>}
-                      </span>
-                      {i.quantity !== null && <span className="tabular-nums">{copy.quantity(i.quantity)}</span>}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-
-        <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-          <section>
-            <Heading icon={Crosshair}>{copy.goals}</Heading>
-            {build.goals.length === 0 ? <p className="card text-muted">{copy.noGoals}</p> : <Goals goals={build.goals} run={t.id} />}
-          </section>
-          <section>
-            <Heading icon={Sparkles}>{copy.build}</Heading>
-            <div className="card space-y-2">
-              <div className="flex items-start justify-between gap-3">
-                {build.plan?.mainStat ? <p className="font-semibold">{copy.mainStat(build.plan.mainStat)}</p> : <span />}
-                {current && <TalkAbout kind="stats" id={current.id} name={copy.build} playthroughId={t.id} />}
-              </div>
-              {build.plan?.summary && <p className="text-muted">{build.plan.summary}</p>}
-              {current ? (
-                <>
-                  <p className="text-sm text-muted">
-                    {current.takenOn}
-                    {current.level !== null ? ` · ${copy.level(current.level)}` : ""}
-                  </p>
-                  <Notes notes={current.notes} />
-                  <dl className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-1">
-                    {current.stats.map((s) => (
-                      <div key={s.key} className="flex justify-between gap-2">
-                        <dt>
-                          {s.name}
-                          {s.localName && <span className="text-sm text-muted"> · {s.localName}</span>}
-                        </dt>
-                        <dd className="font-semibold tabular-nums">
-                          {s.value}
-                          {s.change ? <span className="text-accent"> {s.change > 0 ? `+${s.change}` : s.change}</span> : null}
-                          {build.plan?.targets[s.key] !== undefined && <span className="text-muted"> / {build.plan.targets[s.key]}</span>}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </>
-              ) : (
-                <p className="text-muted">{copy.noBuild}</p>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <TagFilter tags={tagsInUse([...open, ...closed])} label={copy.tags}>
-          <div className="space-y-6">
-            <Group icon={QUEST_ICONS.open} label={copy.openQuests} count={open.length}>
-              {open.length === 0 ? <p className="card text-muted">{copy.noOpenQuests}</p> : <Quests quests={open} run={t.id} />}
-            </Group>
-            {closed.length > 0 && (
-              <Group icon={QUEST_ICONS.done} label={copy.closedQuests} count={closed.length}>
-                <Quests quests={closed} run={t.id} />
-              </Group>
-            )}
-          </div>
-        </TagFilter>
-
-        {/* The inventory in the game's groups; on a wide screen two columns of cards. */}
-        {items.length === 0 ? (
-          <p className="card text-muted">{copy.noItems}</p>
-        ) : (
-          <TagFilter tags={tagsInUse(items)} label={copy.tags}>
-            <div className="space-y-6">
-              {groups.map(([label, key, list]) => (
-                <Group key={label} icon={itemIcon(key)} label={label} count={list.length}>
-                  <ul className="grid gap-2 lg:grid-cols-2">
-                    {list.map((i) => (
-                      <Item key={i.id} item={i} run={t.id} />
-                    ))}
-                  </ul>
-                </Group>
-              ))}
-            </div>
-          </TagFilter>
-        )}
-
-        {codex.length === 0 ? (
-          <p className="card text-muted">{copy.noCodex}</p>
-        ) : (
-          <TagFilter tags={tagsInUse(codex)} label={copy.tags}>
-            <div className="space-y-6">
-              {codexKinds.map((k) => {
-                const entries = codex.filter((e) => e.kind === k);
-                return (
-                  <Group key={k} icon={CODEX_ICONS[k]} label={copy.codexKinds[k]} count={entries.length}>
-                    <ul className="grid gap-2 lg:grid-cols-2">
-                      {entries.map((e) => (
-                        <CodexEntry key={e.id} entry={e} run={t.id} />
+      {/* The rest behind the register's tabs, one address each; hints open on the quests, where they are. */}
+      <Register tabs={tabs} at={tab} label={copy.tabs.label}>
+        {
+          {
+            // Where the player left off: the last session, what each open quest waits for, the plan's next goals and what is equipped.
+            overview: (
+              <div className="space-y-6">
+                {last && (
+                  <section>
+                    <Heading icon={CalendarDays}>{copy.lastSession}</Heading>
+                    <SessionCard session={last} />
+                  </section>
+                )}
+                <section>
+                  <Heading icon={Footprints}>{copy.nextSteps}</Heading>
+                  {open.length === 0 ? (
+                    <p className="card text-muted">{copy.noOpenQuests}</p>
+                  ) : (
+                    <ul className="card divide-y divide-rule py-1">
+                      {open.map((q) => (
+                        <li key={q.id}>
+                          <Link href={q.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                            <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
+                            <span className="min-w-0">
+                              <span className="font-semibold">{q.name}</span>
+                              {q.status === "blocked" ? (
+                                <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
+                              ) : (
+                                q.nextStep && <span className="block text-sm">{q.nextStep}</span>
+                              )}
+                            </span>
+                          </Link>
+                        </li>
                       ))}
                     </ul>
+                  )}
+                </section>
+                {build.goals.some((g) => g.status === "open") && (
+                  <section>
+                    <Heading icon={Crosshair}>{copy.goals}</Heading>
+                    <Goals goals={build.goals.filter((g) => g.status === "open")} run={t.id} />
+                  </section>
+                )}
+                {equipped.length > 0 && (
+                  <section>
+                    <Heading icon={Sword}>{copy.equipped}</Heading>
+                    <ul className="card divide-y divide-rule py-1">
+                      {equipped.map((i) => (
+                        <li key={i.id}>
+                          <Link href={i.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                            <Tile icon={itemIcon(i.kind)} />
+                            <span className="flex-1 font-semibold">
+                              {i.name}
+                              {i.localName && <span className="font-normal text-muted"> · {i.localName}</span>}
+                            </span>
+                            {i.quantity !== null && <span className="tabular-nums">{copy.quantity(i.quantity)}</span>}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </div>
+            ),
+            character: (
+              <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+                <section>
+                  <Heading icon={Crosshair}>{copy.goals}</Heading>
+                  {build.goals.length === 0 ? <p className="card text-muted">{copy.noGoals}</p> : <Goals goals={build.goals} run={t.id} />}
+                </section>
+                <section>
+                  <Heading icon={Sparkles}>{copy.build}</Heading>
+                  <div className="card space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      {build.plan?.mainStat ? <p className="font-semibold">{copy.mainStat(build.plan.mainStat)}</p> : <span />}
+                      {current && <TalkAbout kind="stats" id={current.id} name={copy.build} playthroughId={t.id} />}
+                    </div>
+                    {build.plan?.summary && <p className="text-muted">{build.plan.summary}</p>}
+                    {current ? (
+                      <>
+                        <p className="text-sm text-muted">
+                          {current.takenOn}
+                          {current.level !== null ? ` · ${copy.level(current.level)}` : ""}
+                        </p>
+                        <Notes notes={current.notes} />
+                        <dl className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-1">
+                          {current.stats.map((s) => (
+                            <div key={s.key} className="flex justify-between gap-2">
+                              <dt>
+                                {s.name}
+                                {s.localName && <span className="text-sm text-muted"> · {s.localName}</span>}
+                              </dt>
+                              <dd className="font-semibold tabular-nums">
+                                {s.value}
+                                {s.change ? <span className="text-accent"> {s.change > 0 ? `+${s.change}` : s.change}</span> : null}
+                                {build.plan?.targets[s.key] !== undefined && <span className="text-muted"> / {build.plan.targets[s.key]}</span>}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </>
+                    ) : (
+                      <p className="text-muted">{copy.noBuild}</p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            ),
+            quests: (
+              <TagFilter tags={tagsInUse([...open, ...closed])} label={copy.tags}>
+                <div className="space-y-6">
+                  <Group icon={QUEST_ICONS.open} label={copy.openQuests} count={open.length}>
+                    {open.length === 0 ? <p className="card text-muted">{copy.noOpenQuests}</p> : <Quests quests={open} run={t.id} />}
                   </Group>
-                );
-              })}
-            </div>
-          </TagFilter>
-        )}
-
-        {sessions.length === 0 ? (
-          <p className="card text-muted">{copy.noSessions}</p>
-        ) : (
-          <ul className="card divide-y divide-rule py-1">
-            {sessions.map((s) => (
-              <li key={s.id} className="flex items-center gap-2">
-                <Link href={s.url} className="flex flex-1 gap-3 py-2 hover:text-accent">
-                  <span className="shrink-0 text-sm text-muted tabular-nums">{s.playedOn}</span>
-                  <span>{s.summary}</span>
-                </Link>
-                <TalkAbout kind="session" id={s.id} name={s.playedOn} playthroughId={t.id} />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* What the game is, the player's own notes on it and on this run, and the sites they trust for it. */}
-        {!hasNotes ? (
-          <p className="card text-muted">{copy.noNotes}</p>
-        ) : (
-          <div className="card space-y-3">
-            {(t.game.description || t.game.notes) && (
-              <div>
-                <h4 className="font-semibold">{t.game.title}</h4>
-                <Notes description={t.game.description} notes={t.game.notes} />
-              </div>
-            )}
-            {t.notes && (
-              <div>
-                <h4 className="font-semibold">{t.label}</h4>
-                <Notes notes={t.notes} />
-              </div>
-            )}
-            {t.game.sources.length > 0 && (
-              <div>
-                <h4 className="font-semibold">{copy.sources}</h4>
-                <ul className="mt-1 space-y-2 text-sm">
-                  {t.game.sources.map((x) => (
-                    <li key={x.url}>
-                      <a href={x.url} className="text-accent" target="_blank" rel="noopener noreferrer">
-                        {x.title ?? siteOf(x.url)}
-                      </a>
-                      {x.facts && <p className="text-muted">{x.facts}</p>}
+                  {closed.length > 0 && (
+                    <Group icon={QUEST_ICONS.done} label={copy.closedQuests} count={closed.length}>
+                      <Quests quests={closed} run={t.id} />
+                    </Group>
+                  )}
+                </div>
+              </TagFilter>
+            ),
+            // The inventory in the game's groups; on a wide screen two columns of cards.
+            items:
+              items.length === 0 ? (
+                <p className="card text-muted">{copy.noItems}</p>
+              ) : (
+                <TagFilter tags={tagsInUse(items)} label={copy.tags}>
+                  <div className="space-y-6">
+                    {groups.map(([label, key, list]) => (
+                      <Group key={label} icon={itemIcon(key)} label={label} count={list.length}>
+                        <ul className="grid gap-2 lg:grid-cols-2">
+                          {list.map((i) => (
+                            <Item key={i.id} item={i} run={t.id} />
+                          ))}
+                        </ul>
+                      </Group>
+                    ))}
+                  </div>
+                </TagFilter>
+              ),
+            codex:
+              codex.length === 0 ? (
+                <p className="card text-muted">{copy.noCodex}</p>
+              ) : (
+                <TagFilter tags={tagsInUse(codex)} label={copy.tags}>
+                  <div className="space-y-6">
+                    {codexKinds.map((k) => {
+                      const entries = codex.filter((e) => e.kind === k);
+                      return (
+                        <Group key={k} icon={CODEX_ICONS[k]} label={copy.codexKinds[k]} count={entries.length}>
+                          <ul className="grid gap-2 lg:grid-cols-2">
+                            {entries.map((e) => (
+                              <CodexEntry key={e.id} entry={e} run={t.id} />
+                            ))}
+                          </ul>
+                        </Group>
+                      );
+                    })}
+                  </div>
+                </TagFilter>
+              ),
+            sessions:
+              sessions.length === 0 ? (
+                <p className="card text-muted">{copy.noSessions}</p>
+              ) : (
+                <ul className="card divide-y divide-rule py-1">
+                  {sessions.map((s) => (
+                    <li key={s.id} className="flex items-center gap-2">
+                      <Link href={s.url} className="flex flex-1 gap-3 py-2 hover:text-accent">
+                        <span className="shrink-0 text-sm text-muted tabular-nums">{s.playedOn}</span>
+                        <span>{s.summary}</span>
+                      </Link>
+                      <TalkAbout kind="session" id={s.id} name={s.playedOn} playthroughId={t.id} />
                     </li>
                   ))}
                 </ul>
+              ),
+            // What the game is, the player's own notes on it and on this run, and the sites they trust for it.
+            notes: !hasNotes ? (
+              <p className="card text-muted">{copy.noNotes}</p>
+            ) : (
+              <div className="card space-y-3">
+                {(t.game.description || t.game.notes) && (
+                  <div>
+                    <h4 className="font-semibold">{t.game.title}</h4>
+                    <Notes description={t.game.description} notes={t.game.notes} />
+                  </div>
+                )}
+                {t.notes && (
+                  <div>
+                    <h4 className="font-semibold">{t.label}</h4>
+                    <Notes notes={t.notes} />
+                  </div>
+                )}
+                {t.game.sources.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold">{copy.sources}</h4>
+                    <ul className="mt-1 space-y-2 text-sm">
+                      {t.game.sources.map((x) => (
+                        <li key={x.url}>
+                          <a href={x.url} className="text-accent" target="_blank" rel="noopener noreferrer">
+                            {x.title ?? siteOf(x.url)}
+                          </a>
+                          {x.facts && <p className="text-muted">{x.facts}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* How much Claude adds on its own, and what shows without asking (ADR 0016). */}
-        <div className="card">
-          <PlaythroughSettings playthroughId={t.id} settings={t.settings} />
-        </div>
+            ),
+            // How much Claude adds on its own, and what shows without asking (ADR 0016).
+            settings: (
+              <div className="card">
+                <PlaythroughSettings playthroughId={t.id} settings={t.settings} />
+              </div>
+            ),
+          }[tab]
+        }
       </Register>
     </div>
   );
