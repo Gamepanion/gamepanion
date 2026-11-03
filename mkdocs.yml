@@ -12,6 +12,7 @@ exclude_docs: |
 
 hooks:
   - docs_hooks/roadmap.py
+  - docs_hooks/adr.py
 
 # English is the site; German pages sit next to their English ones (index.de.md) and are built under /de/. A page with no German version
 # shows the English one there (#10).
@@ -45,6 +46,7 @@ plugins:
             Development: Entwicklung
             Decisions: Entscheidungen
 
+# Decisions sits inside Internals: with navigation.sections only a second-level group collapses (#71).
 nav:
   - Home: index.md
   - What Gamepanion stands for: values.md
@@ -59,25 +61,25 @@ nav:
       - How it works: internals/how-it-works.md
       - Development: internals/development.md
       - Brand: internals/brand.md
-  - Decisions:
-      - AI-first game tracker with a built-in MCP: adr/0001-ai-first-game-tracker-with-built-in-mcp.md
-      - On-demand lookups, no crawling (superseded): adr/0002-on-demand-lookups-not-crawling.md
-      - Sign-in through a TypeScript mcp-login-oauth (superseded): adr/0003-sign-in-through-a-typescript-mcp-login-oauth.md
-      - Sign-in with Better Auth: adr/0004-sign-in-with-better-auth.md
-      - Spoiler levels and one gate: adr/0005-spoiler-levels-and-one-gate.md
-      - How Better Auth is wired: adr/0006-better-auth-wiring.md
-      - The REST API's tokens: adr/0007-rest-api-tokens.md
-      - Claude looks things up: adr/0008-claude-looks-things-up.md
-      - Goals and the character: adr/0009-goals-and-the-character.md
-      - The tracker, inventory and codex: adr/0010-the-tracker.md
-      - Notes and descriptions: adr/0011-notes-and-descriptions.md
-      - Icons from lucide: adr/0012-icons.md
-      - The in-app chat: adr/0013-in-app-chat.md
-      - Tags across groups: adr/0014-tags.md
-      - Passkeys and sign-in links: adr/0015-passkeys-and-sign-in-links.md
-      - Background and spoiler settings: adr/0016-background-and-spoilers.md
-      - The name Gamepanion: adr/0017-the-name-gamepanion.md
-      - "The brand: a companion, not a book": adr/0018-the-brand-a-companion-not-a-book.md
+      - Decisions:
+          - AI-first game tracker with a built-in MCP: adr/0001-ai-first-game-tracker-with-built-in-mcp.md
+          - On-demand lookups, no crawling (superseded): adr/0002-on-demand-lookups-not-crawling.md
+          - Sign-in through a TypeScript mcp-login-oauth (superseded): adr/0003-sign-in-through-a-typescript-mcp-login-oauth.md
+          - Sign-in with Better Auth: adr/0004-sign-in-with-better-auth.md
+          - Spoiler levels and one gate: adr/0005-spoiler-levels-and-one-gate.md
+          - How Better Auth is wired: adr/0006-better-auth-wiring.md
+          - The REST API's tokens: adr/0007-rest-api-tokens.md
+          - Claude looks things up: adr/0008-claude-looks-things-up.md
+          - Goals and the character: adr/0009-goals-and-the-character.md
+          - The tracker, inventory and codex: adr/0010-the-tracker.md
+          - Notes and descriptions: adr/0011-notes-and-descriptions.md
+          - Icons from lucide: adr/0012-icons.md
+          - The in-app chat: adr/0013-in-app-chat.md
+          - Tags across groups: adr/0014-tags.md
+          - Passkeys and sign-in links: adr/0015-passkeys-and-sign-in-links.md
+          - Background and spoiler settings: adr/0016-background-and-spoilers.md
+          - The name Gamepanion: adr/0017-the-name-gamepanion.md
+          - "The brand: a companion, not a book": adr/0018-the-brand-a-companion-not-a-book.md
 
 theme:
   name: material
