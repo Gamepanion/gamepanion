@@ -279,7 +279,7 @@ export function openApiDocument(serverUrl: string): Json {
       title: "Gamepanion API",
       version: "1",
       description:
-        "A spoiler-free quest log, build tracker and item list for the games you play. The MCP endpoint (/mcp) comes first; this API follows it, over the same data and the same rules: only the signed-in player's own log, and no spoiler unless a request asks for it.\n\n" +
+        "A spoiler-free companion for the games you play: the quests, build and items a player told Claude about. The MCP endpoint (/mcp) comes first; this API follows it, over the same data and the same rules: only the signed-in player's own log, and no spoiler unless a request asks for it.\n\n" +
         'Every error is JSON, `{"error": "...", "code": "..."}`. Besides the responses listed per operation, an unknown path answers 404 (`not_found`), a method an operation doesn\'t have answers 405 with `Allow`, and a failure on the server\'s side answers 500 (`internal`) without details.',
       license: { name: "AGPL-3.0-only", identifier: "AGPL-3.0-only" },
     },

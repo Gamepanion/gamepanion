@@ -540,7 +540,7 @@ function correctNext(cs: Corrected[], changes: { what: string; background?: stri
   // Raising background doesn't fill in what was filed before on its own (ADR 0016): Claude offers it.
   if (changes.some((c) => c.what === "playthrough" && c.background && c.background !== "none"))
     next.push(
-      "The player's background setting is up: from now on, add background after each session as record's next says. Offer once to add it for what is already in the book too; only on a yes look things up for its items, codex entries and quests, and file them with correct (addBackground).",
+      "The player's background setting is up: from now on, add background after each session as record's next says. Offer once to add it for what is already filed too; only on a yes look things up for its items, codex entries and quests, and file them with correct (addBackground).",
     );
   if (cs.some((c) => c.removed && !c.mergedInto))
     next.push("A removal can't be undone. If one was a mistake, tell the player at once and file it again with record from what they say.");

@@ -23,11 +23,14 @@ What Gamepanion looks and sounds like, and how to use it. The decision behind it
 
 ## Logo
 
-![The Gamepanion icon](brand/icon.svg){ width="96" } ![The flat icon](brand/icon-flat.svg){ width="48" }
+![The Gamepanion lockup](brand/lockup.svg){ width="320" }
 
-* **Icon:** a violet speech bubble with sharp corners holding a blocky G in the darkest violet, with a lime offset shadow. Below 48 px it is drawn flat, without the shadow (`icon-flat.svg`, also the favicon). App icons put it on the near-black ground, maskable ones inside the safe zone.
+![The Gamepanion icon](brand/icon.svg){ width="96" } ![The flat icon](brand/icon-flat.svg){ width="48" } ![The 16 px icon](brand/icon-16.svg){ width="32" }
+
+* **Icon:** a violet speech bubble with sharp corners holding a blocky G in the darkest violet, with a lime offset shadow. Below 48 px it is drawn flat, without the shadow (`icon-flat.svg`, served as `/icon.svg`); at 16 px it is redrawn on the pixel grid (`icon-16.svg`), and `app/favicon.ico` holds that one at 16 px and the flat one at 32 and 48. App icons put it on the near-black ground, maskable ones inside the safe zone.
 * **Wordmark:** "Gamepanion" in Atkinson Hyperlegible Next 800, tight (-0.035em). "Game" in the text colour, "panion" in the soft violet `#C9B4FF` on dark and `#6B3FD6` on light. The wordmark is the one place the violet may appear on every page.
 * **Lockup:** icon left of the wordmark, the gap a quarter of the icon's width.
+* **Files** in `docs/internals/brand/`, the text turned into outlines so they render without the font: `wordmark.svg` and `lockup.svg` for dark grounds, `-light` for light ones; `social-preview.png` (1280×640) for GitHub; `app/opengraph-image.png` (1200×630) is the app's link preview. To redraw them after a change, set the text in Atkinson Hyperlegible Next 800 at -0.035em and convert it to paths (fontTools does it in a few lines).
 * Don't: recolour the icon, put it on violet, outline the wordmark, set it in capitals, or add a glow.
 
 ## Colour

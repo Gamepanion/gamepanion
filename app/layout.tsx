@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "@/components/copy/client";
+import { siteUrl } from "@/backend";
 import { serverCopy, serverLocale } from "@/components/copy/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,6 +10,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: copy.appName, template: `%s · ${copy.appName}` },
     description: copy.tagline,
+    // The link preview (app/opengraph-image.png, docs/internals/brand.md) needs absolute URLs; PUBLIC_URL gives them.
+    metadataBase: new URL(siteUrl()),
+    openGraph: { title: `${copy.appName}: ${copy.sloganPlay} ${copy.sloganRemembers}`, description: copy.tagline, siteName: copy.appName },
     // On an iPhone's home screen it opens without Safari's bars, under its own name (the manifest says the same for everyone else).
     appleWebApp: { capable: true, title: copy.appName, statusBarStyle: "default" },
   };

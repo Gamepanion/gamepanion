@@ -65,7 +65,8 @@ export const de: Copy = {
 
   // Consent
   consentTitle: "Gamepanion verbinden",
-  consentLead: (client: string) => `${client} möchte dein Questlog lesen und schreiben: deine Spiele, Sessions, Quests, Builds und Gegenstände.`,
+  consentLead: (client: string) =>
+    `${client} möchte lesen und schreiben, was dein Gamepanion sich merkt: deine Spiele, Sessions, Quests, Builds und Gegenstände.`,
   consentWho: (name: string) => `Angemeldet als ${name}.`,
   allow: "Erlauben",
   deny: "Ablehnen",
