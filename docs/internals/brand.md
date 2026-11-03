@@ -57,7 +57,7 @@ Dark first; the light theme follows the system setting.
 
 * Sharp corners (0, 2 and 4 px); round only for avatars.
 * Elevation is a hard offset shadow, 4 px right and down, in violet for cards and in the text colour for the primary button. No blurred glows, no gradients.
-* **Games are generated tiles:** their initials in Atkinson 800 on a colour from a hash of the name (about 45% saturation, 34% lightness). No cover art.
+* **Games are generated tiles:** their initials in Atkinson 800 on a colour from a hash of the name (45% saturation, 30% lightness, so white initials keep 4.5:1 on every hue). No cover art.
 * Icons are simple line icons with a 2 px stroke.
 
 ## Where the tokens live

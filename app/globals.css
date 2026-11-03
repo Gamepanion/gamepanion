@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
-/* The quest journal: warm paper, night ink, and ember as the one accent, the colour of a lantern kept for the way back. Dark mode is the
-   same journal by lamplight. */
+/* Violet arcade (ADR 0018, docs/internals/brand.md): a near-black ground, one violet accent, lime for what's done, Atkinson set heavy,
+   sharp corners and a hard offset shadow. Dark first; the light theme follows the system setting. The variable names are the app's
+   own roles: --paper the ground, --ink the text, --rule the hairlines, --hint what warns (spoilers above none). */
 :root {
-  --paper: #f6f2ea;
-  --surface: #fffdf8;
-  --surface-2: #ece6da;
-  --ink: #1e2230;
-  --muted: #645f6e;
-  --rule: #ded6c6;
-  --accent: #b4532a;
+  --paper: #f7f6fa;
+  --surface: #ffffff;
+  --surface-2: #eeebf5;
+  --ink: #14121a;
+  --muted: #5a556a;
+  --rule: #dad6e3;
+  --accent: #6b3fd6;
+  --accent-soft: #6b3fd6;
   --on-accent: #ffffff;
-  --hint: #8a6d1d;
+  --signal: #6b3fd6;
+  --hint: #9a5b00;
   --error: #b42318;
-  --vignette: rgb(60 40 25 / 0.25);
-  --column: rgb(246 242 234 / 0.88);
-  --glass: rgb(255 253 248 / 0.84);
+  --glass: var(--surface);
   /* The register's tabs (components/Register.tsx): the Okabe-Ito colours, told apart with every common kind of colour blindness, warm and
      cool in turn, so neighbours stay apart with red-green colour blindness and in grey; each tab carries its name as well, never the colour alone. */
   --tab-overview: #cc79a7;
@@ -31,19 +32,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #16171d;
-    --surface: #1f2028;
-    --surface-2: #2a2b35;
-    --ink: #ece6da;
-    --muted: #a39d93;
-    --rule: #34353f;
-    --accent: #f0955a;
-    --on-accent: #16171d;
-    --hint: #e3c06a;
+    --paper: #0c0b10;
+    --surface: #17151f;
+    --surface-2: #221f2c;
+    --ink: #f2f0f7;
+    --muted: #a49fb4;
+    --rule: #2e2a3a;
+    --accent: #a77bff;
+    --accent-soft: #c9b4ff;
+    --on-accent: #12082a;
+    --signal: #c6f432;
+    --hint: #e69f00;
     --error: #ff8a80;
-    --vignette: rgb(0 0 0 / 0.5);
-    --column: rgb(22 23 29 / 0.86);
-    --glass: rgb(31 32 40 / 0.8);
     --tab-overview: #d98cb6;
     --tab-character: #e69f00;
     --tab-quests: #3a9ad9;
@@ -64,15 +64,40 @@
   --color-muted: var(--muted);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-signal: var(--signal);
   --color-hint: var(--hint);
   --color-error: var(--error);
   --font-sans: var(--font-text), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-code), ui-monospace, monospace;
+}
+
+/* Sharp corners: every rounded-* in the app draws at most 4px; rounded-full stays round (avatars, the chat button). */
+@theme {
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
+}
+
+/* Headings are set heavy and tight, as on the brand page. */
+h1,
+h2,
+h3 {
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+h1 {
+  letter-spacing: -0.03em;
 }
 
 /* A wide screen is read from further away: everything a touch larger (it is all in rem). */
@@ -82,135 +107,96 @@ body {
   }
 }
 
-/* The backdrop: an open almanac, by daylight or by candlelight (public/backdrop-*.svg, from scripts/backdrop.py), fixed behind a translucent
-   column, with a vignette that keeps the edges quiet. A pseudo-element, not background-attachment: fixed, which phones ignore. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse at 50% 35%, transparent 40%, var(--vignette) 100%),
-    url("/backdrop-light.svg") center / cover no-repeat,
-    var(--paper);
-}
-@media (prefers-color-scheme: dark) {
-  body::before {
-    background:
-      radial-gradient(ellipse at 50% 35%, transparent 40%, var(--vignette) 100%),
-      url("/backdrop-dark.svg") center / cover no-repeat,
-      var(--paper);
-  }
-}
-
-/* On a narrow screen the book is cropped to a strip of it: take the strip with the moon phases and the ribbon. */
-@media (max-width: 40rem) {
-  body::before {
-    background-position:
-      center,
-      72% center,
-      center;
-  }
-}
-
-/* Frosted glass: everything with text on it, so the backdrop shows around and through it and the text stays readable. */
+/* A panel: what used to be frosted glass over the backdrop is now a plain surface. */
 @utility glass {
-  background: var(--glass);
-  backdrop-filter: blur(12px);
+  background: var(--surface);
 }
-/* A small label or link on the backdrop. */
+/* A small label or link. */
 @utility pill {
-  background: var(--glass);
-  backdrop-filter: blur(12px);
+  background: var(--surface);
   display: inline-block;
-  border-radius: 9999px;
+  border-radius: 2px;
   padding: 0.125rem 0.625rem;
+}
+/* A HUD label: small, monospaced in spirit, uppercase and tracked. */
+@utility eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @layer components {
   .field {
-    @apply w-full rounded-lg border border-rule bg-surface px-3 py-2 text-ink outline-none focus:border-accent;
+    @apply w-full rounded-md border border-muted bg-surface px-3 py-2 text-ink outline-none focus:border-accent;
   }
   .button-primary {
-    @apply rounded-lg bg-accent px-4 py-2 font-semibold text-on-accent disabled:opacity-60;
+    @apply rounded-md bg-accent px-4 py-2 text-sm font-extrabold tracking-[0.06em] text-on-accent uppercase disabled:opacity-60;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .button-primary:active:not(:disabled) {
+    box-shadow: 1px 1px 0 var(--ink);
+    transform: translate(3px, 3px);
   }
   .button-secondary {
-    @apply rounded-lg border border-rule bg-surface px-4 py-2 font-semibold text-ink hover:border-accent disabled:opacity-60;
+    @apply rounded-md border-2 border-ink bg-transparent px-4 py-2 text-sm font-extrabold tracking-[0.06em] text-ink uppercase hover:border-accent disabled:opacity-60;
   }
   .card {
-    @apply glass rounded-xl border border-rule p-4;
+    @apply glass rounded-md border border-rule p-4;
   }
   /* A heading block: the page's title and what it says under it. */
   .plate {
-    @apply glass rounded-xl px-4 py-3;
+    @apply glass rounded-md border border-rule px-4 py-3;
   }
-  /* A text button in the accent, for a small action next to what it changes (Rename on the bookplate). */
+  /* A text button in the accent, for a small action next to what it changes (Rename on the account card). */
   .link {
     @apply rounded text-accent underline-offset-4 hover:underline;
-  }
-  /* The account page's bookplate: the inside cover of the almanac, saying whose it is. The cover's gilt as a double frame, inset, the
-     name set large in the middle. */
-  .bookplate {
-    @apply glass relative rounded-xl px-6 py-8 text-center;
-  }
-  .bookplate::before,
-  .bookplate::after {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-    border: 1px solid color-mix(in oklab, var(--hint) 55%, transparent);
-  }
-  .bookplate::before {
-    inset: 0.375rem;
-    border-radius: 0.625rem;
-  }
-  .bookplate::after {
-    inset: 0.625rem;
-    border-radius: 0.5rem;
-    border-color: color-mix(in oklab, var(--hint) 30%, transparent);
-  }
-  .bookplate-name {
-    @apply mt-2 text-3xl leading-tight font-bold break-words;
-    letter-spacing: -0.01em;
-  }
-  /* The name while it is being renamed: the same type in the same place, on a gilt underline instead of a box. */
-  .bookplate-input {
-    @apply block w-full bg-transparent text-center outline-none;
-    border-bottom: 1px dashed color-mix(in oklab, var(--hint) 70%, transparent);
-  }
-  .bookplate-input:focus-visible {
-    border-bottom: 2px solid var(--accent);
-  }
-  .bookplate-input::placeholder {
-    @apply font-normal text-muted italic;
   }
   .link:disabled {
     @apply cursor-default no-underline opacity-50;
   }
-  /* A section's heading: its icon in a seal tinted in the colour of the part it is in (the register's --c; ember outside it), then its
-     name in sentence case, on a frosted pill that reads over the backdrop. */
+  /* The account page's card: who is signed in, the name set large, renamed in place; it carries the hard offset shadow. */
+  .account-card {
+    @apply glass relative rounded-md border border-rule px-6 py-6;
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+  .account-name {
+    @apply mt-1 text-3xl leading-tight font-extrabold break-words;
+    letter-spacing: -0.03em;
+  }
+  /* The name while it is being renamed: the same type in the same place, on an underline instead of a box. */
+  .account-input {
+    @apply block w-full bg-transparent outline-none;
+    border-bottom: 2px solid var(--muted);
+  }
+  .account-input:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  .account-input::placeholder {
+    @apply font-normal text-muted italic;
+  }
+  /* A section's heading: its icon in a square tinted in the colour of the part it is in (the register's --c; violet outside it), then
+     its name, uppercase like a HUD label. */
   .section-title {
-    @apply glass mb-2 flex w-fit items-center gap-2 rounded-full py-1 pr-3 pl-1 text-sm font-semibold text-ink;
+    @apply mb-2 flex w-fit items-center gap-2 text-xs font-extrabold tracking-[0.08em] text-ink uppercase;
   }
   .seal {
-    @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full;
+    @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md;
     background: color-mix(in oklab, var(--c, var(--accent)) 24%, var(--surface));
     color: color-mix(in oklab, var(--c, var(--accent)) 65%, var(--ink));
   }
   .seal svg {
     @apply h-3.5 w-3.5;
   }
-  /* The content column: on a phone there is none, so the scene shows between the cards; on a wider screen it sits between the backdrop's
-     two halves. */
+  /* The content column: hairlines on either side on a wider screen. */
   @media (min-width: 40rem) {
     .column {
-      background: var(--column);
-      @apply border-x border-rule backdrop-blur-sm;
+      @apply border-x border-rule;
     }
   }
 }
 
-/* The book (components/Pages.tsx): the pages side by side, one screen wide each, snapped into place by the browser, each scrolling up and
+/* The pages (components/Pages.tsx): side by side, one screen wide each, snapped into place by the browser, each scrolling up and
    down on its own. The contain stops a swipe past the last page from turning into the browser's back gesture where it can; iOS Safari's
    swipe from the very edge stays the browser's, which is why the pages keep their side gutter. */
 .pages {
@@ -234,27 +220,27 @@ body::before {
   scroll-snap-stop: always;
   @apply px-4 pt-6 pb-20 lg:px-14;
 }
-/* The ribbon marks: one per page, like the ribbons of an almanac, the one in hand longer and in the accent. */
+/* The page markers: one bar per page, like a level select, the one in view wider and in the accent. */
 .ribbons {
-  @apply glass absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-start gap-1.5 overflow-hidden rounded-full px-3 py-1.5;
+  @apply glass absolute bottom-3 left-1/2 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-1.5 overflow-hidden border border-rule px-3 py-2;
 }
 .ribbon {
-  @apply h-3 w-2 shrink-0 rounded-b-sm bg-rule transition-[height,background-color] duration-200;
+  @apply h-1.5 w-3 shrink-0 bg-rule transition-[width,background-color] duration-200;
 }
 .ribbon[aria-current="page"] {
-  @apply h-5 bg-accent;
+  @apply w-6 bg-accent;
 }
 /* The arrows at the sides, for a mouse; a phone swipes. */
 .page-arrow {
-  @apply glass absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-rule text-2xl leading-none text-ink hover:border-accent disabled:opacity-0;
+  @apply glass absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md border border-rule text-2xl leading-none text-ink hover:border-accent disabled:opacity-0;
 }
 @media (pointer: fine) {
   .page-arrow {
     display: flex;
   }
 }
-/* A playthrough on the contents page: a card with a bookmark ribbon over its top edge carrying the page number, ember while it is played,
-   ink once it is finished or dropped (and the card quieter). Its next step is set off by a rule in the ink of a margin note. */
+/* A playthrough on the first page: a card with a badge at its top right carrying its number, violet while it is played, muted once it is
+   finished or dropped (and the card quieter). Its next step is set off on a tinted strip. */
 .run-card {
   @apply relative transition-colors hover:border-accent;
 }
@@ -262,13 +248,13 @@ body::before {
   @apply opacity-75;
 }
 .run-ribbon {
-  @apply absolute -top-1 right-4 flex w-8 justify-center bg-accent pt-2 pb-3.5 text-sm font-bold text-on-accent tabular-nums;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 0.4375rem), 0 100%);
+  @apply absolute -top-2 right-4 flex min-w-8 justify-center bg-accent px-1.5 py-1 text-sm font-extrabold text-on-accent tabular-nums;
+  box-shadow: 2px 2px 0 var(--ink);
 }
 .run-ribbon-closed {
   @apply bg-muted text-surface;
 }
-/* A line of the card: its icon in the margin, ember, then what it says. The next step is set off by a rule like a margin note. */
+/* A line of the card: its icon in the margin, violet, then what it says. */
 .run-line {
   @apply flex items-start gap-3;
 }
@@ -283,16 +269,15 @@ body::before {
     transition: none;
   }
 }
-/* The plan (goals, ADR 0009): an ordered list, each goal with a thin rule that fills in ember as the stat gets there, like ink run along a
-   ruled line. Reached goals stay, quieter; a suggestion is set apart by a dotted rule until the player agrees. */
+/* The plan (goals, ADR 0009): an ordered list, each goal with a bar that fills in violet as the stat gets there, like an XP bar. Reached goals stay, quieter; a suggestion is set apart by a dotted rule until the player agrees. */
 .goal {
   @apply space-y-1;
 }
 .goal-track {
-  @apply h-1 overflow-hidden rounded-full bg-surface-2;
+  @apply h-1.5 overflow-hidden bg-surface-2;
 }
 .goal-fill {
-  @apply h-full rounded-full bg-accent;
+  @apply h-full bg-accent;
 }
 .goal-reached {
   @apply opacity-60;
@@ -304,8 +289,6 @@ body::before {
   @apply bg-muted;
 }
 
-/* A group within a section (weapons, bosses): smaller than the section's title, on the same frosted backing so it reads over the
-   backdrop. */
 /* The player's own notes (ADR 0011): their words, set apart from what the game says, paragraphs kept. */
 .player-note {
   @apply mt-1 border-l-2 border-accent pl-2 text-sm whitespace-pre-line italic;
@@ -343,8 +326,8 @@ body::before {
   @apply outline-2 outline-offset-2 outline-ink;
 }
 
-/* The register (components/Register.tsx): coloured index tabs, like the dividers of a ring binder, along the top of a playthrough's page.
-   Each tab is paper tinted in its colour with the colour's edge on top; the open one stands taller and fuller, and its colour runs on as
+/* The register (components/Register.tsx): coloured tabs along the top of a playthrough's page, like a game menu's.
+   Each tab is the surface tinted in its colour with the colour's edge on top; the open one stands taller and fuller, and its colour runs on as
    the rule under the strip, as a divider's tab runs into its sheet. On a phone the tabs take two rows; from a tablet up they are one row
    that stays at the top while the part scrolls. */
 .register {
@@ -387,8 +370,7 @@ body::before {
     z-index: 5;
     padding-top: 1.5rem;
     margin-top: -1.5rem;
-    background: linear-gradient(to bottom, transparent, var(--glass) 1.5rem);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(to bottom, transparent, var(--paper) 1.5rem);
   }
 }
 .register-tab {
@@ -402,7 +384,7 @@ body::before {
   border: 1px solid color-mix(in oklab, var(--t) 55%, var(--ink));
   border-bottom: 0;
   border-top: 4px solid var(--t);
-  border-radius: 0.5rem 0.5rem 0 0;
+  border-radius: 2px 2px 0 0;
   padding: 0.375rem 0.5rem 0.3125rem;
   background: color-mix(in oklab, var(--t) 18%, var(--surface));
   color: var(--ink);
@@ -492,11 +474,9 @@ body::before {
   @apply font-semibold tabular-nums;
 }
 
-/* Pull to fetch (components/Follow.tsx): the icon's bookmark ribbon comes down from under the header, in ink, ember once letting go
-   fetches. It follows the finger without easing; let go, it slides back up, and while the pull's fetch runs it hangs and sways. */
+/* Pull to fetch (components/Follow.tsx): a bar comes down from under the header, in ink, violet once letting go fetches. It follows the finger without easing; let go, it slides back up, and while the pull's fetch runs it hangs and sways. */
 .ribbon-pull {
   @apply pointer-events-none absolute top-0 right-6 z-10 w-3.5 lg:right-10;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 0.4375rem), 0 100%);
   transform-origin: top center;
 }
 .ribbon-pull-settle {
@@ -525,137 +505,21 @@ body::before {
   }
 }
 
-/* The sign-in page: a closed almanac on a desk (components/ClosedBook.tsx). The desk covers the open almanac of the backdrop until the
-   player is in; then the cover swings open on its spine, showing its marbled inside and the title page, the desk fades, and the open
-   almanac is what is left. Timings: keep OPENING_MS in ClosedBook.tsx in step. */
-.desk {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  overflow-y: auto;
-  background: radial-gradient(ellipse at 50% 40%, #d8cbb6, #ad9c82);
-  transition: opacity 0.7s ease 1.2s;
+/* The sign-in page (components/SignIn.tsx): the wordmark and the slogan, set large and uppercase, next to the sign-in panel; stacked on
+   a phone. */
+.sign-in {
+  @apply mx-auto grid min-h-dvh max-w-5xl content-center items-center gap-10 px-4 py-10 lg:grid-cols-[1.1fr_1fr] lg:px-8;
 }
-@media (prefers-color-scheme: dark) {
-  .desk {
-    background: radial-gradient(ellipse at 50% 40%, #1d1a20, #0a090c);
-  }
+.slogan {
+  @apply text-5xl leading-[0.92] font-extrabold uppercase sm:text-6xl lg:text-7xl;
+  letter-spacing: -0.035em;
 }
-.desk-open {
-  opacity: 0;
-  pointer-events: none;
+.slogan em {
+  @apply text-accent not-italic;
 }
-.book {
-  position: relative;
-  width: min(100%, 25rem);
-  min-height: min(36rem, calc(100dvh - 2rem));
-  perspective: 2200px;
-  transition:
-    transform 0.7s ease 1.2s,
-    opacity 0.7s ease 1.2s;
-}
-.book-open {
-  transform: scale(1.12);
-  opacity: 0;
-}
-/* The pages under the cover, their edges showing on the right; the top one is the title page. */
-.book-pages {
-  position: absolute;
-  inset: 4px -6px 4px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px 10px 10px 2px;
-  color: #7a6347;
-  background:
-    repeating-linear-gradient(to right, transparent 0 2px, rgb(120 95 60 / 0.25) 2px 3px) right / 7px 100% no-repeat,
-    linear-gradient(to right, rgb(0 0 0 / 0.18), transparent 2.5rem),
-    #f3e9d4;
-  box-shadow: 0 18px 40px rgb(0 0 0 / 0.35);
-}
-/* The cover and its inside turn together, on the spine. */
-.book-flap {
-  position: relative;
-  min-height: inherit;
-  transform-origin: left center;
-  transform-style: preserve-3d;
-  transition: transform 1.4s cubic-bezier(0.5, 0.05, 0.25, 1);
-}
-.book-open .book-flap {
-  transform: rotateY(-165deg);
-}
-.book-cover {
-  position: relative;
-  min-height: inherit;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 2.25rem 1.5rem 1.75rem 2.5rem;
-  border-radius: 4px 12px 12px 4px;
-  color: #d9b56a;
-  background: linear-gradient(to right, rgb(0 0 0 / 0.35), transparent 1.6rem), radial-gradient(ellipse at 40% 30%, #6b3220, #3e1c12 70%, #2c140d);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.4),
-    0 20px 45px rgb(0 0 0 / 0.45);
-  backface-visibility: hidden;
-}
-/* The inside of the cover: marbled endpaper in a leather turn-in. */
-.book-endpaper {
-  position: absolute;
-  inset: 0;
-  border-radius: 12px 4px 4px 12px;
-  border: 0.6rem solid #3e1c12;
-  background:
-    radial-gradient(ellipse at 20% 30%, rgb(180 83 42 / 0.35), transparent 40%), radial-gradient(ellipse at 75% 60%, rgb(217 181 106 / 0.35), transparent 45%),
-    radial-gradient(ellipse at 40% 85%, rgb(30 34 48 / 0.35), transparent 40%), repeating-radial-gradient(circle at 60% 40%, #e9dcc0 0 6px, #dcc9a4 6px 9px);
-  transform: rotateY(180deg);
-  backface-visibility: hidden;
-}
-/* The tooled gold border. */
-.book-cover::after {
-  content: "";
-  position: absolute;
-  inset: 0.75rem 0.75rem 0.75rem 1.6rem;
-  border: 1.5px solid rgb(217 181 106 / 0.7);
-  outline: 1px solid rgb(217 181 106 / 0.35);
-  outline-offset: 4px;
-  border-radius: 6px;
-  pointer-events: none;
-}
-.book-title {
-  text-align: center;
-  text-shadow: 0 1px 0 rgb(0 0 0 / 0.5);
-}
-/* The label on the cover holds the sign-in, in the paper's colours whatever the mode. */
-.book-label {
-  position: relative;
-  z-index: 1;
-  margin-top: auto;
-  padding: 1.25rem;
-  border-radius: 6px;
-  background: #f6eedc;
-  box-shadow:
-    inset 0 0 0 1px rgb(120 95 60 / 0.35),
-    0 2px 6px rgb(0 0 0 / 0.3);
-  --surface: #fffdf8;
-  --ink: #1e2230;
-  --muted: #645f6e;
-  --rule: #d6c7a8;
-  --accent: #b4532a;
-  --on-accent: #ffffff;
-  --error: #b42318;
-  color: var(--ink);
-}
-@media (prefers-reduced-motion: reduce) {
-  .desk,
-  .book,
-  .book-flap {
-    transition: none;
-  }
+/* No violet shadow here: the slogan and the button already spend the accent. */
+.sign-in-panel {
+  @apply glass rounded-md border border-rule p-6;
 }
 /* What a link names stays clear of the register's tabs when it is scrolled to. */
 .register-panel [id] {
@@ -665,8 +529,8 @@ body::before {
 /* A part's groups at its top (components/Groups.tsx): chips in the part's colour, the one shown filled, bold and underlined, so it
    differs in more than colour; each with how many it holds. They wrap onto a second line rather than scroll sideways, which would
    fight the swipe that turns pages. */
-/* The tag row (ADR 0014): one paper strip with the tab's spine, like the group bands below it, so it doesn't float on the backdrop. Its
-   chips are shaped like luggage tags, notched with a punched hole, since they hang on things across the groups. */
+/* The tag row (ADR 0014): one strip with the tab's colour as its edge, like the group bands below it. Its chips are shaped like luggage
+   tags, notched with a punched hole, since they hang on things across the groups. */
 .tag-row {
   @apply flex flex-wrap items-center gap-x-1.5 gap-y-2 rounded-r-xl bg-surface py-2 pr-2 pl-2.5 shadow-sm;
   border-left: 4px solid color-mix(in oklab, var(--c, var(--accent)) 75%, var(--ink));
@@ -684,9 +548,9 @@ body::before {
   @apply relative inline-flex items-center gap-1.5 py-1 pr-2.5 pl-5 text-sm text-ink;
   background: color-mix(in oklab, var(--c, var(--accent)) 22%, var(--surface));
   clip-path: polygon(0.6rem 0, 100% 0, 100% 100%, 0.6rem 100%, 0 50%);
-  border-radius: 0 0.4rem 0.4rem 0;
+  border-radius: 0 2px 2px 0;
 }
-/* The punched hole, in the strip's paper. */
+/* The punched hole, in the strip's colour. */
 .tag-shape::before {
   @apply absolute top-1/2 left-2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-surface;
   content: "";
@@ -710,7 +574,7 @@ body::before {
   @apply mt-1 flex flex-wrap gap-1;
 }
 .card-tags li {
-  @apply rounded-full border border-dashed bg-surface px-2 text-xs text-muted;
+  @apply rounded-md border border-dashed bg-surface px-2 text-xs text-muted;
   border-color: color-mix(in oklab, var(--c, var(--accent)) 45%, var(--surface));
 }
 
@@ -755,8 +619,8 @@ body::before {
   @apply bg-surface px-2 py-0.5 text-sm text-ink;
 }
 
-/* The in-app chat (components/chat/Chat.tsx): a frosted sheet that rises over the book, the player's words in ink on the right, Claude's
-   on paper on the left, the rows it changed as chips that open them. The button to open it, Claude's mark on a round button, sits at the bottom right of every page, and a
+/* The in-app chat (components/chat/Chat.tsx): a sheet that rises over the page, the player's words in ink on the right, Claude's
+   on the surface on the left, the rows it changed as chips that open them. The button to open it, Claude's mark on a round button, sits at the bottom right of every page, and a
    small one on every card opens it about that card. */
 .chat-fab {
   @apply fixed right-4 bottom-4 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full border border-rule bg-surface shadow-lg hover:border-accent lg:right-8 lg:bottom-6;
@@ -824,7 +688,7 @@ body::before {
   @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent disabled:opacity-40;
 }
 
-/* A playthrough's two settings (ADR 0016), under its title: each a row of levels in one rounded bar, the chosen level filled. Spoilers
+/* A playthrough's two settings (ADR 0016), under its title: each a row of levels in one bar, the chosen level filled. Spoilers
    above none fill in the hint colour, so a page that gives things away says so at a glance. */
 .settings {
   @apply grid gap-6;
@@ -839,7 +703,7 @@ body::before {
   @apply text-xs text-muted;
 }
 .dial-levels {
-  @apply flex rounded-full border border-rule bg-surface p-0.5;
+  @apply flex rounded-md border border-muted bg-surface p-0.5;
 }
 .dial-levels label {
   @apply relative flex-1 cursor-pointer;
@@ -848,7 +712,7 @@ body::before {
   @apply absolute inset-0 cursor-pointer opacity-0;
 }
 .dial-levels span {
-  @apply block rounded-full px-2 py-1 text-center text-sm text-muted transition-colors;
+  @apply block rounded-md px-2 py-1 text-center text-sm text-muted transition-colors;
 }
 .dial-levels label:hover span {
   @apply text-ink;
@@ -872,4 +736,24 @@ body::before {
 .background {
   @apply mt-2 space-y-1 border-l-2 pl-3 text-sm;
   border-color: color-mix(in oklab, var(--c, var(--accent)) 35%, var(--surface));
+}
+
+/* A game's tile (components/GameTile.tsx): its initials, heavy and white, on the colour from its name. */
+.game-tile {
+  @apply inline-flex shrink-0 items-center justify-center rounded-md font-extrabold text-white;
+  letter-spacing: -0.02em;
+}
+
+/* Something to paste elsewhere (components/CopyField.tsx): the value as code, the copy button beside it. */
+.copy-field {
+  @apply flex items-stretch overflow-hidden rounded-md border border-muted bg-surface-2;
+}
+.copy-field code {
+  @apply min-w-0 flex-1 overflow-x-auto px-3 py-2 font-mono text-sm whitespace-nowrap text-accent-soft select-all;
+}
+.copy-button {
+  @apply inline-flex shrink-0 items-center gap-1.5 border-l border-muted px-3 text-xs font-extrabold tracking-[0.06em] text-ink uppercase hover:bg-surface;
+}
+.copy-button:focus-visible {
+  @apply outline-2 -outline-offset-2 outline-ink;
 }

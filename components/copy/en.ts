@@ -1,13 +1,13 @@
 // Every string the web app shows, in English: the first language (values V8) and the shape every other one follows (index.ts).
 export const en = {
   appName: "Gamepanion",
-  tagline: "A spoiler-free quest log for the games you play.",
+  tagline: "A spoiler-free companion for the games you play.",
+  sloganPlay: "Play on.",
+  sloganRemembers: "Your Gamepanion remembers.",
 
   // Sign-in
-  almanac: "An almanac of your playthroughs",
-  keptBy: (email: string) => `Kept by ${email}`,
   signInTitle: "Sign in to Gamepanion",
-  signInLead: "Your quest log, build and items, as you told them to Claude.",
+  signInLead: "Your quests, build and items, as you told them to Claude.",
   emailLabel: "Email",
   sendCode: "Send me a code",
   codeSent: (email: string) => `A code is on its way to ${email}. It works once, for five minutes.`,
@@ -24,9 +24,9 @@ export const en = {
   refused: (provider: string | null, code: string) => `${provider ?? "The sign-in provider"} refused the sign-in: ${code}`,
   signOut: "Sign out",
 
-  // The account page: the bookplate (who keeps this almanac) and how they sign in
+  // The account page: who is signed in, and how they sign in
   account: "Account",
-  keptByLead: "This almanac is kept by",
+  signedInAs: "Signed in as",
   noName: "No name yet",
   rename: "Rename",
   addName: "Add your name",
@@ -70,13 +70,16 @@ export const en = {
   unknownClient: "An app",
   consentFailed: "That didn't work. Start the connection again from the app.",
 
-  // The book: a contents page, then a page per playthrough
-  contents: "Contents",
+  // The pages: your games, then a page per playthrough
+  contents: "Your games",
   previousPage: "Previous page",
   nextPage: "Next page",
   pages: "Pages",
   nothingYet: "Nothing recorded yet.",
-  connectHint: (url: string) => `Add ${url} to Claude as a custom connector, then tell Claude what you are playing.`,
+  connectBefore: "Add this address to Claude as a custom connector:",
+  connectAfter: "Then tell Claude what you are playing.",
+  copyIt: "Copy",
+  copied: "Copied",
   lastPlayed: (day: string) => `Last played ${day}`,
   pageNumber: (n: number) => `Page ${n}`,
   moreOpen: (n: number) => `and ${n} more open`,
