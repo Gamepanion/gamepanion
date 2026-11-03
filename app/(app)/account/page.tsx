@@ -1,8 +1,9 @@
+import { Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { passkeysOf, profileOf } from "@/backend";
+import { passkeysOf, profileOf, signInMethods } from "@/backend";
+import { Bookplate, EmailCode } from "@/components/Account";
 import { Passkeys } from "@/components/Passkeys";
-import { Profile } from "@/components/Profile";
 import { serverCopy, serverLocale } from "@/components/copy/server";
 import { pagePlayer } from "../viewer";
 
@@ -11,31 +12,47 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-// The player's account: their name and address (#61), and their passkeys (ADR 0015), added here while signed in and used on the sign-in
-// page.
+// The player's account: the bookplate of their almanac (their name, renamed in place, and address; #61), then every way they sign in:
+// email codes (and moving to another address), the providers they linked, their passkeys (ADR 0015).
 export default async function AccountPage() {
   await pagePlayer();
   const h = await headers();
   const copy = await serverCopy();
   const date = new Intl.DateTimeFormat(await serverLocale(), { dateStyle: "medium" });
-  const profile = (await profileOf(h)) ?? { name: "", email: "" };
+  const profile = (await profileOf(h)) ?? { name: "", email: "", linked: [] };
+  const methods = signInMethods();
   const list = (await passkeysOf(h)).map((p) => ({ id: p.id, name: p.name ?? copy.unnamedPasskey, added: date.format(new Date(p.createdAt)) }));
   return (
     <div className="px-4 pt-6 pb-16 lg:px-8">
-      <div className="plate max-w-xl space-y-10">
-        <h1 className="text-2xl font-bold">{copy.account}</h1>
-        <section aria-labelledby="profile">
-          <h2 id="profile" className="text-xl font-bold">
-            {copy.profile}
+      {/* Two leaves on a wide screen, like the open almanac behind: the bookplate on the left, staying in view; how they sign in on the
+          right. One column on a phone. */}
+      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+        <h1 className="sr-only">{copy.account}</h1>
+        <div className="lg:sticky lg:top-6">
+          <Bookplate name={profile.name} email={profile.email} />
+        </div>
+        <section aria-labelledby="sign-in-ways">
+          <h2 id="sign-in-ways" className="section-title">
+            <span className="seal">
+              <ShieldCheck aria-hidden="true" />
+            </span>
+            {copy.signInWays}
           </h2>
-          <Profile name={profile.name} email={profile.email} />
-        </section>
-        <section aria-labelledby="passkeys">
-          <h2 id="passkeys" className="text-xl font-bold">
-            {copy.passkeys}
-          </h2>
-          <p className="mt-2 text-muted">{copy.passkeysLead}</p>
-          <Passkeys list={list} />
+          <ul className="card divide-y divide-rule p-0">
+            {methods.emailCode && <EmailCode email={profile.email} />}
+            {profile.linked.map((p) => (
+              <li key={p.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="seal">
+                  <Link2 aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{p.label}</p>
+                  <p className="text-sm text-muted">{copy.linkedProvider}</p>
+                </div>
+              </li>
+            ))}
+            <Passkeys list={list} />
+          </ul>
         </section>
       </div>
     </div>

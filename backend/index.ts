@@ -17,6 +17,7 @@ export {
   signedInAs,
   signInMethods,
   type PasskeyView,
+  type ProfileView,
   type RefusedSignIn,
 } from "./auth/session";
 export type { SignInMethods } from "./auth/methods";

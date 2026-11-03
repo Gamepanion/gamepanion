@@ -6,6 +6,7 @@ import { requestToResourceInput, verifyAccessTokenRequest } from "better-auth/oa
 import type { Player } from "../types";
 import { apiResource, issuer, jwksUrl } from "../urls";
 import { auth } from "./auth";
+import { signInMethods } from "./methods";
 
 /** The signed-in player of a page request, from its session cookie; null when there is none or it is no longer valid. */
 export async function playerFromHeaders(headers: Headers): Promise<Player | null> {
@@ -68,10 +69,17 @@ export async function passkeysOf(headers: Headers): Promise<PasskeyView[]> {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-/** The signed-in player's name ("" when none was set) and address, for the account page. */
-export async function profileOf(headers: Headers): Promise<{ name: string; email: string } | null> {
-  const s = await (await auth()).api.getSession({ headers });
-  return s ? { name: s.user.name ?? "", email: s.user.email } : null;
+export type ProfileView = { name: string; email: string; linked: { id: string; label: string }[] };
+
+/** The signed-in player's name ("" when none was set), address and the providers they signed in with, for the account page. A provider
+ * no longer configured shows by its id. */
+export async function profileOf(headers: Headers): Promise<ProfileView | null> {
+  const a = await auth();
+  const s = await a.api.getSession({ headers });
+  if (!s) return null;
+  const labels = new Map(signInMethods().providers.map((p) => [p.id, p.label]));
+  const ids = [...new Set((await a.api.listUserAccounts({ headers })).map((x) => x.providerId))].filter((id) => id !== "credential");
+  return { name: s.user.name ?? "", email: s.user.email, linked: ids.map((id) => ({ id, label: labels.get(id) ?? id })) };
 }
 
 /** The signed-in user's display name or address, for the consent page. */

@@ -144,6 +144,35 @@ body::before {
   .plate {
     @apply glass rounded-xl px-4 py-3;
   }
+  /* A text button in the accent, for a small action next to what it changes (Rename on the bookplate). */
+  .link {
+    @apply rounded text-accent underline-offset-4 hover:underline;
+  }
+  /* The account page's bookplate: the inside cover of the almanac, saying whose it is. The cover's gilt as a double frame, inset, the
+     name set large in the middle. */
+  .bookplate {
+    @apply glass relative rounded-xl px-6 py-8 text-center;
+  }
+  .bookplate::before,
+  .bookplate::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid color-mix(in oklab, var(--hint) 55%, transparent);
+  }
+  .bookplate::before {
+    inset: 0.375rem;
+    border-radius: 0.625rem;
+  }
+  .bookplate::after {
+    inset: 0.625rem;
+    border-radius: 0.5rem;
+    border-color: color-mix(in oklab, var(--hint) 30%, transparent);
+  }
+  .bookplate-name {
+    @apply mt-2 text-3xl leading-tight font-bold break-words;
+    letter-spacing: -0.01em;
+  }
   /* A section's heading: its icon in a seal tinted in the colour of the part it is in (the register's --c; ember outside it), then its
      name in sentence case, on a frosted pill that reads over the backdrop. */
   .section-title {

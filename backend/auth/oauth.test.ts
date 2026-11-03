@@ -438,7 +438,7 @@ test("a signed-in player sets their name; nobody else can", async () => {
   expect((await fetch(`${base}/api/auth/update-user`, json({ name: "Ada" }))).status).toBe(401);
   const cookie = cookieOf(await signIn("ada@example.com"));
   expect((await fetch(`${base}/api/auth/update-user`, json({ name: "Ada L." }, { cookie }))).status).toBe(200);
-  expect(await profileOf(new Headers({ cookie }))).toEqual({ name: "Ada L.", email: "ada@example.com" });
+  expect(await profileOf(new Headers({ cookie }))).toEqual({ name: "Ada L.", email: "ada@example.com", linked: [] });
 });
 
 test("a player moves to another address with a code sent there; they stay the same player, and only the right code does it", async () => {
