@@ -1,6 +1,6 @@
 site_name: Gamepanion
 site_description: A spoiler-free quest log, build tracker and item list for the games you play. You tell Claude while you play; Gamepanion remembers, and never shows what you haven't found.
-site_url: https://questlog.marceltov.de/
+site_url: https://docs.gamepanion.app/
 repo_url: https://github.com/gamepanion/gamepanion
 repo_name: gamepanion/gamepanion
 edit_uri: edit/main/docs/
