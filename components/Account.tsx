@@ -12,6 +12,7 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
   const copy = useCopy();
   const router = useRouter();
   const hint = useId();
+  const field = useId();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(name);
   const [busy, setBusy] = useState(false);
@@ -45,32 +46,36 @@ export function Bookplate({ name, email }: { name: string; email: string }) {
         {copy.keptByLead}
       </p>
       {editing ? (
-        <form onSubmit={save} className="mx-auto mt-3 max-w-sm space-y-3 text-left">
-          <label className="block">
-            <span className="text-sm font-semibold">{copy.displayName}</span>
-            <input
-              className="field mt-1"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={60}
-              autoComplete="name"
-              autoFocus
-              aria-describedby={hint}
-            />
-            <span id={hint} className="mt-1 block text-sm text-muted">
-              {copy.displayNameHint}
-            </span>
+        <form onSubmit={save} onKeyDown={(e) => e.key === "Escape" && cancel()}>
+          <label htmlFor={field} className="sr-only">
+            {copy.displayName}
           </label>
-          <div className="flex justify-end gap-2">
-            <button type="button" className="button-secondary" onClick={cancel}>
+          <input
+            id={field}
+            className="bookplate-name bookplate-input"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={copy.noName}
+            maxLength={60}
+            autoComplete="name"
+            autoFocus
+            onFocus={(e) => e.currentTarget.select()}
+            aria-describedby={hint}
+          />
+          <p className="mt-1 text-sm text-muted [overflow-wrap:anywhere]">{email}</p>
+          <div className="mt-4 flex justify-center gap-5 text-sm">
+            <button type="button" className="link text-muted" onClick={cancel}>
               {copy.cancel}
             </button>
-            <button className="button-primary" disabled={busy || draft.trim() === name}>
+            <button className="link font-semibold" disabled={busy || draft.trim() === name}>
               {copy.saveName}
             </button>
           </div>
+          <p id={hint} className="mt-3 text-xs text-muted">
+            {copy.displayNameHint}
+          </p>
           {error && (
-            <p role="alert" className="text-sm text-error">
+            <p role="alert" className="mt-2 text-sm text-error">
               {copy.saveFailed}
             </p>
           )}
