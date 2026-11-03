@@ -18,7 +18,8 @@ import { serverCopy } from "@/components/copy/server";
 import { CopyField } from "@/components/CopyField";
 import { FirstRun } from "@/components/FirstRun";
 import { GameTile } from "@/components/GameTile";
-import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ListTodo, ScrollText } from "lucide-react";
+import { PlaythroughCard, type PlaythroughCardData } from "@/components/PlaythroughCard";
+import { CalendarDays, Crosshair, Footprints, ListTodo } from "lucide-react";
 import { ChatOn } from "@/components/chat/Chat";
 
 // Your games (the home page): every game with its tile, and under it a card for each of its playthroughs that says where the player is:
@@ -73,72 +74,21 @@ async function RunCard({ player, run: t }: { player: Player; run: PlaythroughVie
     itemsOf(player, t.id, { reveal: t.settings.spoilers }),
     codexOf(player, t.id, { reveal: t.settings.spoilers }),
   ]);
-  const last = sessions[0];
   const next = open.find((q) => q.status === "open" && q.nextStep) ?? open[0];
   const goals = build.goals.filter((g) => g.status === "open" && !g.suggested && g.target !== null && g.current !== null).slice(0, 2);
-  const playing = t.status === "playing";
-  const counts = [
-    { icon: ScrollText, text: copy.questCount(open.length) },
-    { icon: Backpack, text: copy.itemCount(items.length) },
-    { icon: BookOpen, text: copy.codexCount(codex.length) },
-  ];
+  const data: PlaythroughCardData = {
+    label: t.label,
+    status: t.status,
+    characterClass: t.character?.class ?? null,
+    last: sessions[0] ?? null,
+    next: next ? { name: next.name, text: next.nextStep, blocked: next.status === "blocked" } : null,
+    moreOpen: Math.max(0, open.length - 1),
+    goals: goals.map((g) => ({ id: g.id, name: g.stat ? `${g.stat.name} ${g.target}` : copy.level(g.target!), current: g.current!, target: g.target! })),
+    counts: { quests: open.length, items: items.length, codex: codex.length },
+  };
   return (
     <li>
-      <Link href={t.url} className={`run-card card block ${playing ? "" : "run-card-closed"}`}>
-        <span className="block font-semibold">
-          {t.label} · {copy.status[t.status]}
-          {t.character?.class && <span className="font-normal text-muted"> · {t.character.class}</span>}
-        </span>
-        <span className="run-line mt-3">
-          <CalendarDays aria-hidden="true" />
-          {last ? (
-            <span>
-              <span className="text-sm text-muted tabular-nums">{copy.lastPlayed(last.playedOn)}</span>
-              <span className="block">{last.summary}</span>
-            </span>
-          ) : (
-            <span className="text-sm text-muted">{copy.notPlayedYet}</span>
-          )}
-        </span>
-        {playing && next && (
-          <span className="run-line run-next mt-3">
-            <Footprints aria-hidden="true" />
-            <span>
-              <span className="block text-sm font-semibold">{next.name}</span>
-              <span className="block text-sm">{next.status === "blocked" ? copy.waitingOnGame : next.nextStep}</span>
-              {open.length > 1 && <span className="block text-sm text-muted">{copy.moreOpen(open.length - 1)}</span>}
-            </span>
-          </span>
-        )}
-        {playing && goals.length > 0 && (
-          <span className="run-line mt-3">
-            <Crosshair aria-hidden="true" />
-            <span className={`grid flex-1 gap-3 ${goals.length > 1 ? "sm:grid-cols-2" : ""}`}>
-              {goals.map((goal) => (
-                <span key={goal.id} className="block">
-                  <span className="flex items-baseline justify-between gap-2 text-sm">
-                    <span className="font-semibold">{goal.stat ? `${goal.stat.name} ${goal.target}` : copy.level(goal.target!)}</span>
-                    <span className="text-muted tabular-nums">{copy.goalProgress(goal.current!, goal.target!)}</span>
-                  </span>
-                  <span className="goal-track mt-1 block" role="presentation">
-                    <span className="goal-fill block" style={{ width: `${Math.min(1, goal.current! / goal.target!) * 100}%` }} />
-                  </span>
-                </span>
-              ))}
-            </span>
-          </span>
-        )}
-        <span className="mt-3 block border-t border-dotted border-rule pt-2 text-sm text-muted">
-          <span className="flex flex-wrap gap-x-5 gap-y-1">
-            {counts.map(({ icon: Icon, text }) => (
-              <span key={text} className="inline-flex items-center gap-1.5">
-                <Icon aria-hidden="true" className="h-4 w-4" />
-                {text}
-              </span>
-            ))}
-          </span>
-        </span>
-      </Link>
+      <PlaythroughCard data={data} copy={copy} href={t.url} />
     </li>
   );
 }

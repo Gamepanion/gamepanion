@@ -7,6 +7,23 @@ export const de: Copy = {
   sloganPlay: "Spiel weiter.",
   sloganRemembers: "Dein Gamepanion merkt es sich.",
 
+  exampleLabel: "Beispiel",
+  exampleFigure: "Beispiel eines abgelegten Durchlaufs",
+  exampleCard: {
+    game: "Lanterns of Saltmere",
+    label: "NG",
+    status: "playing",
+    characterClass: "Gezeitenruferin",
+    last: { playedOn: "2026-11-02", summary: "Die versunkene Kapelle erreicht und das zweite Leuchtfeuer entzündet." },
+    next: { name: "Die Schuld des Fährmanns", text: "Bring dem Fährmann drei Flussperlen", blocked: false },
+    moreOpen: 2,
+    goals: [
+      { id: "resolve", name: "Entschlossenheit 30", current: 22, target: 30 },
+      { id: "level", name: "Stufe 25", current: 18, target: 25 },
+    ],
+    counts: { quests: 3, items: 14, codex: 7 },
+  },
+
   // Sign-in
   signInTitle: "Bei Gamepanion anmelden",
   signInLead: "Deine Quests, dein Build und deine Gegenstände, so wie du sie Claude erzählt hast.",
