@@ -7,6 +7,7 @@ Gamepanion: a spoiler-free companion for the games you play (quest log, build, i
 ## Commands
 
 - `npm run dev` / `npm run build` / `npm start`
+- `npm run demo`: a dev server on :3123 with its own data in `data/demo`, a demo player with two playthroughs, signed in without mail; it prints the session cookie for Playwright (`page.context().addCookies`) and curl. Set `GAMEPANION_ANTHROPIC_API_KEY` to any value to show the chat.
 - `npm run typecheck` (next typegen + tsc), `npm run lint`, `npm run format` / `npm run format:check` (Prettier, 160 columns)
 - `npm test` (vitest), `npx vitest run <file>` for one file. `backend/auth/oauth.test.ts` runs the whole OAuth sign-in over HTTP.
 - `npm run generate` rewrites `openapi.json` from the route table (`backend/http/api.ts`); commit the result, CI fails on any difference.

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Tailwind scans the repository for class names; the design explorations are mockups, not the app. */
+@source not "../.open-design";
 
 /* Violet arcade (ADR 0018, docs/internals/brand.md): a near-black ground, one violet accent, lime for what's done, Atkinson set heavy,
    sharp corners and a hard offset shadow. Dark first; the light theme follows the system setting. The variable names are the app's

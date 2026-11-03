@@ -22,8 +22,10 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local data and scratch
+# local data and scratch (the demo instance's data is /data/demo, scripts/demo.sh)
 /data/
+# the browser tool's snapshots and logs: ignored, so Tailwind's source scan skips them and the dev server doesn't reload on each
+/.playwright-mcp/
 /.superpowers/
 /docs/superpowers/
 
