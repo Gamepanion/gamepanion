@@ -2,6 +2,7 @@
 // deletion, and the yearly saving.
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { accessOf } from "../access";
+import { resetDbForTests } from "../db/testing";
 import { fakeCancelled, fakeSignature } from "../payments";
 import { deletePlayerLog } from "../players";
 import { pricingPlans, paymentsWebhookRoute, receiveWebhook, setEmailLookupForTests, startCheckout, yearlySaving } from "./flow";
@@ -12,6 +13,7 @@ const p = { id: "p1" };
 const DAY = 86_400_000;
 
 beforeEach(async () => {
+  await resetDbForTests();
   await resetBillingForTests();
   vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "fake");
   vi.stubEnv("GAMEPANION_FAKE_WEBHOOK_SECRET", SECRET);
