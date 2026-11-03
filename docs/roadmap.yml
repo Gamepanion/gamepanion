@@ -13,6 +13,17 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: switcher
+    status: done
+    date: 2026-11-03
+    icon: swap-horizontal
+    title: A switcher and tabs with addresses
+    title_de: Ein Umschalter und Reiter mit Adressen
+    summary: The sideways pages give way to a playthrough switcher in the header; every tab of a playthrough has its own address, and links open the right tab.
+    summary_de: Statt seitlich blätternder Seiten ein Umschalter für Durchläufe in der Kopfzeile; jeder Reiter eines Durchlaufs hat eine eigene Adresse, und Links öffnen den richtigen Reiter.
+    links:
+      - { label: "ADR 0019", url: "https://docs.gamepanion.app/adr/0019-a-switcher-and-tabs-not-pages/" }
+      - { label: "#83", url: "https://github.com/gamepanion/gamepanion/pull/83" }
   - id: name
     status: done
     date: 2026-11-01

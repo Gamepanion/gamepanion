@@ -1,33 +1,15 @@
+import Link from "next/link";
 import { buildOf, codexOf, itemsOf, listPlaythroughs, mcpUrl, questsOf, sessionsOf, type Player, type PlaythroughView } from "@/backend";
-import { Pages } from "@/components/Pages";
 import { serverCopy } from "@/components/copy/server";
-import { Sheet } from "./Sheet";
 import { CopyField } from "@/components/CopyField";
 import { GameTile } from "@/components/GameTile";
 import { Backpack, BookOpen, CalendarDays, Crosshair, Footprints, ScrollText } from "lucide-react";
 
-// The web app is a row of pages (#12): your games first, then one page per playthrough, most recently played first, so it opens on the game
-// being played now. Every page is rendered here; components/Pages.tsx lays them side by side and turns them. `at` is the playthrough
-// whose address was opened (null for your games). Each page shows as much as its playthrough's spoiler setting (ADR 0016).
-export async function Book({ player, at }: { player: Player; at: string | null }) {
+// Your games (the home page): every game with its tile, and under it a card for each of its playthroughs that says where the player is:
+// the last session, the next step, the plan's next goals and how much is filed. A card opens its playthrough.
+export async function Home({ player }: { player: Player }) {
   const copy = await serverCopy();
   const runs = await listPlaythroughs(player);
-  const pages = [{ key: "contents", title: copy.contents, href: "/" }, ...runs.map((t) => ({ key: t.id, title: `${t.game.title} ${t.label}`, href: t.url }))];
-  const start = at ? runs.findIndex((t) => t.id === at) + 1 : 0;
-  return (
-    <Pages pages={pages} start={start} labels={{ previous: copy.previousPage, next: copy.nextPage, pages: copy.pages }}>
-      <Contents player={player} runs={runs} />
-      {runs.map((t) => (
-        <Sheet key={t.id} player={player} playthrough={t} />
-      ))}
-    </Pages>
-  );
-}
-
-// Your games: every game with its tile, and under it a card for each of its playthroughs that says where the player is: the last
-// session, the next step, the plan's next goals and how much is filed. The badge carries the page number. A card turns to its page (data-page), or, without JavaScript, opens its address.
-async function Contents({ player, runs }: { player: Player; runs: PlaythroughView[] }) {
-  const copy = await serverCopy();
   if (!runs.length)
     return (
       <div className="space-y-4">
@@ -40,7 +22,7 @@ async function Contents({ player, runs }: { player: Player; runs: PlaythroughVie
         </div>
       </div>
     );
-  // Games in the order of their latest playthrough; each game's playthroughs in page order.
+  // Games in the order of their latest playthrough; each game's playthroughs latest first.
   const games = [...new Map(runs.map((t) => [t.game.id, t.game])).values()];
   return (
     <div className="space-y-6">
@@ -52,14 +34,14 @@ async function Contents({ player, runs }: { player: Player; runs: PlaythroughVie
             <span className="text-2xl">{g.title}</span>
             {g.platform && <span className="self-end pb-1 text-muted">{g.platform}</span>}
           </h2>
-          <ol className="space-y-3">{runs.map((t, i) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} page={i + 1} />))}</ol>
+          <ol className="space-y-3">{runs.map((t) => (t.game.id !== g.id ? null : <RunCard key={t.id} player={player} run={t} />))}</ol>
         </section>
       ))}
     </div>
   );
 }
 
-async function RunCard({ player, run: t, page }: { player: Player; run: PlaythroughView; page: number }) {
+async function RunCard({ player, run: t }: { player: Player; run: PlaythroughView }) {
   const copy = await serverCopy();
   const [open, build, sessions, items, codex] = await Promise.all([
     questsOf(player, t.id, { statuses: ["open", "blocked"], reveal: t.settings.spoilers }),
@@ -79,12 +61,8 @@ async function RunCard({ player, run: t, page }: { player: Player; run: Playthro
   ];
   return (
     <li>
-      <a href={t.url} data-page={page} className={`run-card card block ${playing ? "" : "run-card-closed"}`}>
-        <span className={`run-ribbon ${playing ? "" : "run-ribbon-closed"}`}>
-          <span className="sr-only">{copy.pageNumber(page)}</span>
-          <span aria-hidden="true">{page}</span>
-        </span>
-        <span className="block pr-10 font-semibold">
+      <Link href={t.url} className={`run-card card block ${playing ? "" : "run-card-closed"}`}>
+        <span className="block font-semibold">
           {t.label} · {copy.status[t.status]}
           {t.character?.class && <span className="font-normal text-muted"> · {t.character.class}</span>}
         </span>
@@ -137,7 +115,7 @@ async function RunCard({ player, run: t, page }: { player: Player; run: Playthro
             ))}
           </span>
         </span>
-      </a>
+      </Link>
     </li>
   );
 }

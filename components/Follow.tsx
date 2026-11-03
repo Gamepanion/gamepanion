@@ -1,11 +1,11 @@
 "use client";
 // The pages follow what Claude files while they are open: they fetch again when the app comes back to the front (after switching over
 // from Claude), when the network returns, and every little while as long as they are in view. router.refresh() renders the server
-// components again and keeps everything on the client: the page turned to, where each page is scrolled.
+// components again and keeps everything on the client: where the page is scrolled.
 //
 // And a pull to fetch now, for the home-screen app, which has no browser to reload it. The window doesn't scroll (the header stays and
 // each page scrolls on its own), so the browser's own pull-to-refresh never happens; this one starts when the page under the finger is
-// at its top and the finger moves down, not sideways (that turns the page). What comes down is the bookmark ribbon of the app's icon:
+// at its top and the finger moves down, not sideways. What comes down is the bookmark ribbon of the app's icon:
 // it turns ember once it is long enough, and letting go then fetches.
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
@@ -51,7 +51,7 @@ export function Follow({ children }: { children: ReactNode }) {
   useEffect(() => {
     const el = area.current;
     if (!el) return;
-    // null: no pull (not at the top, or turning a page); undefined: not decided yet.
+    // null: no pull (not at the top, or a sideways swipe); undefined: not decided yet.
     let start: { x: number; y: number } | null = null;
     let vertical: boolean | undefined;
     let length = 0;
