@@ -77,6 +77,19 @@ test("a free or plain subscriber without a key can't reach the instance's key: t
   expect(await chatPlan(s.a)).toMatchObject({ counted: false });
 });
 
+test("a player in GAMEPANION_FREE_PLAYERS runs on the instance's key, uncounted, and may speak; others on the free tier don't", async () => {
+  sell();
+  setTranscriberForTests({ transcribe: async () => ({ text: "Hi." }) });
+  vi.stubEnv("GAMEPANION_FREE_PLAYERS", "@gamepanion.app,me@example.com");
+  setEmailLookupForTests(async (id) => (id === s.a.id ? "Crew@Gamepanion.app" : "player@example.com"));
+  expect(await chatPlan(s.a)).toMatchObject({ counted: false });
+  expect((await chatFor(s.a, ask())).status).toBe(200);
+  expect(calls[0].max_tokens).toBe(16000);
+  expect(await voiceEnabled(s.a)).toBe(true);
+  expect(await chatPlan(s.b)).toEqual({ needsKey: true });
+  expect(await voiceEnabled(s.b)).toBe(false);
+});
+
 test("a hosted-AI player runs on the instance's key with the cap and the guardrails, and every round counts", async () => {
   sell();
   await subscribe(s.a, "hostedAi");

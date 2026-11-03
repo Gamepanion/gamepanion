@@ -77,7 +77,8 @@ export async function voiceEnabled(p: Player): Promise<boolean> {
   if (!transcriber()) return false;
   const plan = await chatPlan(p);
   if (!plan || !("model" in plan)) return false;
-  return !config.paymentProvider() || plan.counted;
+  // Where the instance sells, speaking runs on its whisper for those its key serves: the hosted-AI plan and GAMEPANION_FREE_PLAYERS.
+  return !config.paymentProvider() || plan.counted || !plan.model.own;
 }
 
 const STATUS = {

@@ -1,10 +1,11 @@
 // The hosted-AI tier (#56, ADR 0024): where the instance sells, its own Anthropic key serves only players on "Subscription + hosted AI",
 // within a monthly quota of tokens and transcription minutes, a per-minute rate and a reply-length cap, and with a system prompt that keeps
-// the chat on the player's own game. Everyone else runs the chat on their own key (ADR 0021), which never counts. Without a payment
+// the chat on the player's own game; and players in GAMEPANION_FREE_PLAYERS, uncounted. Everyone else runs the chat on their own key
+// (ADR 0021), which never counts. Without a payment
 // provider nothing here applies: the instance's key serves everyone, as before (V7).
-import { subscriptionOf } from "./billing/flow";
+import { playerEmail, subscriptionOf } from "./billing/flow";
 import { billing } from "./billing/store";
-import { config } from "./config";
+import { config, mayJoin } from "./config";
 import { today } from "./dates";
 import { processState } from "./state";
 import type { Player } from "./types";
@@ -12,7 +13,10 @@ import type { Player } from "./types";
 /** May the player's chat run on the instance's key? `counted`: their use counts against the hosted-AI quota and its guardrails apply. */
 export async function operatorAi(p: Player): Promise<{ allowed: boolean; counted: boolean }> {
   if (!config.paymentProvider()) return { allowed: true, counted: false };
-  return (await subscriptionOf(p)).hostedAi ? { allowed: true, counted: true } : { allowed: false, counted: false };
+  if ((await subscriptionOf(p)).hostedAi) return { allowed: true, counted: true };
+  // GAMEPANION_FREE_PLAYERS are never limited: the instance's key serves them as it would without a provider.
+  const email = await playerEmail(p.id);
+  return email && mayJoin(email, config.freePlayers()) ? { allowed: true, counted: false } : { allowed: false, counted: false };
 }
 
 const month = (now = new Date()) => today(now).slice(0, 7);
