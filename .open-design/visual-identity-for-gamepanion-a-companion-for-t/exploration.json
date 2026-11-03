@@ -40,5 +40,11 @@
       "spec": "### Quiet graphite  `(id: quiet-graphite)`\n\nNeutral graphite greys, off-white text, a muted gold accent, generous spacing. Restrained and content-first, almost no decoration; brand carried by type weight and the icon.\n",
       "entryPath": ".open-design/visual-identity-for-gamepanion-a-companion-for-t/quiet-graphite.html"
     }
-  ]
+  ],
+  "chosen": {
+    "directionId": "violet-arcade",
+    "next": "save-design-system",
+    "notes": "Gamepanion's style for the visual overhaul (#68): dark first with the light theme kept, Atkinson Hyperlegible Next heavy, Okabe-Ito tabs with names, generated game tiles.",
+    "chosenAt": "2026-11-03T09:15:40.427Z"
+  }
 }
