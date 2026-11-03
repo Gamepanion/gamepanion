@@ -34,3 +34,17 @@ Gamepanion: a spoiler-free quest log, build tracker and item list for the games 
 - Env vars are `GAMEPANION_*`, except `PUBLIC_URL`, `DATA_DIR`, `PORT`, `TZ`. Keep `backend/config.ts`, `.env.example` and `docs/self-hosting/configuration.md` in step; `compose.yaml` reads `.env` whole (`env_file`), so a new setting doesn't touch it.
 - Architectural decisions go to `docs/adr/NNNN-*.md` (MADR). Never commit superpowers artifacts (`.superpowers/`, specs, plans).
 - `next dev` writes a "nextjs-agent-rules" block into `AGENTS.md`; it is git-ignored, don't commit it.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `gamepanion/gamepanion`, through the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default roles, each label named after its role (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` at the root, ADRs in `docs/adr/`. See `docs/agents/domain.md`.
