@@ -16,12 +16,13 @@ import { questsOf } from "../quests";
 import { resetSecretForTests } from "../secret";
 import { auth, resetAuthForTests } from "./auth";
 import { setMailerForTests } from "./mail";
-import { authRoute, authServerMetadataRoute, playerFromHeaders } from "./session";
+import { authRoute, authServerMetadataRoute, playerFromHeaders, profileOf } from "./session";
 
 let server: Server;
 let base = "";
 const codes = new Map<string, string>();
 const links = new Map<string, string>();
+const purposes = new Map<string, string>();
 
 // The routes of app/, without Next: what each path is answered by.
 function route(req: Request): Promise<Response> {
@@ -76,8 +77,9 @@ beforeAll(async () => {
   vi.stubEnv("GAMEPANION_OIDC_FAKE_ISSUER", `${base}/fake-oidc`);
   vi.stubEnv("GAMEPANION_OIDC_FAKE_CLIENT_ID", "gamepanion-client");
   resetSecretForTests();
-  setMailerForTests(async (to, code, link) => {
+  setMailerForTests(async (to, code, { purpose, link }) => {
     codes.set(to, code);
+    purposes.set(to, purpose);
     if (link) links.set(to, link);
     else links.delete(to);
   });
@@ -430,4 +432,38 @@ test("a client registered without asking for /api/v1, as claude.ai registers, ca
   const r = await fetch(authorize, { redirect: "manual", headers: { accept: "text/html" } });
   const to = new URL(r.status === 302 ? r.headers.get("location")! : (await r.json()).url);
   expect(to.searchParams.get("error")).toBe("invalid_target");
+});
+
+test("a signed-in player sets their name; nobody else can", async () => {
+  expect((await fetch(`${base}/api/auth/update-user`, json({ name: "Ada" }))).status).toBe(401);
+  const cookie = cookieOf(await signIn("ada@example.com"));
+  expect((await fetch(`${base}/api/auth/update-user`, json({ name: "Ada L." }, { cookie }))).status).toBe(200);
+  expect(await profileOf(new Headers({ cookie }))).toEqual({ name: "Ada L.", email: "ada@example.com", linked: [] });
+});
+
+test("a player moves to another address with a code sent there; they stay the same player, and only the right code does it", async () => {
+  const cookie = cookieOf(await signIn("ada@example.com"));
+  const before = await playerFromHeaders(new Headers({ cookie }));
+  const move = async (to: string, session: string) => {
+    codes.delete(to);
+    expect((await fetch(`${base}/api/auth/email-otp/request-email-change`, json({ newEmail: to }, { cookie: session }))).status).toBe(200);
+    expect(purposes.get(to)).toBe("change-email");
+    const wrong = codes.get(to) === "000000" ? "111111" : "000000";
+    expect((await fetch(`${base}/api/auth/email-otp/change-email`, json({ newEmail: to, otp: wrong }, { cookie: session }))).status).toBe(400);
+    const done = await fetch(`${base}/api/auth/email-otp/change-email`, json({ newEmail: to, otp: codes.get(to) }, { cookie: session }));
+    expect(done.status).toBe(200);
+    return [session, cookieOf(done)].filter(Boolean).join("; ");
+  };
+  expect((await fetch(`${base}/api/auth/email-otp/request-email-change`, json({ newEmail: "ada@new.example" }))).status).toBe(401);
+
+  // The new address needn't be one that may sign up: the player already is one.
+  const moved = await move("ada@new.example", cookie);
+  expect((await profileOf(new Headers({ cookie: moved })))?.email).toBe("ada@new.example");
+  expect(await playerFromHeaders(new Headers({ cookie: moved }))).toEqual(before);
+  const ctx = await (await auth()).$context;
+  expect(await ctx.internalAdapter.findUserByEmail("ada@example.com")).toBeNull();
+
+  // And back, so the address the other tests sign in with is still this player.
+  await move("ada@example.com", moved);
+  expect((await ctx.internalAdapter.findUserByEmail("ada@example.com"))?.user.id).toBe(before!.id);
 });

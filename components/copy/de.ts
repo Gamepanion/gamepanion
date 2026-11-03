@@ -26,6 +26,28 @@ export const de: Copy = {
   refused: (provider: string | null, code: string) => `${provider ?? "Der Anmeldedienst"} hat die Anmeldung abgelehnt: ${code}`,
   signOut: "Abmelden",
 
+  // Die Kontoseite: das Exlibris (wer diesen Almanach führt) und wie man sich anmeldet
+  account: "Konto",
+  keptByLead: "Diesen Almanach führt",
+  noName: "Noch kein Name",
+  rename: "Umbenennen",
+  addName: "Namen eintragen",
+  displayName: "Name",
+  displayNameHint: "Wird angezeigt, wenn du eine App mit Gamepanion verbindest. Leer: deine E-Mail-Adresse.",
+  saveName: "Name speichern",
+  cancel: "Abbrechen",
+  saveFailed: "Das wurde nicht gespeichert. Versuch es noch einmal.",
+  signInWays: "Wie du dich anmeldest",
+  emailCode: "Code per E-Mail",
+  emailCodeTo: (email: string) => `An ${email}`,
+  changeAddress: "Adresse ändern",
+  newEmail: "Neue Adresse",
+  sendChangeCode: "Code schicken",
+  changeCodeFailed: "An diese Adresse ließ sich kein Code schicken. Prüf sie oder versuch es in einer Minute noch einmal.",
+  useAddress: "Diese Adresse verwenden",
+  changeEmailFailed: "Das hat nicht geklappt. Prüf den Code oder fordere einen neuen an.",
+  linkedProvider: "Mit diesem Konto verknüpft",
+
   // Passkeys, auf der Kontoseite
   passkeys: "Passkeys",
   passkeysLead:

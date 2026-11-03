@@ -116,7 +116,10 @@ function options(database: Awaited<ReturnType<typeof openSqlite>>) {
       // Codes and links are stored hashed: auth.sqlite holds no usable code or link.
       emailOTP({
         storeOTP: "hashed",
+        // The account page's email change: a code to the new address, then the switch. Only a signed-in player asks, so no sign-up check.
+        changeEmail: { enabled: true },
         sendVerificationOTP: async ({ email, otp, type }, ctx) => {
+          if (type === "change-email") return sendCode(email, otp, { purpose: "change-email" });
           if (type !== "sign-in") return;
           if (!config.smtp()) throw new APIError("BAD_REQUEST", { message: "Email codes are off on this instance" });
           // No mail to an address that may not sign up and isn't a player: nobody can use Gamepanion to send mail to strangers.
@@ -124,7 +127,7 @@ function options(database: Awaited<ReturnType<typeof openSqlite>>) {
           // During an MCP or script sign-in (the login page's signed query came along) the mail holds only the code: a link would sign in
           // whichever browser opens it, not the one the authorization waits in (ADR 0004).
           const link = (await oauthSignIn.get()) ? undefined : await signInLink(email, ctx?.request?.headers);
-          await sendCode(email, otp, link);
+          await sendCode(email, otp, { purpose: "sign-in", link });
         },
       }),
       magicLink({
