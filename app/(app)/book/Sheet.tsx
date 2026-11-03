@@ -187,15 +187,13 @@ export async function Sheet({ player: p, playthrough: t }: { player: Player; pla
 
         <TagFilter tags={tagsInUse([...open, ...closed])} label={copy.tags}>
           <div className="space-y-6">
-            <section data-tag-scope>
-              <Heading icon={QUEST_ICONS.open}>{copy.openQuests}</Heading>
+            <Group icon={QUEST_ICONS.open} label={copy.openQuests} count={open.length}>
               {open.length === 0 ? <p className="card text-muted">{copy.noOpenQuests}</p> : <Quests quests={open} run={t.id} />}
-            </section>
+            </Group>
             {closed.length > 0 && (
-              <section data-tag-scope>
-                <Heading icon={QUEST_ICONS.done}>{copy.closedQuests}</Heading>
+              <Group icon={QUEST_ICONS.done} label={copy.closedQuests} count={closed.length}>
                 <Quests quests={closed} run={t.id} />
-              </section>
+              </Group>
             )}
           </div>
         </TagFilter>
