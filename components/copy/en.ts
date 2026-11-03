@@ -5,6 +5,23 @@ export const en = {
   sloganPlay: "Play on.",
   sloganRemembers: "Your Gamepanion remembers.",
 
+  exampleLabel: "Example",
+  exampleFigure: "Example of a filed playthrough",
+  exampleCard: {
+    game: "Lanterns of Saltmere",
+    label: "NG",
+    status: "playing",
+    characterClass: "Tidecaller",
+    last: { playedOn: "2026-11-02", summary: "Reached the drowned chapel and lit the second beacon." },
+    next: { name: "The Ferryman's Debt", text: "Bring the ferryman three river pearls", blocked: false },
+    moreOpen: 2,
+    goals: [
+      { id: "resolve", name: "Resolve 30", current: 22, target: 30 },
+      { id: "level", name: "Level 25", current: 18, target: 25 },
+    ],
+    counts: { quests: 3, items: 14, codex: 7 },
+  },
+
   // Sign-in
   signInTitle: "Sign in to Gamepanion",
   signInLead: "Your quests, build and items, as you told them to Claude.",

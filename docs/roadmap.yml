@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: sign-in-example
+    status: done
+    date: 2026-11-03
+    icon: card-text-outline
+    title: An example on the sign-in page
+    title_de: Ein Beispiel auf der Anmeldeseite
+    summary: Before signing in, an example card shows what Gamepanion files for a game.
+    summary_de: Vor der Anmeldung zeigt eine Beispielkarte, was Gamepanion zu einem Spiel ablegt.
+    links:
+      - { label: "#91", url: "https://github.com/gamepanion/gamepanion/pull/91" }
   - id: next-links
     status: done
     date: 2026-11-03
