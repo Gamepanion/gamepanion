@@ -10,7 +10,7 @@ import { itemsOf } from "./items";
 import { deletePlayerLog } from "./players";
 import { questsOf } from "./quests";
 import { record } from "./record";
-import { getSession, sessionsOf } from "./sessions";
+import { getSession, latestSession, sessionsOf } from "./sessions";
 import { seen } from "./spoilers";
 import { A_FIRST, A_SECOND, seed, type Seed } from "./testing/fixtures";
 import { todosOf } from "./todos";
@@ -171,4 +171,13 @@ test("A's to-dos never reach B: not by A's playthrough, not on B's own reads, an
     record(s.b, { playthroughId: s.eldenRing, summary: "x", transcript: "x", todos: [{ text: "x", about: { what: "quest", id: s.antonia } }] }),
   ).rejects.toBeInstanceOf(NotFoundError);
   expect((await todosOf(s.a, s.liesOfP)).map((t) => t.status)).toEqual(["open"]);
+});
+
+test("the first-run check sees only the player's own latest session", async () => {
+  expect((await latestSession(s.b))?.id).toBe(s.benSession);
+  expect((await latestSession(s.a))?.id).toBe(s.second);
+  await deletePlayerLog(s.b);
+  expect(await latestSession(s.b)).toBeNull();
+  const r = await record(s.b, { game: "Elden Ring", summary: "Back.", transcript: "Started again." });
+  expect(await latestSession(s.b)).toEqual({ id: r.sessionId, url: r.url });
 });

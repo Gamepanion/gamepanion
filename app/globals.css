@@ -238,6 +238,19 @@ h1 {
 .continue-card {
   @apply border-2 border-accent p-5;
 }
+/* The first-run checklist (#80): numbered steps, the number in a violet square. */
+.first-run-steps {
+  @apply space-y-3;
+  counter-reset: step;
+}
+.first-run-steps > li {
+  @apply relative space-y-2 pl-10;
+  counter-increment: step;
+}
+.first-run-steps > li::before {
+  @apply absolute top-0 left-0 flex h-7 w-7 items-center justify-center rounded-md bg-accent text-sm font-extrabold text-on-accent;
+  content: counter(step);
+}
 /* A line of the card: its icon in the margin, violet, then what it says. */
 .run-line {
   @apply flex items-start gap-3;

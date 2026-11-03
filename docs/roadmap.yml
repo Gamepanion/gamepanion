@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: first-run
+    status: done
+    date: 2026-11-03
+    icon: flag-checkered
+    title: A first-run checklist
+    title_de: Eine Checkliste für den Start
+    summary: With nothing filed, the home page shows the steps for each way in, the connector and your own key, and notices the first session as soon as it arrives.
+    summary_de: Solange nichts abgelegt ist, zeigt die Startseite die Schritte für jeden Weg hinein, den Connector und den eigenen Schlüssel, und bemerkt die erste Session, sobald sie da ist.
+    links:
+      - { label: "#88", url: "https://github.com/gamepanion/gamepanion/pull/88" }
   - id: own-key
     status: done
     date: 2026-11-03

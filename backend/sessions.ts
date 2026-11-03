@@ -23,6 +23,16 @@ export async function sessionsOf(p: Player, playthroughId: string, limit = 50): 
   return rows.map((r) => ({ id: r.id, playedOn: r.played_on, summary: r.summary, notes: r.notes, url: sessionPath(r.id) }));
 }
 
+/** The player's latest filed session, for the first-run page to notice the first one (#80); null with none. One cheap read, through the gate. */
+export async function latestSession(p: Player): Promise<{ id: string; url: string } | null> {
+  const r = await seen((await db()).selectFrom("sessions"), p, "sessions")
+    .select("id")
+    .orderBy("created_at", "desc")
+    .limit(1)
+    .executeTakeFirst();
+  return r ? { id: r.id, url: sessionPath(r.id) } : null;
+}
+
 /** One of the player's sessions, with its transcript. */
 export async function getSession(p: Player, id: string): Promise<SessionView> {
   const r = await seen((await db()).selectFrom("sessions"), p, "sessions")
