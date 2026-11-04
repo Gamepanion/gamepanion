@@ -11,8 +11,9 @@ export type Plan = { period: Period; tier: Tier; name: string; amount: number; c
 
 /** What a webhook says about a subscription. `providerRef` is the provider's subscription id; `validUntil` when the paid period ends (ms). */
 export type PaymentEvent =
-  /** Bought: the player whose id the checkout carried subscribes from now on. */
-  | { type: "started"; providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null; tier?: Tier }
+  /** Bought, or any event that names the player (Creem's subscription events carry the checkout's metadata): the player subscribes.
+   * Whichever of a subscription's events arrives first makes the row. `renews` is false for one cancelled at the provider. */
+  | { type: "started"; providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null; tier?: Tier; renews?: boolean }
   /** Paid again: the period is extended. */
   | { type: "renewed"; providerRef: string; validUntil: number | null }
   /** The buyer cancelled: it stays active until `validUntil`. */

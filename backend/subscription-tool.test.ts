@@ -52,7 +52,7 @@ test("a subscriber gets their plan, until when, and their own Creem portal", asy
   ]);
   await receiveWebhook(body, new Headers({ "x-fake-signature": fakeSignature(SECRET, body) }));
   const out = await run(s.a, {});
-  expect(out).toMatchObject({ subscribed: true, plan: "standard", validUntil: "2027-11-04", url: "https://fake.invalid/portal/cust_1" });
+  expect(out).toMatchObject({ subscribed: true, plan: "standard", validUntil: "2027-11-04", renews: true, url: "https://fake.invalid/portal/cust_1" });
   expect(next(out)).toMatch(/cancel/);
   // Another player sees nothing of it.
   expect(await run(s.b, {})).toMatchObject({ subscribed: false, plan: null });

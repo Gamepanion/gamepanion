@@ -69,20 +69,23 @@ export function ChatProvider({
   playerId: string;
   runs: Record<string, string>;
   homeRun: string | null;
-  /** Where the instance sells: no key of the player's and no hosted-AI plan, so the chat only says what it needs (ADR 0024). */
+  /** Where the instance sells: no key of the player's and no hosted-AI plan. The chat's buttons stay, and take the player to the plans
+   * instead of opening a chat they couldn't use (ADR 0024). */
   needsKey?: boolean;
   children: ReactNode;
 }) {
   const copy = useCopy();
+  const router = useRouter();
   const [state, setState] = useState<{ about?: About; run?: string } | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   const open = useCallback(
     (about?: About, run?: string) => {
+      if (needsKey) return router.push("/subscribe");
       opener.current = document.activeElement as HTMLElement | null;
       const here = pageRun() ?? (window.location.pathname === "/" ? (homeRun ?? undefined) : undefined);
       setState({ about, run: about?.playthroughId ?? run ?? here });
     },
-    [homeRun],
+    [homeRun, needsKey, router],
   );
   const close = useCallback(() => {
     setState(null);
@@ -92,20 +95,18 @@ export function ChatProvider({
     <ChatContext.Provider value={{ enabled, open }}>
       {children}
       {enabled && !state && (
-        <button type="button" className="chat-fab" aria-label={copy.askClaude} title={copy.askClaude} onClick={() => open()}>
+        <button
+          type="button"
+          className="chat-fab"
+          aria-label={needsKey ? copy.chatNeedsPlan : copy.askClaude}
+          title={needsKey ? copy.chatNeedsPlan : copy.askClaude}
+          onClick={() => open()}
+        >
           <ClaudeMark />
         </button>
       )}
       {enabled && state && (
-        <ChatSheet
-          playerId={playerId}
-          voice={voice}
-          about={state.about}
-          run={state.run}
-          runName={state.run ? runs[state.run] : undefined}
-          needsKey={needsKey}
-          onClose={close}
-        />
+        <ChatSheet playerId={playerId} voice={voice} about={state.about} run={state.run} runName={state.run ? runs[state.run] : undefined} onClose={close} />
       )}
     </ChatContext.Provider>
   );
@@ -149,7 +150,6 @@ function ChatSheet({
   about: opened,
   run,
   runName,
-  needsKey = false,
   onClose,
 }: {
   playerId: string;
@@ -157,7 +157,6 @@ function ChatSheet({
   about?: About;
   run?: string;
   runName?: string;
-  needsKey?: boolean;
   onClose: () => void;
 }) {
   const copy = useCopy();
@@ -326,19 +325,7 @@ function ChatSheet({
               </button>
             </span>
           )}
-          {needsKey && (
-            <p role="note" className="mt-4 rounded-lg border border-rule px-3 py-2 text-center">
-              {copy.needsKey}{" "}
-              <Link href="/account#key" className="font-semibold text-accent underline" onClick={onClose}>
-                {copy.addOwnKey}
-              </Link>{" "}
-              ·{" "}
-              <Link href="/subscribe" className="font-semibold text-accent underline" onClick={onClose}>
-                {copy.seePlans}
-              </Link>
-            </p>
-          )}
-          {!needsKey && turns.length === 0 && (
+          {turns.length === 0 && (
             <div className="mt-4 space-y-3 text-center">
               <p className="text-muted">{copy.chatHello}</p>
               <ul className="flex flex-col items-center gap-2" aria-label={copy.chatExamples}>

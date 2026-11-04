@@ -43,7 +43,19 @@ import { isFrozen } from "./access";
 import { portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 import { OWN_LICENSE, thirdPartyLicenses } from "./licenses";
 import { readOperatorPage } from "./operator";
-import { aboutPath, accountDataPath, siteUrl, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, subscribePath, tabPath } from "./urls";
+import {
+  aboutPath,
+  LICENSES_URL,
+  accountDataPath,
+  siteUrl,
+  accountExportPath,
+  accountKeyPath,
+  homePath,
+  inText,
+  playthroughPath,
+  subscribePath,
+  tabPath,
+} from "./urls";
 
 export type Tool = {
   name: string;
@@ -99,6 +111,7 @@ const SubscriptionJson = z.object({
   subscribed: z.boolean(),
   plan: z.enum(["standard", "hostedAi"]).nullable().describe("What the player has: the subscription, or with the in-app chat on the instance's AI"),
   validUntil: z.string().nullable().describe("When the paid period ends, YYYY-MM-DD"),
+  renews: z.boolean().describe("Whether it renews at validUntil; false once cancelled: it ends then"),
   url: z
     .string()
     .nullable()
@@ -1004,13 +1017,13 @@ export const TOOLS: Tool[] = [
     handler: async (_p, { page, language = "en" }) => {
       if (page === "licenses") {
         const packages = thirdPartyLicenses.map((x) => ({ name: x.name, version: x.version, license: x.license }));
-        return ok(AboutJson, { page, url: aboutPath("licenses"), text: null, own: OWN_LICENSE, packages, plans: [] }, [
-          `Gamepanion itself is ${OWN_LICENSE.license}; its source is at ${OWN_LICENSE.source}. Name the packages the player asks about with their licenses; the full license texts are on ${inText(aboutPath("licenses"))}.`,
+        return ok(AboutJson, { page, url: LICENSES_URL, text: null, own: OWN_LICENSE, packages, plans: [] }, [
+          `Gamepanion itself is ${OWN_LICENSE.license}; its source is at ${OWN_LICENSE.source}. Name the packages the player asks about with their licenses; the full license texts are on ${LICENSES_URL}.`,
         ]);
       }
       const text = await readOperatorPage(page, language);
       const plans = page === "pricing" ? (await pricingPlans()).plans : [];
-      const url = page === "pricing" ? (plans.length ? subscribePath() : null) : text ? aboutPath(page) : null;
+      const url = page === "pricing" ? (plans.length ? subscribePath() : null) : text ? aboutPath(page as "imprint" | "privacy" | "terms") : null;
       if (!text && !plans.length)
         return ok(AboutJson, { page, url: null, text: null, own: null, packages: [], plans }, [
           `This instance has no ${page} page. Tell the player so; don't fill in what such a page usually says.`,
@@ -1044,6 +1057,7 @@ export const TOOLS: Tool[] = [
         subscribed: sub.subscribed,
         plan: sub.subscribed ? (sub.hostedAi ? "hostedAi" : "standard") : null,
         validUntil: sub.validUntil ? new Date(sub.validUntil).toISOString().slice(0, 10) : null,
+        renews: sub.subscribed && sub.renews,
         plans,
       } as const;
       if (!sub.sold)
@@ -1063,7 +1077,7 @@ export const TOOLS: Tool[] = [
       const url = portal ?? `${siteUrl()}${subscribePath()}`;
       return ok(SubscriptionJson, { ...base, url }, [
         sub.subscribed
-          ? `Tell the player their plan and until when it is paid (validUntil). To see, change or cancel it, give them their Creem customer portal: ${url}. Cancelling keeps it to the end of the paid period.`
+          ? `Tell the player their plan and until when it is paid (validUntil), and whether it renews then or, cancelled, ends. To see, change or cancel it, give them their Creem customer portal: ${url}. Cancelling keeps it to the end of the paid period.`
           : `The player has no subscription. Tell them what the plans give and cost (amounts are in minor units, 499 is 4.99), with the plans page: ${url}. When they choose one, call subscription again with its plan and period for a link straight to the checkout.`,
         never,
       ]);
