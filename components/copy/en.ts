@@ -28,7 +28,8 @@ export const en = {
 
   subscribeTitle: "Subscribe",
   subscribed: "You subscribe. Every game is open.",
-  subscribedUntil: (day: string) => `You subscribe until ${day}. Every game is open.`,
+  renewsOn: (day: string) => `You subscribe, renewing on ${day}. Every game is open.`,
+  cancelledUntil: (day: string) => `Cancelled: you subscribe until ${day}, then it ends. Every game is open until then.`,
   managePlan: "Manage subscription",
   confirming: "Confirming your payment…",
   reload: "Reload",

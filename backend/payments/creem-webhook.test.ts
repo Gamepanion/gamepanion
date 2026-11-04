@@ -4,7 +4,7 @@
 import { generateSignature } from "@creem_io/webhook-types";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { accessOf } from "../access";
-import { paymentsWebhookRoute, setEmailLookupForTests } from "../billing/flow";
+import { paymentsWebhookRoute, setEmailLookupForTests, subscriptionOf } from "../billing/flow";
 import { billing, resetBillingForTests } from "../billing/store";
 import { resetDbForTests } from "../db/testing";
 
@@ -36,7 +36,7 @@ function sellWithCreem() {
 // Deliveries in the shape Creem sends them (https://docs.creem.io/learn/webhooks/event-types; the types of @creem_io/webhook-types).
 const product = (id: string) => ({ id, object: "product", name: "Gamepanion", price: 499, currency: "EUR", mode: "test" });
 const customer = { id: "cust_1", object: "customer", email: "p1@example.com", name: "P", country: "DE", mode: "test" };
-const subscription = (id: string, end = END, status = "active") => ({
+const subscription = (id: string, end = END, status = "active", player: string | null = "p1") => ({
   id,
   object: "subscription",
   product: product("prod_m"),
@@ -45,7 +45,8 @@ const subscription = (id: string, end = END, status = "active") => ({
   status,
   current_period_start_date: new Date().toISOString(),
   current_period_end_date: end,
-  metadata: { player_id: "p1" },
+  canceled_at: status === "canceled" || status === "scheduled_cancel" ? new Date().toISOString() : null,
+  metadata: player ? { player_id: player } : {},
   mode: "test",
 });
 const checkout = (o: { player?: string; product?: string; sub?: string }) => ({
@@ -131,7 +132,8 @@ test("paused and unpaid end access; a delivery for a subscription nobody bought 
   await deliver("checkout.completed", checkout({ player: "p1", sub: "sub_9" }));
   await deliver("subscription.unpaid", subscription("sub_9"));
   expect((await subs()).every((s) => s.status === "lapsed")).toBe(true);
-  expect(await deliver("subscription.paid", subscription("sub_unknown"))).toBe(200);
+  expect(await deliver("subscription.paid", subscription("sub_unknown", END, "active", null))).toBe(200);
+  expect((await subs()).map((x) => x.providerRef)).not.toContain("sub_unknown");
   expect(await deliver("subscription.past_due", subscription("sub_1"))).toBe(200);
 });
 
@@ -153,4 +155,37 @@ test("refund.created and dispute.created end access at once and cancel the subsc
   await deliver("checkout.completed", checkout({ player: "p1", sub: "sub_d" }));
   expect(await deliver("dispute.created", { ...refund("sub_d"), id: "disp_1", object: "dispute", amount: 499, currency: "EUR" })).toBe(200);
   expect((await subs()).find((s) => s.providerRef === "sub_d")?.status).toBe("lapsed");
+});
+
+test("in Creem's order, paid before the checkout: the first event that names the player makes them a subscriber", async () => {
+  sellWithCreem();
+  await deliver("subscription.paid", { ...subscription("sub_1", END), product: product("prod_ai") });
+  expect(await subs()).toMatchObject([{ providerRef: "sub_1", playerId: "p1", tier: "hostedAi", status: "active", renews: true }]);
+  await deliver("checkout.completed", checkout({ player: "p1", product: "prod_ai" }));
+  expect(await subs()).toHaveLength(1);
+});
+
+test("cancelled in the portal: still active until paid-until, but it no longer renews; the account page says so", async () => {
+  sellWithCreem();
+  await deliver("checkout.completed", checkout({ player: "p1" }));
+  expect((await subscriptionOf(p1)).renews).toBe(true);
+  await deliver("subscription.canceled", subscription("sub_1", END, "canceled"));
+  expect(await subscriptionOf(p1)).toMatchObject({ subscribed: true, renews: false, validUntil: Date.parse(END) });
+  // A late paid event for the same subscription doesn't undo the cancel: Creem's own canceled_at says it ends.
+  await deliver("subscription.paid", subscription("sub_1", END, "canceled"));
+  expect((await subscriptionOf(p1)).renews).toBe(false);
+});
+
+test("a late event after a refund doesn't revive the subscription; a later period would", async () => {
+  sellWithCreem();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => Response.json(subscription("sub_1", END, "canceled"))),
+  );
+  await deliver("checkout.completed", checkout({ player: "p1" }));
+  await deliver("refund.created", refund("sub_1"));
+  await deliver("subscription.active", subscription("sub_1", END));
+  expect((await accessOf(p1)).subscribed).toBe(false);
+  await deliver("subscription.paid", subscription("sub_1", LATER));
+  expect((await accessOf(p1)).subscribed).toBe(true);
 });
