@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { pricingPlans, readOperatorPage, subscriptionOf } from "@/backend";
+import { checkoutOverlay, pricingPlans, readOperatorPage, subscriptionOf } from "@/backend";
 import { OperatorMarkdown } from "@/components/OperatorMarkdown";
 import { Plans } from "@/components/Plans";
 import { serverCopy, serverLocale } from "@/components/copy/server";
@@ -60,6 +60,7 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
               price: new Intl.NumberFormat(locale, { style: "currency", currency: x.currency }).format(x.amount / 100),
             }))}
           saving={{ standard: yearlySavingPercent, hostedAi: hostedAiSavingPercent }}
+          overlay={checkoutOverlay()}
         />
       )}
     </div>

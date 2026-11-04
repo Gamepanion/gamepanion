@@ -1,13 +1,15 @@
-// The payment providers (#48): the fake signs and parses its own events; Creem's signature, events, checkout, plans, portal and cancel,
-// against a stand-in fetch.
-import { createHmac } from "node:crypto";
+// The payment providers (#48): the fake signs and parses its own events; Creem's SDK (#107) checkout, plans, portal and cancel against a
+// stand-in fetch. Creem's deliveries are creem-webhook.test.ts's.
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { config } from "../config";
-import { createCreem, resetPlansForTests } from "./creem";
+import { createCreem, resetPlansForTests } from "./creem-api";
 import { createFake, fakeSignature } from "./fake";
 import { WebhookRejectedError } from "./types";
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 beforeEach(() => resetPlansForTests());
 
 test("payment provider: empty is off, unknown is refused, creem names what is missing", () => {
@@ -23,10 +25,10 @@ test("payment provider: empty is off, unknown is refused, creem names what is mi
 test("the fake signs and parses its own events; plans are a monthly and a yearly plan", async () => {
   const f = createFake("s3cret");
   const body = JSON.stringify([{ type: "renewed", providerRef: "sub_1", validUntil: 5 }]);
-  expect(await f.parseWebhook(body, new Headers({ "x-fake-signature": fakeSignature("s3cret", body) }))).toEqual([
+  expect(await f.parseWebhook!(body, new Headers({ "x-fake-signature": fakeSignature("s3cret", body) }))).toEqual([
     { type: "renewed", providerRef: "sub_1", validUntil: 5 },
   ]);
-  await expect(f.parseWebhook(body, new Headers({ "x-fake-signature": "nope" }))).rejects.toBeInstanceOf(WebhookRejectedError);
+  await expect(f.parseWebhook!(body, new Headers({ "x-fake-signature": "nope" }))).rejects.toBeInstanceOf(WebhookRejectedError);
   expect((await f.plans()).map((p) => [p.period, p.tier, p.amount])).toEqual([
     ["month", "standard", 499],
     ["year", "standard", 4990],
@@ -35,75 +37,64 @@ test("the fake signs and parses its own events; plans are a monthly and a yearly
   ]);
 });
 
-const SECRET = "whsec";
-const sign = (body: string) => createHmac("sha256", SECRET).update(body).digest("hex");
-type Call = { url: string; init?: RequestInit };
+// The SDK, against a stand-in fetch.
+type Call = { method: string; url: string; body: string };
 function creem(handler: (c: Call) => Response | Promise<Response>, apiKey = "creem_test_k") {
   const calls: Call[] = [];
-  const f = (async (url: string, init?: RequestInit) => {
-    calls.push({ url, init });
-    return handler({ url, init });
-  }) as unknown as typeof fetch;
-  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y", webhookSecret: SECRET, fetch: f }), calls };
+  vi.stubGlobal("fetch", async (input: Request | string | URL, init?: RequestInit) => {
+    const req = input instanceof Request ? input : new Request(input, init);
+    const c = { method: req.method, url: req.url, body: await req.text() };
+    calls.push(c);
+    return handler(c);
+  });
+  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y", webhookSecret: "whsec" }), calls };
 }
-const event = (eventType: string, object: unknown) => JSON.stringify({ eventType, object });
-const parse = async (p: ReturnType<typeof creem>["p"], body: string) => p.parseWebhook(body, new Headers({ "creem-signature": sign(body) }));
-
-test("a bad signature is rejected; the signature is HMAC-SHA256 hex over the raw body in creem-signature", async () => {
-  const { p } = creem(() => new Response());
-  const body = event("subscription.paid", { id: "sub_1" });
-  await expect(p.parseWebhook(body, new Headers({ "creem-signature": "00" }))).rejects.toBeInstanceOf(WebhookRejectedError);
-  expect(await parse(p, body)).toEqual([{ type: "renewed", providerRef: "sub_1", validUntil: null }]);
+const subscriptionJson = {
+  id: "sub_1",
+  object: "subscription",
+  mode: "test",
+  product: "prod_m",
+  customer: "cust_1",
+  collection_method: "charge_automatically",
+  status: "canceled",
+  created_at: "2026-10-19T00:00:00.000Z",
+  updated_at: "2026-10-19T00:00:00.000Z",
+};
+const productJson = (id: string, price: number) => ({
+  id,
+  object: "product",
+  mode: "test",
+  name: id === "prod_m" ? "Monthly" : "Yearly",
+  description: "Gamepanion",
+  price,
+  currency: "EUR",
+  billing_type: "recurring",
+  billing_period: id === "prod_m" ? "every-month" : "every-year",
+  status: "active",
+  tax_mode: "inclusive",
+  tax_category: "saas",
+  created_at: "2026-10-19T00:00:00.000Z",
+  updated_at: "2026-10-19T00:00:00.000Z",
 });
 
-test("checkout.completed becomes started with the player from metadata; without one it is rejected", async () => {
-  const { p } = creem(() => new Response());
-  const end = "2026-12-03T00:00:00.000Z";
-  expect(
-    await parse(
-      p,
-      event("checkout.completed", { metadata: { player_id: "p1" }, customer: { id: "cust_1" }, subscription: { id: "sub_1", current_period_end_date: end } }),
-    ),
-  ).toEqual([{ type: "started", providerRef: "sub_1", playerId: "p1", customerRef: "cust_1", validUntil: Date.parse(end), tier: "standard" }]);
-  expect(await parse(p, event("checkout.completed", { request_id: "p2", subscription: { id: "sub_2" } }))).toMatchObject([{ playerId: "p2" }]);
-  await expect(parse(p, event("checkout.completed", { subscription: { id: "sub_3" } }))).rejects.toBeInstanceOf(WebhookRejectedError);
-});
-
-test("subscription and refund events map to renewed, cancelled, ended and refunded; other kinds to nothing", async () => {
-  const { p } = creem(() => new Response());
-  const kinds = async (k: string, o: unknown) => (await parse(p, event(k, o))).map((e) => e.type);
-  expect(await kinds("subscription.active", { id: "sub_1" })).toEqual(["renewed"]);
-  expect(await kinds("subscription.canceled", { id: "sub_1" })).toEqual(["cancelled"]);
-  expect(await kinds("subscription.scheduled_cancel", { id: "sub_1" })).toEqual(["cancelled"]);
-  expect(await kinds("subscription.expired", { id: "sub_1" })).toEqual(["ended"]);
-  expect(await kinds("subscription.unpaid", { id: "sub_1" })).toEqual(["ended"]);
-  expect(await kinds("refund.created", { subscription: { id: "sub_1" } })).toEqual(["refunded"]);
-  expect(await kinds("dispute.created", { subscription: "sub_1" })).toEqual(["refunded"]);
-  expect(await kinds("subscription.trialing", { id: "sub_1" })).toEqual([]);
-});
-
-test("createCheckout sends product, success_url, request_id and metadata.player_id, to the sandbox for a test key", async () => {
-  const { p, calls } = creem(() => Response.json({ checkout_url: "https://pay.example/c" }));
+test("createCheckout sends product, success_url and metadata.player_id, to the sandbox for a test key", async () => {
+  const answer = () =>
+    Response.json({ id: "ch_1", object: "checkout", mode: "test", status: "pending", product: "prod_y", checkout_url: "https://pay.example/c" });
+  const { p, calls } = creem(answer);
   expect(await p.createCheckout({ period: "year", playerId: "p1", email: "a@b.c", successUrl: "https://g.example/subscribe" })).toEqual({
     url: "https://pay.example/c",
   });
   expect(calls[0].url).toBe("https://test-api.creem.io/v1/checkouts");
-  expect(JSON.parse(String(calls[0].init?.body))).toEqual({
+  expect(JSON.parse(calls[0].body)).toEqual({
     product_id: "prod_y",
     success_url: "https://g.example/subscribe",
-    request_id: "p1",
     metadata: { player_id: "p1" },
     customer: { email: "a@b.c" },
   });
-  const live = creem(() => Response.json({ checkout_url: "https://pay.example/c" }), "creem_live");
+  const live = creem(answer, "creem_live");
   await live.p.createCheckout({ period: "month", playerId: "p1", email: null, successUrl: "https://g.example/subscribe" });
   expect(live.calls[0].url).toBe("https://api.creem.io/v1/checkouts");
-  const monthOnly = createCreem({
-    apiKey: "creem_test_k",
-    productId: "prod_m",
-    webhookSecret: SECRET,
-    fetch: (async () => new Response()) as unknown as typeof fetch,
-  });
+  const monthOnly = createCreem({ apiKey: "creem_test_k", productId: "prod_m", webhookSecret: "whsec" });
   await expect(monthOnly.createCheckout({ period: "year", playerId: "p1", email: null, successUrl: "x" })).rejects.toThrow(/no product/);
 });
 
@@ -112,20 +103,15 @@ test("plans() reads both products, keeps them five minutes, and keeps the last l
   let down = false;
   const { p, calls } = creem(({ url }) => {
     if (down) throw new Error("down");
-    const id = new URL(url).searchParams.get("product_id");
-    return Response.json({
-      status: "active",
-      name: id === "prod_m" ? "Monthly" : "Yearly",
-      price: id === "prod_m" ? 499 : 4990,
-      currency: "EUR",
-      tax_mode: "inclusive",
-    });
+    const id = new URL(url).pathname.split("/").pop()!;
+    return Response.json(productJson(id, id === "prod_m" ? 499 : 4990));
   });
   const plans = await p.plans();
-  expect(plans.map((x) => [x.period, x.amount])).toEqual([
-    ["month", 499],
-    ["year", 4990],
+  expect(plans.map((x) => [x.period, x.amount, x.taxIncluded])).toEqual([
+    ["month", 499, true],
+    ["year", 4990, true],
   ]);
+  expect(calls[0].url).toBe("https://test-api.creem.io/v1/products/prod_m");
   await p.plans();
   expect(calls).toHaveLength(2);
   vi.advanceTimersByTime(6 * 60 * 1000);
@@ -137,17 +123,20 @@ test("plans() reads both products, keeps them five minutes, and keeps the last l
     throw new Error("down");
   });
   expect(await never.p.plans()).toEqual([]);
+  resetPlansForTests();
+  const gone = creem(({ url }) =>
+    url.endsWith("prod_y") ? Response.json({ error: "not found" }, { status: 404 }) : Response.json(productJson("prod_m", 499)),
+  );
+  expect((await gone.p.plans()).map((x) => x.period)).toEqual(["month"]);
 });
 
-test("portalUrl posts the customer to /customers/billing; cancel ends a sub_ subscription at once and ignores other references", async () => {
+test("portalUrl asks for the customer's billing links; cancel ends the subscription at once", async () => {
   const { p, calls } = creem(({ url }) =>
-    url.endsWith("/customers/billing") ? Response.json({ customer_portal_link: "https://portal.example" }) : Response.json({}),
+    url.endsWith("/customers/billing") ? Response.json({ customer_portal_link: "https://portal.example" }) : Response.json(subscriptionJson),
   );
   expect(await p.portalUrl("cust_1")).toBe("https://portal.example");
-  expect(JSON.parse(String(calls[0].init?.body))).toEqual({ customer_id: "cust_1" });
+  expect(JSON.parse(calls[0].body)).toEqual({ customer_id: "cust_1" });
   await p.cancel("sub_1");
   expect(calls[1].url).toBe("https://test-api.creem.io/v1/subscriptions/sub_1/cancel");
-  expect(JSON.parse(String(calls[1].init?.body))).toEqual({ mode: "immediate" });
-  await p.cancel("ord_1");
-  expect(calls).toHaveLength(2);
+  expect(JSON.parse(calls[1].body)).toEqual({ mode: "immediate" });
 });

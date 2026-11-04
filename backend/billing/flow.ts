@@ -77,6 +77,9 @@ export async function paymentsWebhookRoute(req: Request): Promise<Response> {
   }
 }
 
+/** Whether the checkout opens as an overlay on the subscribe page. */
+export const checkoutOverlay = (): boolean => paymentProvider()?.overlay ?? false;
+
 /** The signed-in player's own portal at the provider; null before they ever bought. */
 export async function portalFor(p: Player): Promise<string | null> {
   const provider = paymentProvider();

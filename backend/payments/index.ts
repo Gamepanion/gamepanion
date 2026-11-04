@@ -1,7 +1,7 @@
 // The provider this instance uses, from GAMEPANION_PAYMENT_PROVIDER; null while none is set: then nothing is sold and nothing is limited
 // (V7). Nothing in backend/payments/ knows about games.
 import { config } from "../config";
-import { createCreem } from "./creem";
+import { createCreem } from "./creem-api";
 import { createFake } from "./fake";
 import type { PaymentProvider } from "./types";
 
