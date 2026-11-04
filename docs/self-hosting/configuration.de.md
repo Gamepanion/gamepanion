@@ -73,7 +73,7 @@ und `GAMEPANION_TRANSCRIBE_URL=http://whisper:8000` in der `.env`. Die erste Umw
 
 ## Die Seiten des Betreibers
 
-`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` und `GAMEPANION_TERMS_FILE` nennen eigene Markdown-Dateien: Impressum, Datenschutzerklärung und AGB unter `/imprint`, `/privacy` und `/terms`, verlinkt in der Fußzeile. Ohne Einstellung, oder wenn die Datei fehlt oder größer als 256 KiB ist, gibt es keine Seite und keinen Link. Ein Wert darf `{lang}` enthalten (`/legal/imprint.{lang}.md`), ersetzt durch die Sprache der Seite (`en`, `de`), sonst Englisch. Die Dateien werden bei jedem Aufruf gelesen. Gamepanion liefert keine der Texte mit. `/licenses` listet die Open-Source-Pakete, die Gamepanion mitbringt, und ist immer da.
+`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` und `GAMEPANION_TERMS_FILE` nennen eigene Markdown-Dateien: Impressum, Datenschutzerklärung und AGB unter `/imprint`, `/privacy` und `/terms`, verlinkt in der Fußzeile. Ohne Einstellung, oder wenn die Datei fehlt oder größer als 256 KiB ist, gibt es keine Seite und keinen Link. Ein Wert darf `{lang}` enthalten (`/legal/imprint.{lang}.md`), ersetzt durch die Sprache der Seite (`en`, `de`), sonst Englisch. Die Dateien werden bei jedem Aufruf gelesen. Gamepanion liefert keine der Texte mit. Die Open-Source-Pakete, die Gamepanion mitbringt, stehen mit ihren Lizenzen auf der Seite [Lizenzen](../reference/licenses.md) der Doku, verlinkt in der Fußzeile jeder Instanz; `/licenses` leitet dorthin weiter.
 
 ## Zahlungen
 
