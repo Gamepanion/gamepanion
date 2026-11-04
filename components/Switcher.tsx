@@ -112,11 +112,11 @@ export function Switcher({ runs }: { runs: SwitcherRun[] }) {
         onKeyDown={onButtonKey}
       >
         {here ? (
-          <span className="self-center">
+          <span>
             <GameTile title={here.game} size="sm" />
           </span>
         ) : (
-          <House aria-hidden="true" className="size-5 shrink-0 self-center text-muted" />
+          <House aria-hidden="true" className="size-5 shrink-0 text-muted" />
         )}
         <span className="truncate">
           <span className="sr-only">{copy.switcherWhere}: </span>
