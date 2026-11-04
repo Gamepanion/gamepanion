@@ -127,6 +127,7 @@ export const de: Copy = {
   keyRemoved: "Entfernt.",
 
   // Die Kontoseite: wer angemeldet ist, und wie man sich anmeldet
+  accountSections: "Auf dieser Seite",
   account: "Konto",
   signedInAs: "Angemeldet als",
   noName: "Noch kein Name",
