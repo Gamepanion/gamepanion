@@ -25,6 +25,8 @@ export const itemPath = (playthroughId: string, id: string) => `${tabPath(playth
 export const accountKeyPath = () => "/account#key";
 /** Where a player subscribes (#48). */
 export const subscribePath = () => "/subscribe";
+/** The operator's pages and the licenses (#48). */
+export const aboutPath = (page: "imprint" | "privacy" | "terms" | "licenses") => `/${page}`;
 /** The account page. */
 export const accountPath = () => "/account";
 /** The home page: what the player is playing, or, with nothing filed, how to start. */

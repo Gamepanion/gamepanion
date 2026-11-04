@@ -69,3 +69,7 @@ The link to the account page's key section (`/account#key`), where the player st
 - **`hiddenItems`:** the items marked as hints or spoilers.
 
 `next` has Claude name the threads left behind first, read out the rest one quest at a time, and, if the player wants more than their log holds, say that what follows is Claude's own knowledge of the game, at the level they asked for.
+
+## about
+
+The instance's own pages, so a player can ask Claude about them: `page` is `terms`, `privacy`, `imprint`, `pricing` or `licenses`, `language` is `en` or `de` (a page the operator has only in English comes in English). The operator's pages are the Markdown the website shows, read by the same function, with their URL; `pricing` adds the plans and prices as the payment provider holds them. `licenses` gives Gamepanion's own license (AGPL-3.0-only) with its source, and every shipped package with its license; the full texts are on `/licenses`. A page the instance doesn't have comes back as `null`, and `next` tells Claude to say so rather than fill it in, to answer from the text and quote it, and that it isn't legal advice.

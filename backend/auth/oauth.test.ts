@@ -239,6 +239,7 @@ test("an MCP client signs the player in and calls the tools as them; nothing els
     "correct",
     "chat_key",
     "missed",
+    "about",
   ]);
   const filed = await (
     await rpc(
