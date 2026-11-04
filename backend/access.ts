@@ -8,7 +8,7 @@ import { billing } from "./billing/store";
 import { config, mayJoin } from "./config";
 import { db } from "./db";
 import type { Schema } from "./db/schema";
-import { GamepanionError, NotFoundError } from "./errors";
+import { GamepanionError, InvalidInputError, NotFoundError } from "./errors";
 import { seen } from "./spoilers";
 import type { Player } from "./types";
 import { accountPath, siteUrl, subscribePath } from "./urls";
@@ -69,7 +69,7 @@ export async function assertMayFile(trx: Transaction<Schema>, p: Player, game: {
     ? (await seen(trx.selectFrom("games"), p, "games").select("title").where("id", "=", a.activeGameId).executeTakeFirst())?.title
     : undefined;
   throw new SubscriptionRequiredError(
-    `${game.title} is frozen: the subscription ended, and the player's active game is ${active ?? "another one"}. Reading it still works. Tell the player they can subscribe again (${subscribe}) or make ${game.title} their active game on ${siteUrl()}${accountPath()}. Nothing was filed.`,
+    `${game.title} is frozen: the subscription ended, and the player's active game is ${active ?? "another one"}. Reading it still works. Tell the player they can subscribe again (${subscribe}) or make ${game.title} their active game on ${siteUrl()}${accountPath()} (it can change once every ${ACTIVE_GAME_CHANGE_DAYS} days). Nothing was filed.`,
   );
 }
 
@@ -79,7 +79,23 @@ export async function isFrozen(p: Player, gameId: string): Promise<boolean> {
   return a.limited && a.activeGameId !== null && a.activeGameId !== gameId;
 }
 
-/** Makes one of the player's games the active one (the account page). NotFoundError for a game that isn't theirs. */
+/** How often a limited player may change their active game: once in this many days, so the free game is one game, not whichever is
+ * being played tonight. The first choice is free. */
+export const ACTIVE_GAME_CHANGE_DAYS = 30;
+const CHANGE_MS = ACTIVE_GAME_CHANGE_DAYS * 86_400_000;
+
+/** When a switch made now could next be changed (ms): what the account page asks the player to accept before switching. */
+export const switchBackOn = (): number => Date.now() + CHANGE_MS;
+
+/** When the player may next change their active game (ms); null when they may now. */
+export async function nextActiveGameChange(p: Player): Promise<number | null> {
+  const c = await (await billing()).choice(p.id);
+  const next = c ? c.chosenAt + CHANGE_MS : null;
+  return next !== null && next > Date.now() ? next : null;
+}
+
+/** Makes one of the player's games the active one (the account page): once in ACTIVE_GAME_CHANGE_DAYS. NotFoundError for a game that
+ * isn't theirs; InvalidInputError, with the day, before the next change is due. Choosing the game that is already chosen changes nothing. */
 export async function chooseActiveGame(p: Player, gameId: string): Promise<void> {
   if (
     !(await seen((await db()).selectFrom("games"), p, "games")
@@ -88,5 +104,10 @@ export async function chooseActiveGame(p: Player, gameId: string): Promise<void>
       .executeTakeFirst())
   )
     throw new NotFoundError("No such game");
-  await (await billing()).chooseGame(p.id, gameId);
+  const b = await billing();
+  if ((await b.choice(p.id))?.gameId === gameId) return;
+  const next = await nextActiveGameChange(p);
+  if (next !== null)
+    throw new InvalidInputError(`The active game can change once every ${ACTIVE_GAME_CHANGE_DAYS} days; next on ${new Date(next).toISOString().slice(0, 10)}`);
+  await b.chooseGame(p.id, gameId);
 }

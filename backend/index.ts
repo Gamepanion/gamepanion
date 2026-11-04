@@ -52,7 +52,7 @@ export { getSession, latestSession, sessionsOf, type SessionSummary, type Sessio
 export { InvalidInputError, NotFoundError } from "./errors";
 export { operatorLinks, readOperatorPage } from "./operator";
 export { checkoutOverlay, paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
-export { accessOf, chooseActiveGame, isFrozen } from "./access";
+export { ACTIVE_GAME_CHANGE_DAYS, accessOf, chooseActiveGame, isFrozen, nextActiveGameChange, switchBackOn } from "./access";
 export { exportDownloadRoute } from "./export";
 export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";
 export {

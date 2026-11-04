@@ -38,10 +38,17 @@ export const de: Copy = {
   subscriptionTitle: "Abo",
   freePlan: "Kostenlos: ein Spiel, mit all seinen Durchläufen.",
   activeGame: "Dein aktives Spiel",
-  activeGameHint: "Ohne Abo gehen neue Sessions nur in dieses Spiel. Die anderen bleiben lesbar.",
-  makeActive: "Aktiv machen",
+  noActiveGame: "Noch keins",
+  activeGameRule: (days: number) =>
+    `Im kostenlosen Tarif gehen neue Sitzungen in dieses eine Spiel. Du kannst alle ${days} Tage zu einem anderen wechseln; deine anderen Spiele bleiben lesbar.`,
+  activeGameNext: (day: string) => `Nächster Wechsel möglich am ${day}.`,
+  switchTo: "Wechseln zu",
+  makeActive: "Wechseln",
+  switchConfirm: (game: string, day: string) => `${game} zu deinem aktiven Spiel machen? Du kannst erst am ${day} wieder wechseln.`,
+  switchNow: "Ja, wechseln",
   seePlans: "Zu den Abos",
-  frozenNotice: "Dieses Spiel ist eingefroren: Ohne Abo gehen neue Sessions nur in dein aktives Spiel. Lesen kannst du hier weiter alles.",
+  frozenNotice: (days: number, next: string | null) =>
+    `Dieses Spiel ist eingefroren: Im kostenlosen Tarif gehen neue Sitzungen nur in dein aktives Spiel, und das kann alle ${days} Tage wechseln${next ? ` (nächstes Mal am ${next})` : ""}. Lesen kannst du hier weiterhin alles.`,
   frozenSubscribe: "Wieder abonnieren",
   frozenChoose: "Aktives Spiel wählen",
 

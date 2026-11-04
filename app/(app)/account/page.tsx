@@ -2,9 +2,12 @@ import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import {
+  ACTIVE_GAME_CHANGE_DAYS,
   accessOf,
   accountExportPath,
   chatWithoutOwnKey,
+  nextActiveGameChange,
+  switchBackOn,
   keyStatus,
   keyStorageEnabled,
   listPlaythroughs,
@@ -102,7 +105,15 @@ export default async function AccountPage() {
                     </form>
                   )}
                 </div>
-                {access?.limited && games.length > 1 && <ActiveGame games={games} active={access.activeGameId} />}
+                {access?.limited && (
+                  <ActiveGame
+                    games={games}
+                    active={access.activeGameId}
+                    nextChange={await nextActiveGameChange(player)}
+                    days={ACTIVE_GAME_CHANGE_DAYS}
+                    backOn={switchBackOn()}
+                  />
+                )}
               </div>
             </section>
           )}
