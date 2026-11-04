@@ -3,9 +3,9 @@ name: Publish docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", .github/workflows/pages.yml]
+    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
   pull_request:
-    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", .github/workflows/pages.yml]
+    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -22,6 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # The licenses page (docs_hooks/licenses.py) reads third-party-licenses.json, made from the lock file and node_modules.
+      - run: npm ci --ignore-scripts && npm run licenses
       - uses: astral-sh/setup-uv@v7
       # mkdocs<2: Material 9 isn't compatible with MkDocs 2.0.
       - run: uvx --with mkdocs-material==9.7.7 --with 'mkdocs<2' --with mkdocs-static-i18n==1.3.1 mkdocs build --strict

@@ -22,6 +22,9 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# made before build, dev and tests (scripts/third-party-licenses.mjs), not committed
+/third-party-licenses.json
+
 # local data and scratch (the demo instance's data is /data/demo, scripts/demo.sh)
 /data/
 # the browser tool's snapshots and logs: ignored, so Tailwind's source scan skips them and the dev server doesn't reload on each
