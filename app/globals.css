@@ -194,21 +194,28 @@ h1 {
   @apply border-accent;
   box-shadow: inset 0 0 0 1px var(--accent);
 }
-/* The colour scheme switch in the header (components/ThemeSwitch.tsx): three small buttons, the one in use filled. */
-.theme-switch {
-  @apply ml-1 flex items-center rounded-md border border-rule p-0.5;
+/* How the app looks (components/DisplayMenu.tsx): a panel under its header button, two groups of choices, the one in use marked by
+   its radio and bold. */
+.display-menu {
+  @apply absolute top-full right-0 z-30 mt-1 w-60 space-y-3 rounded-md border border-rule bg-paper p-3 shadow-lg;
 }
-.theme-switch button {
-  @apply inline-flex size-7 items-center justify-center rounded-sm text-muted hover:text-ink;
+.display-menu legend {
+  @apply mb-1 text-xs font-extrabold tracking-[0.08em] text-muted uppercase;
 }
-.theme-switch button svg {
-  @apply size-4;
+.display-menu label {
+  @apply flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-surface-2;
 }
-.theme-switch button[aria-pressed="true"] {
-  @apply bg-accent text-on-accent;
+.display-menu label:has(input:checked) {
+  @apply font-semibold;
 }
-.theme-switch button:focus-visible {
-  @apply outline-2 outline-offset-1 outline-ink;
+.display-menu input {
+  @apply accent-[var(--accent)];
+}
+.display-menu label > svg {
+  @apply size-4 text-muted;
+}
+.display-menu input:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
 }
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
@@ -333,23 +340,12 @@ h1 {
   @apply flex items-center gap-3;
 }
 
-/* The language switch (components/LanguageSwitch.tsx): small flags, the one in use full and ringed, the others faded until hovered. */
+/* A language's flag beside its name in the display menu (components/DisplayMenu.tsx): small, with a hairline so white edges show. */
 .flag {
-  @apply block h-4 w-6 overflow-hidden rounded-[3px] opacity-55 ring-1 ring-rule transition-opacity hover:opacity-100;
+  @apply block h-3 w-5 shrink-0 overflow-hidden rounded-[2px] ring-1 ring-rule;
 }
 .flag svg {
   @apply block h-full w-full;
-}
-.flag[aria-pressed="true"] {
-  @apply opacity-100 ring-2 ring-ink ring-offset-1 ring-offset-surface;
-}
-@media (pointer: coarse) {
-  .flag {
-    @apply my-[-0.875rem] box-content border-y-[0.875rem] border-transparent;
-  }
-}
-.flag:focus-visible {
-  @apply outline-2 outline-offset-2 outline-ink;
 }
 
 /* The register (components/Register.tsx): coloured tabs along the top of a playthrough's page, like a game menu's.
