@@ -123,6 +123,9 @@ export const en = {
   keyRemoved: "Removed.",
 
   // The account page: who is signed in, and how they sign in
+  menu: "Menu",
+  theme: "Colour scheme",
+  themes: { system: "System colours", light: "Light", dark: "Dark" },
   accountSections: "On this page",
   account: "Account",
   signedInAs: "Signed in as",

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { checkoutAction } from "@/app/(app)/subscribe/actions";
 import { useCopy, useLocale } from "./copy/client";
+import { showsDark } from "./theme";
 
 type Tier = "standard" | "hostedAi";
 type Period = "month" | "year";
@@ -68,7 +69,7 @@ export function Plans({
       openCheckout({
         checkoutUrl: url,
         locale,
-        theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+        theme: showsDark() ? "dark" : "light",
         // With a success URL the embed goes there itself; otherwise this page, with the checkout's id, waits for the webhook.
         onComplete: (d) => d.redirect || router.push(`/subscribe?checkout_id=${encodeURIComponent(d.checkoutId)}`),
       });
