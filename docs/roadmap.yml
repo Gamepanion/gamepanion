@@ -13,6 +13,16 @@
 items:
   # ---- open ------------------------------------------------------------------------------------------------------------
   # ---- done ------------------------------------------------------------------------------------------------------------
+  - id: about-tool
+    status: done
+    date: 2026-11-04
+    icon: file-document-outline
+    title: Ask Claude about the terms
+    title_de: Claude nach den AGB fragen
+    summary: Claude reads the instance's terms, privacy policy, imprint, prices and licenses, and answers from them, with the link.
+    summary_de: Claude liest die AGB, die Datenschutzerklärung, das Impressum, die Preise und die Lizenzen der Instanz und antwortet daraus, mit dem Link.
+    links:
+      - { label: "#112", url: "https://github.com/gamepanion/gamepanion/pull/112" }
   - id: export-and-delete
     status: done
     date: 2026-11-04

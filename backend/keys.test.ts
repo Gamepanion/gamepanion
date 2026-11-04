@@ -103,7 +103,7 @@ test("the MCP tool hands out the settings link and nothing of the key; no tool r
   expect(out.keyStorage).toBe(true);
   expect((out.next as string[]).join(" ")).toMatch(/Never ask for the key in this chat/);
   for (const t of TOOLS.filter((x) => x.annotations.readOnlyHint && x.name !== "missed")) {
-    const body = JSON.stringify(await t.run(s.a, { playthroughId: s.liesOfP }));
+    const body = JSON.stringify(await t.run(s.a, { playthroughId: s.liesOfP, page: "licenses" }));
     expect(body).not.toContain(KEY);
     expect(body).not.toContain("WXYZ");
   }

@@ -73,3 +73,7 @@ The link to the account page's key section (`/account#key`), where the player st
 ## export
 
 The link to the download of everything the player filed (`/account/export`): one JSON file with every table of the log, spoilers included ([ADR 0025](../adr/0025-export-and-deleting-the-account.md)). Only the link: the file never goes through the chat, so it neither fills Claude's context nor puts spoilers in front of it. The browser the player is signed in with downloads it; `GET /api/v1/export` gives scripts the same document. No tool deletes an account: that is on the account page only.
+
+## about
+
+The instance's own pages, so a player can ask Claude about them: `page` is `terms`, `privacy`, `imprint`, `pricing` or `licenses`, `language` is `en` or `de` (a page the operator has only in English comes in English). The operator's pages are the Markdown the website shows, read by the same function, with their URL; `pricing` adds the plans and prices as the payment provider holds them. `licenses` gives Gamepanion's own license (AGPL-3.0-only) with its source, and every shipped package with its license; the full texts are on `/licenses`. A page the instance doesn't have comes back as `null`, and `next` tells Claude to say so rather than fill it in, to answer from the text and quote it, and that it isn't legal advice.

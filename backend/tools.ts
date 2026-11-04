@@ -40,7 +40,10 @@ import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { isFrozen } from "./access";
-import { accountDataPath, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
+import { pricingPlans } from "./billing/flow";
+import { OWN_LICENSE, thirdPartyLicenses } from "./licenses";
+import { readOperatorPage } from "./operator";
+import { aboutPath, accountDataPath, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, subscribePath, tabPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -90,6 +93,32 @@ function tool<I extends z.ZodObject, O extends z.ZodObject>(t: {
 // ---- Shapes -------------------------------------------------------------------------------------------------------------------
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL: give it to the player when they may want to look");
+
+const ABOUT_PAGES = ["terms", "privacy", "imprint", "pricing", "licenses"] as const;
+const AboutJson = z.object({
+  page: z.enum(ABOUT_PAGES),
+  url: Url.nullable().describe("The page in the web app; null when the instance has none"),
+  text: z.string().nullable().describe("The page as the operator wrote it, Markdown; null for licenses and for a page the instance doesn't have"),
+  own: z
+    .object({ name: z.string(), license: z.string(), source: z.string().describe("Where the source code is") })
+    .nullable()
+    .describe("For licenses: Gamepanion's own license"),
+  packages: z
+    .array(z.object({ name: z.string(), version: z.string().nullable(), license: z.string().nullable() }))
+    .describe("For licenses: the third-party packages shipped, with their licenses"),
+  plans: z
+    .array(
+      z.object({
+        tier: z.enum(["standard", "hostedAi"]).describe("standard, or with the in-app chat on the instance's AI"),
+        period: z.enum(["month", "year"]),
+        name: z.string(),
+        amount: z.number().describe("In minor units: 499 is 4.99"),
+        currency: z.string(),
+        taxIncluded: z.boolean(),
+      }),
+    )
+    .describe("For pricing: the plans sold, as the payment provider holds them; empty where nothing is sold"),
+});
 
 const TodoRefJson = z
   .array(
@@ -939,6 +968,38 @@ export const TOOLS: Tool[] = [
         `Give the player this link, ${inText(accountExportPath())}: it downloads the file in the browser they are signed in with (they sign in first if not). The account page, ${inText(accountDataPath())}, has the same button.`,
         "The file holds spoilers they may not have asked to see; if they share it with you, don't read it out.",
       ]),
+  }),
+  tool({
+    name: "about",
+    description:
+      "This Gamepanion instance's own pages: its terms, privacy policy, imprint, pricing (with the plans and prices it sells) and the licenses of the software. Call it when the player asks about them: whether they can cancel, what happens to their data, who runs the instance, what it costs, what Gamepanion is built from. Answer only from what it returns.",
+    input: z.object({
+      page: z.enum(ABOUT_PAGES).describe("Which page"),
+      language: z.enum(["en", "de"]).optional().describe("The player's language; a page the operator has only in English comes in English. Default en"),
+    }),
+    output: AboutJson,
+    annotations: { readOnlyHint: true },
+    handler: async (_p, { page, language = "en" }) => {
+      if (page === "licenses") {
+        const packages = thirdPartyLicenses.map((x) => ({ name: x.name, version: x.version, license: x.license }));
+        return ok(AboutJson, { page, url: aboutPath("licenses"), text: null, own: OWN_LICENSE, packages, plans: [] }, [
+          `Gamepanion itself is ${OWN_LICENSE.license}; its source is at ${OWN_LICENSE.source}. Name the packages the player asks about with their licenses; the full license texts are on ${inText(aboutPath("licenses"))}.`,
+        ]);
+      }
+      const text = await readOperatorPage(page, language);
+      const plans = page === "pricing" ? (await pricingPlans()).plans : [];
+      const url = page === "pricing" ? (plans.length ? subscribePath() : null) : text ? aboutPath(page) : null;
+      if (!text && !plans.length)
+        return ok(AboutJson, { page, url: null, text: null, own: null, packages: [], plans }, [
+          `This instance has no ${page} page. Tell the player so; don't fill in what such a page usually says.`,
+        ]);
+      return ok(AboutJson, { page, url, text, own: null, packages: [], plans }, [
+        "Answer from this text alone and quote the sentence you rely on; don't add what such pages usually say, and say when it doesn't cover the question.",
+        ...(plans.length ? ["Prices are in minor units (499 EUR is 4.99 €); say whether tax is included."] : []),
+        ...(url ? [`Give the player the page, ${inText(url)}.`] : []),
+        "It is the operator's text, not legal advice: for a dispute, point to the operator's contact in the imprint.",
+      ]);
+    },
   }),
 ];
 
