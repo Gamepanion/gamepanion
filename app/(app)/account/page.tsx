@@ -1,7 +1,18 @@
 import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { accessOf, accountExportPath, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
+import {
+  accessOf,
+  accountExportPath,
+  chatWithoutOwnKey,
+  keyStatus,
+  keyStorageEnabled,
+  listPlaythroughs,
+  passkeysOf,
+  profileOf,
+  signInMethods,
+  subscriptionOf,
+} from "@/backend";
 import { ActiveGame } from "@/components/ActiveGame";
 import { portalAction } from "../subscribe/actions";
 import { KeySection } from "@/components/KeySection";
@@ -91,7 +102,7 @@ export default async function AccountPage() {
               </div>
             </section>
           )}
-          <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} />
+          <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} without={await chatWithoutOwnKey(player)} sold={sub.sold} />
           <YourData email={profile.email} mailed={methods.emailCode} exportPath={accountExportPath()} />
         </div>
       </div>

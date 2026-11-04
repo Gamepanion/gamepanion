@@ -57,6 +57,14 @@ export async function chatPlan(p: Player): Promise<{ model: ChatModel; counted: 
   return config.paymentProvider() && (instance || keyStorageEnabled()) ? { needsKey: true } : null;
 }
 
+/** What the chat runs on for `p` without a key of their own, for the account page's key section (see chatPlan): the instance's key
+ * (`instance`), nothing until they add a key or take the hosted-AI plan (`needsKey`), or there is no chat without a key (`none`). */
+export async function chatWithoutOwnKey(p: Player): Promise<"instance" | "needsKey" | "none"> {
+  const instance = state.override ?? config.anthropicKey();
+  if (instance && (await operatorAi(p)).allowed) return "instance";
+  return config.paymentProvider() && (instance || keyStorageEnabled()) ? "needsKey" : "none";
+}
+
 /** The model a player's message runs on; null without one (see chatPlan). */
 export async function chatModelFor(p: Player): Promise<ChatModel | null> {
   const plan = await chatPlan(p);

@@ -103,7 +103,10 @@ export const de: Copy = {
   keyOff: "Dieses Gamepanion speichert keine Schlüssel von Spielern. Sein Chat läuft mit dem eigenen Schlüssel der Instanz, falls sie einen hat.",
   keyField: "API-Schlüssel",
   keyStored: (last4: string) => `Ein Schlüssel mit der Endung ${last4} ist gespeichert. Der Chat läuft damit.`,
-  keyNone: "Kein Schlüssel gespeichert. Der Chat läuft mit dem Schlüssel der Instanz, falls sie einen hat.",
+  keyNone: "Kein Schlüssel gespeichert.",
+  keyNoneInstance: (sold: boolean) =>
+    `Kein Schlüssel gespeichert: Der Chat hier läuft mit ${sold ? "Gamepanions KI" : "dem eigenen Schlüssel dieser Instanz"}.`,
+  keyNoneNeeded: "Kein Schlüssel gespeichert, deshalb ist der Chat hier aus. Füg deinen Schlüssel hinzu oder wähl den Tarif mit Gamepanions KI.",
   keyTest: "Schlüssel testen",
   keySave: "Schlüssel speichern",
   keyReplace: "Schlüssel ersetzen",
