@@ -7,6 +7,7 @@ import {
   accountExportPath,
   chatWithoutOwnKey,
   nextActiveGameChange,
+  switchBackOn,
   keyStatus,
   keyStorageEnabled,
   listPlaythroughs,
@@ -105,7 +106,13 @@ export default async function AccountPage() {
                   )}
                 </div>
                 {access?.limited && (
-                  <ActiveGame games={games} active={access.activeGameId} nextChange={await nextActiveGameChange(player)} days={ACTIVE_GAME_CHANGE_DAYS} />
+                  <ActiveGame
+                    games={games}
+                    active={access.activeGameId}
+                    nextChange={await nextActiveGameChange(player)}
+                    days={ACTIVE_GAME_CHANGE_DAYS}
+                    backOn={switchBackOn()}
+                  />
                 )}
               </div>
             </section>

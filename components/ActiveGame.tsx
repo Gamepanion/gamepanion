@@ -13,12 +13,15 @@ export function ActiveGame({
   active,
   nextChange,
   days,
+  backOn: backAt,
 }: {
   games: { id: string; title: string }[];
   active: string | null;
   /** When the next change is possible (ms); null: now. */
   nextChange: number | null;
   days: number;
+  /** When a switch made now could be undone (ms), worked out on the server: rendering never reads the clock. */
+  backOn: number;
 }) {
   const copy = useCopy();
   const locale = useLocale();
@@ -30,7 +33,7 @@ export function ActiveGame({
   const [pending, start] = useTransition();
   const date = (ms: number) => new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(ms));
   const current = games.find((g) => g.id === active)?.title;
-  const backOn = date(Date.now() + days * 86_400_000);
+  const backOn = date(backAt);
   return (
     <div className="space-y-3 rounded-md border border-accent p-4">
       <p className="eyebrow text-muted">{copy.activeGame}</p>

@@ -84,6 +84,9 @@ export async function isFrozen(p: Player, gameId: string): Promise<boolean> {
 export const ACTIVE_GAME_CHANGE_DAYS = 30;
 const CHANGE_MS = ACTIVE_GAME_CHANGE_DAYS * 86_400_000;
 
+/** When a switch made now could next be changed (ms): what the account page asks the player to accept before switching. */
+export const switchBackOn = (): number => Date.now() + CHANGE_MS;
+
 /** When the player may next change their active game (ms); null when they may now. */
 export async function nextActiveGameChange(p: Player): Promise<number | null> {
   const c = await (await billing()).choice(p.id);
