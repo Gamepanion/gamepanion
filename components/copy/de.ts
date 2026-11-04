@@ -127,6 +127,7 @@ export const de: Copy = {
   keyRemoved: "Entfernt.",
 
   // Die Kontoseite: wer angemeldet ist, und wie man sich anmeldet
+  accountSections: "Auf dieser Seite",
   account: "Konto",
   signedInAs: "Angemeldet als",
   noName: "Noch kein Name",
@@ -244,7 +245,7 @@ export const de: Copy = {
   noTodos: "Nichts auf deiner Liste. Erzähl Claude, woran du denken willst.",
   suggestedTodos: "Von Claude vorgeschlagen",
   suggestedTodosLead: "Erst auf deiner Liste, wenn du Claude sagst, dass du sie willst.",
-  closedTodos: (n: number) => `Erledigt und verworfen (${n})`,
+  closedTodosTitle: "Erledigt und verworfen",
   todoStatus: { open: "Offen", done: "Erledigt", dropped: "Verworfen" } as Record<string, string>,
   noCodex: "Noch niemand und nichts aufgezeichnet. Erzähl Claude, wen du getroffen hast.",
   noSessions: "Noch keine Sessions.",

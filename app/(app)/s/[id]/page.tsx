@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Group, PART_ICONS } from "@/components/icons";
 import { getSession } from "@/backend";
 import { Notes } from "@/components/Notes";
 import { serverCopy } from "@/components/copy/server";
@@ -19,8 +20,11 @@ export default async function SessionPage({ params }: PageProps<"/s/[id]">) {
         <p className="mt-1 text-muted">{s.summary}</p>
         <Notes notes={s.notes} />
       </div>
-      <h2 className="section-title mt-6 block w-fit">{copy.transcript}</h2>
-      <blockquote className="card whitespace-pre-wrap">{s.transcript}</blockquote>
+      <div className="mt-6">
+        <Group icon={PART_ICONS.sessions} label={copy.transcript}>
+          <blockquote className="card whitespace-pre-wrap">{s.transcript}</blockquote>
+        </Group>
+      </div>
     </div>
   );
 }
