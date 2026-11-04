@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ChatProvider } from "@/components/chat/Chat";
 import { LanguageMenu } from "@/components/LanguageMenu";
 import { ThemeMenu } from "@/components/ThemeMenu";
+import { PhoneMenu } from "@/components/PhoneMenu";
 import { pickTheme, THEME_COOKIE } from "@/components/theme";
 import { cookies } from "next/headers";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -17,6 +18,7 @@ import { pagePlayer } from "./viewer";
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const copy = await serverCopy();
   const player = await pagePlayer();
+  const theme = pickTheme((await cookies()).get(THEME_COOKIE)?.value);
   const runs = (await listPlaythroughs(player)).map((t) => ({
     id: t.id,
     href: t.url,
@@ -36,18 +38,19 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
           <Switcher runs={runs} />
         </div>
-        {/* The language and the colour scheme, a menu each, a hairline, then the account and signing out as two quiet buttons of the switcher's height; on a phone
-            only their icons, named for screen readers. */}
-        <div className="flex items-center gap-1">
+        {/* The language and the colour scheme, a menu each, a hairline, then the account and signing out as two quiet buttons of the
+            switcher's height. On a phone all of it behind one menu button (PhoneMenu), beside the logo. */}
+        <div className="hidden items-center gap-1 sm:flex">
           <LanguageMenu />
-          <ThemeMenu theme={pickTheme((await cookies()).get(THEME_COOKIE)?.value)} />
+          <ThemeMenu theme={theme} />
           <span aria-hidden="true" className="mx-2 h-6 border-l border-rule" />
-          <Link href="/account" className="header-link" aria-label={copy.account}>
+          <Link href="/account" className="header-link">
             <UserRound aria-hidden="true" />
-            <span className="hidden sm:inline">{copy.account}</span>
+            {copy.account}
           </Link>
           <SignOutButton />
         </div>
+        <PhoneMenu theme={theme} />
       </header>
       <ChatProvider
         enabled={await chatEnabled(player)}

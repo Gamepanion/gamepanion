@@ -18,3 +18,6 @@ export function applyTheme(t: Theme): void {
   if (t === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
 }
+
+/** The scheme in use now, as the page shows it: what a menu marks when it opens. */
+export const currentTheme = (): Theme => pickTheme(document.documentElement.dataset.theme);

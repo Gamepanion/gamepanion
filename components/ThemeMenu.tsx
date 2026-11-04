@@ -5,7 +5,7 @@
 import { ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
 import { useCopy } from "./copy/client";
-import { applyTheme, THEMES, type Theme } from "./theme";
+import { applyTheme, currentTheme, THEMES, type Theme } from "./theme";
 import { usePopover } from "./usePopover";
 
 /** Three swatches of a scheme: its ground, its accent and its text; without `scheme`, the page's as it shows now. */
@@ -38,6 +38,33 @@ function Preview({ theme }: { theme: Theme }) {
   );
 }
 
+/** The schemes as radio choices, each a tile in its own colours and its name; picking one applies it at once. Used by the header's
+ * colour scheme menu and by the phone's menu. */
+export function ThemeChoices({ name, theme, onPick, legend = false }: { name: string; theme: Theme; onPick: (t: Theme) => void; legend?: boolean }) {
+  const copy = useCopy();
+  return (
+    <fieldset>
+      <legend className={legend ? "header-menu-legend" : "sr-only"}>{copy.theme}</legend>
+      {THEMES.map((t) => (
+        <label key={t} className="header-menu-item">
+          <input
+            type="radio"
+            name={name}
+            className="sr-only"
+            checked={t === theme}
+            onChange={() => {
+              onPick(t);
+              applyTheme(t);
+            }}
+          />
+          <Preview theme={t} />
+          {copy.themes[t]}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 export function ThemeMenu({ theme: initial }: { theme: Theme }) {
   const copy = useCopy();
   const id = useId();
@@ -46,31 +73,25 @@ export function ThemeMenu({ theme: initial }: { theme: Theme }) {
   const label = `${copy.theme}: ${copy.themes[theme]}`;
   return (
     <div className="relative">
-      <button ref={button} type="button" className="header-link" aria-expanded={open} aria-controls={id} aria-label={label} title={label} onClick={toggle}>
+      <button
+        ref={button}
+        type="button"
+        className="header-link"
+        aria-expanded={open}
+        aria-controls={id}
+        aria-label={label}
+        title={label}
+        onClick={() => {
+          setTheme(currentTheme());
+          toggle();
+        }}
+      >
         <Swatches />
         <ChevronDown aria-hidden="true" />
       </button>
       {open && (
         <div ref={panel} id={id} className="header-menu">
-          <fieldset>
-            <legend className="sr-only">{copy.theme}</legend>
-            {THEMES.map((t) => (
-              <label key={t} className="header-menu-item">
-                <input
-                  type="radio"
-                  name={id}
-                  className="sr-only"
-                  checked={t === theme}
-                  onChange={() => {
-                    setTheme(t);
-                    applyTheme(t);
-                  }}
-                />
-                <Preview theme={t} />
-                {copy.themes[t]}
-              </label>
-            ))}
-          </fieldset>
+          <ThemeChoices name={id} theme={theme} onPick={setTheme} />
         </div>
       )}
     </div>

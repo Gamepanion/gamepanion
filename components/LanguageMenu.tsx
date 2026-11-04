@@ -12,7 +12,6 @@ import { usePopover } from "./usePopover";
 export function LanguageMenu() {
   const copy = useCopy();
   const locale = useLocale();
-  const router = useRouter();
   const id = useId();
   const { open, toggle, button, panel } = usePopover();
   const label = `${copy.language}: ${LOCALE_NAMES[locale]}`;
@@ -26,29 +25,40 @@ export function LanguageMenu() {
       </button>
       {open && (
         <div ref={panel} id={id} className="header-menu">
-          <fieldset>
-            <legend className="sr-only">{copy.language}</legend>
-            {LOCALES.map((l) => (
-              <label key={l} lang={l} className="header-menu-item">
-                <input
-                  type="radio"
-                  name={id}
-                  checked={l === locale}
-                  onChange={() => {
-                    rememberLocale(l);
-                    router.refresh();
-                  }}
-                />
-                <span className="flag">
-                  <Flag locale={l} />
-                </span>
-                {LOCALE_NAMES[l]}
-              </label>
-            ))}
-          </fieldset>
+          <LanguageChoices name={id} />
         </div>
       )}
     </div>
+  );
+}
+
+/** The languages as radio choices, each its flag and its name in its own words; picking one renders the page again in it. Used by the
+ * header's language menu and by the phone's menu. `legend` shows the group's name (the phone's menu has several groups). */
+export function LanguageChoices({ name, legend = false }: { name: string; legend?: boolean }) {
+  const copy = useCopy();
+  const locale = useLocale();
+  const router = useRouter();
+  return (
+    <fieldset>
+      <legend className={legend ? "header-menu-legend" : "sr-only"}>{copy.language}</legend>
+      {LOCALES.map((l) => (
+        <label key={l} lang={l} className="header-menu-item">
+          <input
+            type="radio"
+            name={name}
+            checked={l === locale}
+            onChange={() => {
+              rememberLocale(l);
+              router.refresh();
+            }}
+          />
+          <span className="flag">
+            <Flag locale={l} />
+          </span>
+          {LOCALE_NAMES[l]}
+        </label>
+      ))}
+    </fieldset>
   );
 }
 
@@ -56,7 +66,7 @@ function rememberLocale(l: Locale) {
   document.cookie = `${LOCALE_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
 }
 
-function Flag({ locale }: { locale: Locale }) {
+export function Flag({ locale }: { locale: Locale }) {
   // useId may hold characters that url(#…) doesn't take.
   const id = useId().replace(/[^\w-]/g, "");
   if (locale === "de")

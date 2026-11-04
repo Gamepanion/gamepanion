@@ -202,10 +202,13 @@ h1 {
 /* The header's language and colour scheme menus (components/LanguageMenu.tsx, ThemeMenu.tsx): a panel under the button, one choice per
    row, the one in use bold and edged in the accent. */
 .header-menu {
-  @apply absolute top-full right-0 z-30 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-rule bg-paper p-1 shadow-lg max-sm:right-auto max-sm:left-0;
+  @apply absolute top-full right-0 z-30 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-rule bg-paper p-1 shadow-lg;
 }
 .header-menu-item {
   @apply flex cursor-pointer items-center gap-3 rounded border-l-2 border-transparent px-2 py-1.5 text-sm hover:bg-surface-2;
+}
+.header-menu-legend {
+  @apply px-2 pt-1 pb-0.5 text-xs font-extrabold tracking-[0.08em] text-muted uppercase;
 }
 .header-menu-item:has(input:checked) {
   @apply border-accent font-semibold;
