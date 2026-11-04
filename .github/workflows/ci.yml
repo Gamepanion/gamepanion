@@ -103,7 +103,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - id: build
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -112,6 +113,40 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Attached to the image in the registry: what it contains, and how and from which commit it was built.
+          sbom: true
+          provenance: mode=max
+      # The SBOM files of a release (CycloneDX), attached to it by the release job. Written on main too, so a broken step shows before a
+      # tag needs it.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: SBOM of the npm dependencies
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/v*) version="${GITHUB_REF_NAME#v}" ;;
+            *) version="0.0.0-main.sha${GITHUB_SHA::7}" ;;
+          esac
+          echo "SBOM_VERSION=$version" >> "$GITHUB_ENV"
+          mkdir sbom
+          npm version "$version" --no-git-tag-version --allow-same-version
+          # What package-lock.json resolves, without the packages only tests and the build use.
+          npm sbom --package-lock-only --omit dev --sbom-format cyclonedx > "sbom/gamepanion-$version-npm.cdx.json"
+      # What is in the pushed image (linux/amd64), the distroless base's packages included.
+      - name: SBOM of the image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/gamepanion/gamepanion@${{ steps.build.outputs.digest }}
+          format: cyclonedx-json
+          output-file: sbom/gamepanion-${{ env.SBOM_VERSION }}-image.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom/
+          if-no-files-found: error
 
   # A version tag also makes the GitHub release, its notes the pull requests merged since the previous tag.
   release:
@@ -125,3 +160,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes --verify-tag
+      # The SBOM files the image job wrote (CycloneDX): the npm dependencies and the image's contents.
+      - uses: actions/download-artifact@v4
+        with:
+          name: sbom
+          path: sbom
+      - name: Attach the SBOM files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" sbom/*.cdx.json --clobber --repo "$GITHUB_REPOSITORY"
