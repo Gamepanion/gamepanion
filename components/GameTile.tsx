@@ -19,12 +19,13 @@ export function hueOf(title: string): number {
   return h;
 }
 
-const SIZES = { sm: "h-7 w-7 text-xs", md: "h-10 w-10 text-base", lg: "h-14 w-14 text-xl" };
+// The box, and the initials' size (on the initials alone: the tile itself keeps the font of the text beside it, which .icon-middle measures).
+const SIZES = { sm: ["h-7 w-7", "text-xs"], md: ["h-10 w-10", "text-base"], lg: ["h-14 w-14", "text-xl"] } as const;
 
-export function GameTile({ title, size = "md" }: { title: string; size?: keyof typeof SIZES }) {
+export function GameTile({ title, size = "md", className = "" }: { title: string; size?: keyof typeof SIZES; className?: string }) {
   return (
-    <span aria-hidden="true" className={`game-tile shrink-0 ${SIZES[size]}`} style={{ background: `hsl(${hueOf(title)} 45% 30%)` }}>
-      {initials(title)}
+    <span aria-hidden="true" className={`game-tile shrink-0 ${SIZES[size][0]} ${className}`} style={{ background: `hsl(${hueOf(title)} 45% 30%)` }}>
+      <span className={`game-tile-initials ${SIZES[size][1]}`}>{initials(title)}</span>
     </span>
   );
 }

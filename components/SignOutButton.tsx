@@ -10,7 +10,7 @@ export function SignOutButton({ className = "header-link" }: { className?: strin
   const router = useRouter();
   return (
     <button type="button" className={className} onClick={async () => (await authClient.signOut(), router.push("/login"))}>
-      <LogOut aria-hidden="true" className="size-4" />
+      <LogOut aria-hidden="true" className="icon-middle size-4" />
       {copy.signOut}
     </button>
   );

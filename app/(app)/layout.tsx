@@ -29,10 +29,10 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   }));
   return (
     // The window doesn't scroll: the header stays, and what is under it scrolls on its own. The switcher says where you are and goes
-    // elsewhere (ADR 0019); on a phone it takes a row of its own under the logo. From sm up the logo's name and the switcher's text share a
-    // baseline; the buttons on the right are centred.
+    // elsewhere (ADR 0019); on a phone it takes a row of its own under the logo. From sm up every text in the row shares one baseline, and
+    // every icon is centred on the lowercase letters beside it (.icon-middle).
     <div className="column mx-auto flex h-dvh max-w-2xl flex-col lg:max-w-6xl">
-      <header className="glass z-20 flex shrink-0 flex-wrap items-center justify-between sm:items-baseline gap-x-4 gap-y-2 border-b border-rule px-4 py-3 lg:px-8">
+      <header className="glass z-20 flex shrink-0 flex-wrap items-center justify-between sm:items-baseline gap-x-4 gap-y-2 border-b border-rule px-4 py-3 sm:py-2 lg:px-8">
         <Link href="/" aria-label={copy.appName}>
           <Wordmark />
         </Link>
@@ -41,12 +41,12 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         </div>
         {/* The language and the colour scheme, a menu each, a hairline, then the account and signing out as two quiet buttons of the
             switcher's height. On a phone all of it behind one menu button (PhoneMenu), beside the logo. */}
-        <div className="hidden items-center gap-1 sm:flex sm:self-center">
+        <div className="hidden items-baseline gap-1 sm:flex">
           <LanguageMenu />
           <ThemeMenu theme={theme} />
-          <span aria-hidden="true" className="mx-2 h-6 border-l border-rule" />
+          <span aria-hidden="true" className="mx-2 h-6 self-center border-l border-rule" />
           <Link href="/account" className="header-link">
-            <UserRound aria-hidden="true" />
+            <UserRound aria-hidden="true" className="icon-middle" />
             {copy.account}
           </Link>
           <SignOutButton />

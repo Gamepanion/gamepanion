@@ -18,10 +18,10 @@ export function LanguageMenu() {
   return (
     <div className="relative">
       <button ref={button} type="button" className="header-link" aria-expanded={open} aria-controls={id} aria-label={label} title={label} onClick={toggle}>
-        <span className="flag">
+        <span className="flag icon-middle">
           <Flag locale={locale} />
         </span>
-        <ChevronDown aria-hidden="true" />
+        <ChevronDown aria-hidden="true" className="icon-middle" />
       </button>
       {open && (
         <div ref={panel} id={id} className="header-menu">

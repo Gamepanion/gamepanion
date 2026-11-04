@@ -9,9 +9,9 @@ import { applyTheme, currentTheme, THEMES, type Theme } from "./theme";
 import { usePopover } from "./usePopover";
 
 /** Three swatches of a scheme: its ground, its accent and its text; without `scheme`, the page's as it shows now. */
-function Swatches({ scheme }: { scheme?: "light" | "dark" }) {
+function Swatches({ scheme, className = "" }: { scheme?: "light" | "dark"; className?: string }) {
   return (
-    <span className="swatches" data-scheme={scheme}>
+    <span className={`swatches ${className}`} data-scheme={scheme}>
       <span className="bg-paper" />
       <span className="bg-accent" />
       <span className="bg-ink" />
@@ -86,8 +86,8 @@ export function ThemeMenu({ theme: initial }: { theme: Theme }) {
           toggle();
         }}
       >
-        <Swatches />
-        <ChevronDown aria-hidden="true" />
+        <Swatches className="icon-middle" />
+        <ChevronDown aria-hidden="true" className="icon-middle" />
       </button>
       {open && (
         <div ref={panel} id={id} className="header-menu">

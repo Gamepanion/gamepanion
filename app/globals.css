@@ -233,9 +233,16 @@ h1 {
 .theme-half {
   @apply flex flex-1 items-center justify-center bg-surface py-1.5;
 }
+/* An icon beside text, centred on the text's capitals, where the eye puts the middle of a word: it stands on the text's baseline, then
+   moves down by half its height less half a cap height. The header's icons all use it (logo, switcher, menus, account), so every text
+   in the row can share one baseline. Only the drawing moves, not the layout. */
+.icon-middle {
+  align-self: baseline;
+  transform: translateY(calc(50% - 0.5cap));
+}
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
-  @apply inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold text-muted hover:bg-surface hover:text-ink;
+  @apply inline-flex items-baseline gap-1.5 rounded-md px-2.5 py-2.5 text-sm/5 font-semibold text-muted hover:bg-surface hover:text-ink;
 }
 .header-link svg {
   @apply size-4;
@@ -253,6 +260,17 @@ h1 {
 }
 .switcher-button[aria-expanded="true"] {
   @apply bg-surface;
+}
+/* On a phone the switcher is alone on its row, in its frame: nothing beside it to share a baseline with, so its tile or house, text and
+   chevron are simply centred in the frame. */
+@media (max-width: 39.999rem) {
+  .switcher-button {
+    align-items: center;
+  }
+  .switcher-button .icon-middle {
+    align-self: center;
+    transform: none;
+  }
 }
 .switcher-button:focus-visible,
 .switcher-item:focus-visible {
@@ -810,8 +828,13 @@ h1 {
 
 /* A game's tile (components/GameTile.tsx): its initials, heavy and white, on the colour from its name. */
 .game-tile {
-  @apply inline-flex shrink-0 items-center justify-center rounded-md font-extrabold text-white;
+  @apply relative inline-flex shrink-0 rounded-md font-extrabold text-white;
   letter-spacing: -0.02em;
+}
+/* The initials are drawn over the tile, not in its flow: the tile is a picture to the layout, with no baseline of its own, so beside
+   text it lines up by its edges like any icon (.icon-middle). */
+.game-tile-initials {
+  @apply absolute inset-0 flex items-center justify-center;
 }
 
 /* Something to paste elsewhere (components/CopyField.tsx): the value as code, the copy button beside it. */
