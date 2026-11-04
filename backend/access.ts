@@ -61,7 +61,7 @@ export async function assertMayFile(trx: Transaction<Schema>, p: Player, game: {
   if (!game) {
     if (a.activeGameId === null) return; // the first game is free
     throw new SubscriptionRequiredError(
-      `Free players keep one game, and ${title} would be a second. Tell the player that more games need a subscription and give them this link: ${subscribe}. Nothing was filed.`,
+      `Free players keep one game, and ${title} would be a second. Tell the player that more games need a subscription: give them this link, ${subscribe}, or, when they want to buy right away, call subscription with the plan and period they choose for a link straight to the checkout. Nothing was filed.`,
     );
   }
   if (game.id === a.activeGameId) return;

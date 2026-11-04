@@ -40,10 +40,22 @@ import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { isFrozen } from "./access";
-import { pricingPlans } from "./billing/flow";
+import { portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 import { OWN_LICENSE, thirdPartyLicenses } from "./licenses";
 import { readOperatorPage } from "./operator";
-import { aboutPath, LICENSES_URL, accountDataPath, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, subscribePath, tabPath } from "./urls";
+import {
+  aboutPath,
+  LICENSES_URL,
+  accountDataPath,
+  siteUrl,
+  accountExportPath,
+  accountKeyPath,
+  homePath,
+  inText,
+  playthroughPath,
+  subscribePath,
+  tabPath,
+} from "./urls";
 
 export type Tool = {
   name: string;
@@ -93,6 +105,29 @@ function tool<I extends z.ZodObject, O extends z.ZodObject>(t: {
 // ---- Shapes -------------------------------------------------------------------------------------------------------------------
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL: give it to the player when they may want to look");
+
+const SubscriptionJson = z.object({
+  sold: z.boolean().describe("Whether this instance sells subscriptions; false: every feature is open to everyone"),
+  subscribed: z.boolean(),
+  plan: z.enum(["standard", "hostedAi"]).nullable().describe("What the player has: the subscription, or with the in-app chat on the instance's AI"),
+  validUntil: z.string().nullable().describe("When the paid period ends, YYYY-MM-DD"),
+  renews: z.boolean().describe("Whether it renews at validUntil; false once cancelled: it ends then"),
+  url: z
+    .string()
+    .nullable()
+    .describe("The link to give the player: the checkout for the plan asked for, else their Creem customer portal, else the plans page"),
+  plans: z
+    .array(
+      z.object({
+        plan: z.enum(["standard", "hostedAi"]),
+        period: z.enum(["month", "year"]),
+        name: z.string(),
+        amount: z.number().describe("In minor units: 499 is 4.99"),
+        currency: z.string(),
+      }),
+    )
+    .describe("What is sold, as the payment provider holds it"),
+});
 
 const ABOUT_PAGES = ["terms", "privacy", "imprint", "pricing", "licenses"] as const;
 const AboutJson = z.object({
@@ -998,6 +1033,53 @@ export const TOOLS: Tool[] = [
         ...(plans.length ? ["Prices are in minor units (499 EUR is 4.99 €); say whether tax is included."] : []),
         ...(url ? [`Give the player the page, ${inText(url)}.`] : []),
         "It is the operator's text, not legal advice: for a dispute, point to the operator's contact in the imprint.",
+      ]);
+    },
+  }),
+  tool({
+    name: "subscription",
+    description:
+      "The player's Gamepanion subscription, and the way to Creem, where it is bought and managed. Without arguments: whether they subscribe, which plan and until when, and a link to their own Creem customer portal (see, change or cancel it), or to the plans when they never bought. With plan and period: a link straight to Creem's checkout for that plan. Paying and cancelling happen on Creem's pages, never in this chat.",
+    input: z.object({
+      plan: z.enum(["standard", "hostedAi"]).optional().describe("To buy: standard (every game) or hostedAi (also the in-app chat on Gamepanion's AI)"),
+      period: z.enum(["month", "year"]).optional().describe("To buy: billed monthly or yearly; with plan"),
+    }),
+    output: SubscriptionJson,
+    annotations: { readOnlyHint: true },
+    handler: async (p, { plan, period }) => {
+      if ((plan === undefined) !== (period === undefined)) throw new InvalidInputError("plan and period go together: give both to buy, or neither");
+      const sub = await subscriptionOf(p);
+      const plans = sub.sold
+        ? (await pricingPlans()).plans.map((x) => ({ plan: x.tier, period: x.period, name: x.name, amount: x.amount, currency: x.currency }))
+        : [];
+      const base = {
+        sold: sub.sold,
+        subscribed: sub.subscribed,
+        plan: sub.subscribed ? (sub.hostedAi ? "hostedAi" : "standard") : null,
+        validUntil: sub.validUntil ? new Date(sub.validUntil).toISOString().slice(0, 10) : null,
+        renews: sub.subscribed && sub.renews,
+        plans,
+      } as const;
+      if (!sub.sold)
+        return ok(SubscriptionJson, { ...base, url: null }, [
+          "This Gamepanion instance sells nothing: every game and feature is open to every player. Tell the player there is nothing to buy.",
+        ]);
+      const never = "Never ask for card or payment details in this chat: paying happens only on Creem's page.";
+      if (plan && period) {
+        const { url } = await startCheckout(p, period, plan);
+        return ok(SubscriptionJson, { ...base, url }, [
+          `Give the player this link to Creem's checkout for ${plan === "hostedAi" ? "the subscription with Gamepanion's AI" : "the subscription"}, billed ${period === "year" ? "yearly" : "monthly"}: ${url}`,
+          never,
+          "The subscription starts once Creem confirms the payment, usually within seconds; call subscription again to check, then carry on with what they wanted (a second game files once it has started).",
+        ]);
+      }
+      const portal = sub.portal ? await portalFor(p) : null;
+      const url = portal ?? `${siteUrl()}${subscribePath()}`;
+      return ok(SubscriptionJson, { ...base, url }, [
+        sub.subscribed
+          ? `Tell the player their plan and until when it is paid (validUntil), and whether it renews then or, cancelled, ends. To see, change or cancel it, give them their Creem customer portal: ${url}. Cancelling keeps it to the end of the paid period.`
+          : `The player has no subscription. Tell them what the plans give and cost (amounts are in minor units, 499 is 4.99), with the plans page: ${url}. When they choose one, call subscription again with its plan and period for a link straight to the checkout.`,
+        never,
       ]);
     },
   }),
