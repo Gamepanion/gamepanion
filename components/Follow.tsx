@@ -6,7 +6,7 @@
 // And a pull to fetch now, for the home-screen app, which has no browser to reload it. The window doesn't scroll (the header stays and
 // each page scrolls on its own), so the browser's own pull-to-refresh never happens; this one starts when the page under the finger is
 // at its top and the finger moves down, not sideways. What comes down is the bookmark ribbon of the app's icon:
-// it turns ember once it is long enough, and letting go then fetches.
+// it turns violet once it is long enough, and letting go then fetches.
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useCopy } from "./copy/client";

@@ -40,7 +40,6 @@ export function PlaythroughSettings({ playthroughId, settings }: { playthroughId
         names={copy.spoilerLevel}
         value={now.spoilers}
         onPick={(spoilers) => pick({ spoilers })}
-        warn
       />
     </div>
   );
@@ -53,7 +52,6 @@ function Dial<L extends string>({
   names,
   value,
   onPick,
-  warn,
 }: {
   label: string;
   hint: string;
@@ -61,7 +59,6 @@ function Dial<L extends string>({
   names: Record<L, string>;
   value: L;
   onPick: (l: L) => void;
-  warn?: boolean;
 }) {
   return (
     <fieldset className="dial">
@@ -69,7 +66,7 @@ function Dial<L extends string>({
         <span className="dial-label">{label}</span>
         <span className="dial-hint">{hint}</span>
       </legend>
-      <div className="dial-levels" data-warn={warn && value !== levels[0] ? "" : undefined}>
+      <div className="dial-levels">
         {levels.map((l) => (
           <label key={l}>
             <input type="radio" name={label} value={l} checked={value === l} onChange={() => onPick(l)} />

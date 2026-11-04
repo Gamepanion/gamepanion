@@ -43,5 +43,5 @@ test("licenses: Gamepanion's own and every shipped package with its license, wit
   expect(out.own).toEqual({ name: "Gamepanion", license: "AGPL-3.0-only", source: "https://github.com/gamepanion/gamepanion" });
   expect((out.packages as unknown[]).length).toBe(thirdPartyLicenses.length);
   expect(JSON.stringify(out)).not.toContain("Permission is hereby granted");
-  expect(out.url).toBe("/licenses");
+  expect(out.url).toBe("https://docs.gamepanion.app/reference/licenses/");
 });
