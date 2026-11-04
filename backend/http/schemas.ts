@@ -18,6 +18,7 @@ import {
   TRUST_LEVELS,
 } from "../types";
 import { TODO_TARGETS } from "../todos";
+import { EXPORTED_TABLES } from "../export";
 import { ERROR_CODES } from "./errors";
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL");
@@ -359,8 +360,20 @@ export const TagListJson = z
   })
   .meta({ id: "TagList" });
 
+export const ExportJson = z
+  .object({
+    format: z.number().describe("The document's version"),
+    exportedAt: z.string().describe("When it was made, ISO 8601"),
+    ...(Object.fromEntries(
+      EXPORTED_TABLES.map((t) => [t, z.array(z.record(z.string(), z.unknown())).describe(`The ${t.replace(/_/g, " ")}, oldest first, as stored`)]),
+    ) as Record<(typeof EXPORTED_TABLES)[number], z.ZodArray<z.ZodRecord<z.ZodString, z.ZodUnknown>>>),
+  })
+  .describe("Everything the player filed, spoilers included (#106): one list per table of the log, ids linking the rows")
+  .meta({ id: "Export" });
+
 export const COMPONENTS = [
   ErrorJson,
+  ExportJson,
   SourceJson,
   ReferenceJson,
   PlaythroughJson,

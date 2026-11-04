@@ -19,6 +19,7 @@
 | `GET /api/v1/sessions/{id}` | One session, with its transcript |
 | `POST /api/v1/sessions` | File a session: the same body as the `record` tool; 201 |
 | `POST /api/v1/corrections` | Fix or remove what was filed: `{ "changes": [...] }`, as the `correct` tool |
+| `GET /api/v1/export` | Everything the player filed, spoilers included, as the `export` tool |
 | `GET /api/v1/openapi.json` | The description |
 
 Errors are JSON, `{"error": "...", "code": "..."}`: 400 `invalid_request` or `invalid_input`, 401 `unauthorized`, 404 `not_found` (also for another player's ids), 409 `ambiguous`.

@@ -69,3 +69,7 @@ The link to the account page's key section (`/account#key`), where the player st
 - **`hiddenItems`:** the items marked as hints or spoilers.
 
 `next` has Claude name the threads left behind first, read out the rest one quest at a time, and, if the player wants more than their log holds, say that what follows is Claude's own knowledge of the game, at the level they asked for.
+
+## export
+
+Everything the player filed, as one JSON document: one list per table of the log (games, playthroughs with their settings, sessions with their transcripts, quests and their entries, build plans, goals, stat snapshots, items, codex, item uses, tags, background and to-dos), spoilers included, since it is the player's own log ([ADR 0025](../adr/0025-export-and-deleting-the-account.md)). Only when the player asks for their data. `next` tells Claude not to read any of it out, and to offer saving it as a file or the account page's download (`/account#data`). The in-app chat doesn't have this tool. No tool deletes an account: that is on the account page only.

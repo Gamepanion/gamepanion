@@ -11,4 +11,10 @@ export const mailCopy = {
     `Someone signed in to Gamepanion wants to use this address for their account. The code is ${code}\n\n` +
     `Type it into the account page where you asked for it. It works once and for five minutes.\n` +
     `If you didn't ask for it, ignore this mail: without the code the address isn't changed.`,
+  deleteSubject: "Confirm deleting your Gamepanion account",
+  deleteText: (code: string, link: string) =>
+    `Someone signed in to Gamepanion asked to delete this account and everything filed in it. To confirm, paste this code into the ` +
+    `account page where you asked:\n\n${code}\n\nOr open this link in the browser you are signed in with:\n${link}\n\n` +
+    `Both work once and for an hour. Deleting can't be undone; the backups keep the data for up to 31 more days, then it is gone.\n` +
+    `If you didn't ask for it, ignore this mail: without the code or the link nothing is deleted.`,
 };

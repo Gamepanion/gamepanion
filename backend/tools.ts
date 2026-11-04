@@ -35,12 +35,13 @@ import {
   type Player,
   type SpoilerLevel,
 } from "./types";
-import { BackgroundJson } from "./http/schemas";
+import { BackgroundJson, ExportJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { isFrozen } from "./access";
-import { accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
+import { exportLog } from "./export";
+import { accountDataPath, accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -926,6 +927,21 @@ export const TOOLS: Tool[] = [
       const m = await missed(p, ref, reveal);
       return ok(MissedJson, m, missedNext(m));
     },
+  }),
+  tool({
+    name: "export",
+    description:
+      "Everything the player filed in Gamepanion as one JSON document: games, playthroughs with their settings, sessions with their transcripts, quests, items, builds, goals, codex, notes, tags, sources and to-dos, spoilers included. Only when the player asks for their data, an export or a backup. It is for keeping, not for reading out.",
+    input: z.object({}),
+    output: ExportJson,
+    annotations: { readOnlyHint: true },
+    handler: async (p) =>
+      ({
+        ...(await exportLog(p)),
+        next: [
+          `This holds everything the player filed, spoilers they never asked to see included: don't read any of it out or summarise it. Offer to save it as a file, or give them the account page, ${inText(accountDataPath())}, where they download the same document.`,
+        ],
+      }) as never,
   }),
 ];
 
