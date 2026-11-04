@@ -13,6 +13,7 @@ exclude_docs: |
 hooks:
   - docs_hooks/roadmap.py
   - docs_hooks/adr.py
+  - docs_hooks/licenses.py
 
 # English is the site; German pages sit next to their English ones (index.de.md) and are built under /de/. A page with no German version
 # shows the English one there (#10).
@@ -41,6 +42,7 @@ plugins:
             Connect Claude: Claude verbinden
             Reference: Referenz
             MCP tools: MCP-Werkzeuge
+            Licenses: Lizenzen
             Internals: Interna
             How it works: Wie es funktioniert
             Development: Entwicklung
@@ -57,6 +59,7 @@ nav:
   - Reference:
       - MCP tools: reference/mcp-tools.md
       - REST API: reference/rest-api.md
+      - Licenses: reference/licenses.md
   - Internals:
       - How it works: internals/how-it-works.md
       - Development: internals/development.md

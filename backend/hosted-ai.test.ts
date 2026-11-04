@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { receiveWebhook, setEmailLookupForTests } from "./billing/flow";
 import { resetBillingForTests } from "./billing/store";
 import type { ChatModel } from "./chat";
-import { chatFor, chatPlan, setChatModelForTests, voiceFor, voiceEnabled } from "./chat-route";
+import { chatFor, chatPlan, chatWithoutOwnKey, setChatModelForTests, voiceFor, voiceEnabled } from "./chat-route";
 import { countUsage, quotaLeft, resetRateForTests, takeRate } from "./hosted-ai";
 import { saveKey } from "./keys";
 import { fakeSignature } from "./payments";
@@ -142,4 +142,17 @@ test("transcription is for hosted-AI players where the instance sells, and count
   await countUsage(s.a, { seconds: 60 * 60 - 40 });
   const over = await voiceFor(s.a, speak(30));
   expect([over.status, await code(over)]).toEqual([429, "quota_used"]);
+});
+
+test("the account page knows what the chat runs on without a key: the instance's, nothing until a key or the AI plan, or no chat", async () => {
+  expect(await chatWithoutOwnKey(s.a)).toBe("instance");
+  sell();
+  expect(await chatWithoutOwnKey(s.a)).toBe("needsKey");
+  await subscribe(s.a, "standard");
+  expect(await chatWithoutOwnKey(s.a)).toBe("needsKey");
+  await subscribe(s.a, "hostedAi");
+  expect(await chatWithoutOwnKey(s.a)).toBe("instance");
+  vi.unstubAllEnvs();
+  setChatModelForTests(null);
+  expect(await chatWithoutOwnKey(s.b)).toBe("none");
 });

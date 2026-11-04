@@ -25,9 +25,13 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
   const back = typeof (await searchParams).checkout_id === "string";
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 pt-6 pb-16">
+    <div className="mx-auto max-w-5xl space-y-6 px-4 pt-6 pb-16">
       <h1 className="text-3xl">{copy.subscribeTitle}</h1>
-      {words && <OperatorMarkdown text={words} />}
+      {words && (
+        <div className="max-w-3xl">
+          <OperatorMarkdown text={words} />
+        </div>
+      )}
       {sub.subscribed ? (
         <div className="card space-y-2">
           <p className="font-semibold">{sub.validUntil ? (sub.renews ? copy.renewsOn : copy.cancelledUntil)(date.format(sub.validUntil)) : copy.subscribed}</p>
@@ -61,6 +65,7 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
             }))}
           saving={{ standard: yearlySavingPercent, hostedAi: hostedAiSavingPercent }}
           overlay={checkoutOverlay()}
+          free={sub.subscribed ? null : new Intl.NumberFormat(locale, { style: "currency", currency: plans[0].currency, maximumFractionDigits: 0 }).format(0)}
         />
       )}
     </div>

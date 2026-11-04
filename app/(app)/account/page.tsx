@@ -1,7 +1,18 @@
 import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { accessOf, accountExportPath, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
+import {
+  accessOf,
+  accountExportPath,
+  chatWithoutOwnKey,
+  keyStatus,
+  keyStorageEnabled,
+  listPlaythroughs,
+  passkeysOf,
+  profileOf,
+  signInMethods,
+  subscriptionOf,
+} from "@/backend";
 import { ActiveGame } from "@/components/ActiveGame";
 import { portalAction } from "../subscribe/actions";
 import { KeySection } from "@/components/KeySection";
@@ -33,13 +44,10 @@ export default async function AccountPage() {
   const list = (await passkeysOf(h)).map((p) => ({ id: p.id, name: p.name ?? copy.unnamedPasskey, added: date.format(new Date(p.createdAt)) }));
   return (
     <div className="px-4 pt-6 pb-16 lg:px-8">
-      {/* Two columns on a wide screen: the account card on the left, staying in view; how they sign in on the right. One column on a
-          phone. */}
-      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+      {/* One column, the account card on top: the sections below are too many and too long for a second column to balance. */}
+      <div className="mx-auto max-w-3xl space-y-8">
         <h1 className="sr-only">{copy.account}</h1>
-        <div className="lg:sticky lg:top-6">
-          <AccountCard name={profile.name} email={profile.email} />
-        </div>
+        <AccountCard name={profile.name} email={profile.email} />
         <div className="space-y-8">
           <section aria-labelledby="sign-in-ways">
             <h2 id="sign-in-ways" className="section-title">
@@ -98,7 +106,7 @@ export default async function AccountPage() {
               </div>
             </section>
           )}
-          <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} />
+          <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} without={await chatWithoutOwnKey(player)} sold={sub.sold} />
           <YourData email={profile.email} mailed={methods.emailCode} exportPath={accountExportPath()} />
         </div>
       </div>
