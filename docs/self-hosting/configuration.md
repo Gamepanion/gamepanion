@@ -73,7 +73,7 @@ and `GAMEPANION_TRANSCRIBE_URL=http://whisper:8000` in `.env`. The first transcr
 
 ## The operator's pages
 
-`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` and `GAMEPANION_TERMS_FILE` name Markdown files of your own: the imprint, privacy policy and terms at `/imprint`, `/privacy` and `/terms`, linked in the footer. Without a setting, or with a file that is missing or larger than 256 KiB, there is no page and no link. A value may hold `{lang}` (`/legal/imprint.{lang}.md`), replaced by the page's language (`en`, `de`) and falling back to English. Files are read on every request, so an edited file shows at once. Gamepanion ships none of the texts. `/licenses` lists the open-source packages Gamepanion ships and is always there.
+`GAMEPANION_IMPRINT_FILE`, `GAMEPANION_PRIVACY_FILE` and `GAMEPANION_TERMS_FILE` name Markdown files of your own: the imprint, privacy policy and terms at `/imprint`, `/privacy` and `/terms`, linked in the footer. Without a setting, or with a file that is missing or larger than 256 KiB, there is no page and no link. A value may hold `{lang}` (`/legal/imprint.{lang}.md`), replaced by the page's language (`en`, `de`) and falling back to English. Files are read on every request, so an edited file shows at once. Gamepanion ships none of the texts. The open-source packages Gamepanion ships are listed with their licenses on the docs site's [Licenses](../reference/licenses.md) page, linked in every instance's footer; `/licenses` forwards there.
 
 ## Payments
 
