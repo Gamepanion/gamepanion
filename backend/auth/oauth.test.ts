@@ -12,7 +12,10 @@ import { resetDbForTests } from "../db/testing";
 import { dispatch } from "../http/api";
 import { apiResourceMetadataRoute } from "../http/metadata";
 import { mcpRoute } from "../mcp";
+import { billing, resetBillingForTests } from "../billing/store";
+import { fakeCancelled } from "../payments";
 import { questsOf } from "../quests";
+import { record } from "../record";
 import { resetSecretForTests } from "../secret";
 import { auth, resetAuthForTests } from "./auth";
 import { setMailerForTests } from "./mail";
@@ -239,6 +242,7 @@ test("an MCP client signs the player in and calls the tools as them; nothing els
     "correct",
     "chat_key",
     "missed",
+    "export",
     "about",
   ]);
   const filed = await (
@@ -487,4 +491,31 @@ test("a session keeps neither the client's address nor its browser", async () =>
   const sessions = await ctx.adapter.findMany<{ ipAddress: string | null; userAgent: string | null }>({ model: "session" });
   expect(sessions.length).toBeGreaterThan(0);
   for (const s of sessions) expect([s.ipAddress ?? "", s.userAgent ?? ""]).toEqual(["", ""]);
+});
+
+test("a player deletes their account with the code mailed to them (#106): the log, billing rows and subscription go; a wrong code does nothing", async () => {
+  vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "fake");
+  vi.stubEnv("GAMEPANION_FAKE_WEBHOOK_SECRET", "fake-secret");
+  await resetBillingForTests();
+  const cookie = cookieOf(await signIn("ada@example.com"));
+  const player = (await playerFromHeaders(new Headers({ cookie })))!;
+  const filed = await record(player, { game: "Lies of P", summary: "Met Venigni.", transcript: "Met Venigni." });
+  await (await billing()).upsertStarted({ providerRef: "sub_gone", playerId: player.id, customerRef: null, validUntil: Date.now() + 86_400_000 });
+
+  // Asking mails a code and a link to the address; nothing is deleted yet.
+  const asked = await fetch(`${base}/api/auth/delete-user`, json({ callbackURL: "/login?deleted=1" }, { cookie }));
+  expect(await asked.json()).toMatchObject({ success: true, message: "Verification email sent" });
+  expect(purposes.get("ada@example.com")).toBe("delete-account");
+  const token = codes.get("ada@example.com")!;
+  expect(links.get("ada@example.com")).toContain(`/api/auth/delete-user/callback?token=${token}`);
+  expect((await fetch(`${base}/api/auth/delete-user`, json({ token: "wrong" }, { cookie }))).ok).toBe(false);
+  expect(await playerFromHeaders(new Headers({ cookie }))).not.toBeNull();
+
+  const deleted = await fetch(`${base}/api/auth/delete-user`, json({ token }, { cookie }));
+  expect(await deleted.json()).toMatchObject({ success: true, message: "User deleted" });
+  expect(await playerFromHeaders(new Headers({ cookie }))).toBeNull();
+  await expect(questsOf(player, filed.playthrough.id)).rejects.toThrow();
+  expect(await (await billing()).ofPlayer(player.id)).toEqual([]);
+  expect(fakeCancelled).toContain("sub_gone");
+  vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "");
 });

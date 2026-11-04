@@ -13,8 +13,8 @@ import { TOOLS, toolByName } from "./tools";
 const run = (name: string, p: { id: string }, args: unknown) => toolByName(name)!.run(p, args);
 const next = (out: Record<string, unknown>) => (out.next as string[]).join("\n");
 
-test("the table has record, briefing, open_threads, item, codex, correct, chat_key, missed and about, each with an English description and a next in its output", () => {
-  expect(TOOLS.map((t) => t.name)).toEqual(["record", "briefing", "open_threads", "item", "codex", "correct", "chat_key", "missed", "about"]);
+test("the table has record, briefing, open_threads, item, codex, correct, chat_key, missed, export and about, each with an English description and a next in its output", () => {
+  expect(TOOLS.map((t) => t.name)).toEqual(["record", "briefing", "open_threads", "item", "codex", "correct", "chat_key", "missed", "export", "about"]);
   for (const t of TOOLS) {
     expect(t.description).toMatch(/^[\x20-\x7e]+$/);
     expect(Object.keys(t.output.shape)).toContain("next");

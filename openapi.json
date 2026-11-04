@@ -28,6 +28,10 @@
       "description": "Fixing or removing what was filed."
     },
     {
+      "name": "Export",
+      "description": "Everything the player filed, as one document."
+    },
+    {
       "name": "Meta",
       "description": "About the API itself."
     }
@@ -2462,6 +2466,43 @@
         }
       }
     },
+    "/export": {
+      "get": {
+        "operationId": "exportLog",
+        "summary": "Everything the player filed",
+        "description": "One JSON document with every game, playthrough and its settings, session and its transcript, quest, item, build, goal, codex entry, note, tag, source and to-do, spoilers included: it is the player's own log. Free on every plan. The same as the MCP tool export.",
+        "tags": [
+          "Export"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The player's log",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Export"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token for this API (`unauthorized`); `WWW-Authenticate` points to how to get one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/openapi.json": {
       "get": {
         "operationId": "getOpenApi",
@@ -2531,6 +2572,205 @@
         ],
         "additionalProperties": false,
         "description": "Every error the API answers with"
+      },
+      "Export": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "number",
+            "description": "The document's version"
+          },
+          "exportedAt": {
+            "type": "string",
+            "description": "When it was made, ISO 8601"
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The games, oldest first, as stored"
+          },
+          "playthroughs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The playthroughs, oldest first, as stored"
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The sessions, oldest first, as stored"
+          },
+          "quests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The quests, oldest first, as stored"
+          },
+          "quest_entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The quest entries, oldest first, as stored"
+          },
+          "build_plans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The build plans, oldest first, as stored"
+          },
+          "goals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The goals, oldest first, as stored"
+          },
+          "stat_snapshots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The stat snapshots, oldest first, as stored"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The items, oldest first, as stored"
+          },
+          "codex": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The codex, oldest first, as stored"
+          },
+          "item_uses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The item uses, oldest first, as stored"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The tags, oldest first, as stored"
+          },
+          "tag_links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The tag links, oldest first, as stored"
+          },
+          "background": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The background, oldest first, as stored"
+          },
+          "todos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The todos, oldest first, as stored"
+          }
+        },
+        "required": [
+          "format",
+          "exportedAt",
+          "games",
+          "playthroughs",
+          "sessions",
+          "quests",
+          "quest_entries",
+          "build_plans",
+          "goals",
+          "stat_snapshots",
+          "items",
+          "codex",
+          "item_uses",
+          "tags",
+          "tag_links",
+          "background",
+          "todos"
+        ],
+        "additionalProperties": false,
+        "description": "Everything the player filed, spoilers included (#106): one list per table of the log, ids linking the rows"
       },
       "Source": {
         "type": "object",

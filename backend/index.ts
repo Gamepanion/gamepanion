@@ -26,7 +26,7 @@ export { chatEnabled, chatNeedsKey, chatRoute, voiceEnabled, voiceRoute } from "
 export type { AboutKind, ChatLink } from "./chat";
 export { dispatch as apiRoute } from "./http/api";
 export { apiResourceMetadataRoute } from "./http/metadata";
-export { accountKeyPath, mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, todoPath, type PlaythroughTab } from "./urls";
+export { accountExportPath, accountKeyPath, mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, todoPath, type PlaythroughTab } from "./urls";
 
 // What the pages read, as the signed-in player sees it: through the same gate as the tools, never asking for spoilers unless the
 // player asked on the page.
@@ -40,9 +40,10 @@ export { todosOf, type TodoView } from "./todos";
 export { getSession, latestSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
 export { InvalidInputError, NotFoundError } from "./errors";
 export { operatorLinks, readOperatorPage } from "./operator";
-export { paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
+export { checkoutOverlay, paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 export { accessOf, chooseActiveGame, isFrozen } from "./access";
 export { thirdPartyLicenses } from "./licenses";
+export { exportDownloadRoute } from "./export";
 export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";
 export {
   BACKGROUND_LEVELS,

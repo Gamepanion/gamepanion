@@ -23,6 +23,16 @@ items:
     summary_de: Claude liest die AGB, die Datenschutzerklärung, das Impressum, die Preise und die Lizenzen der Instanz und antwortet daraus, mit dem Link.
     links:
       - { label: "#112", url: "https://github.com/gamepanion/gamepanion/pull/112" }
+  - id: export-and-delete
+    status: done
+    date: 2026-11-04
+    icon: database-export-outline
+    title: Your data, to take or to delete
+    title_de: Deine Daten, zum Mitnehmen oder Löschen
+    summary: Download everything you filed as one file, from the account page, over MCP or the API; delete your account yourself on the account page, confirmed with a code by mail. Free on every plan.
+    summary_de: Lade alles, was du abgelegt hast, als eine Datei herunter, auf der Kontoseite, über MCP oder die API; lösche dein Konto selbst auf der Kontoseite, bestätigt mit einem Code per E-Mail. Kostenlos in jedem Tarif.
+    links:
+      - { label: "#109", url: "https://github.com/gamepanion/gamepanion/pull/109" }
   - id: chat-picture
     status: done
     date: 2026-11-03
