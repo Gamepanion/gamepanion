@@ -40,7 +40,7 @@ export { todosOf, type TodoView } from "./todos";
 export { getSession, latestSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
 export { InvalidInputError, NotFoundError } from "./errors";
 export { operatorLinks, readOperatorPage } from "./operator";
-export { paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
+export { checkoutOverlay, creemWebhook, paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 export { accessOf, chooseActiveGame, isFrozen } from "./access";
 export { thirdPartyLicenses } from "./licenses";
 export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";

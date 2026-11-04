@@ -12,6 +12,7 @@ export const fakeCancelled: string[] = processState("fake-cancelled", () => [] a
 
 export function createFake(webhookSecret: string): PaymentProvider {
   return {
+    overlay: false,
     async plans() {
       return [
         { period: "month", tier: "standard", name: "Monthly", amount: 499, currency: "EUR", taxIncluded: true },

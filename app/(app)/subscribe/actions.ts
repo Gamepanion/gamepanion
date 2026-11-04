@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { chooseActiveGame, portalFor, startCheckout } from "@/backend";
 import { pagePlayer } from "../viewer";
 
-export async function checkoutAction(period: "month" | "year", tier: "standard" | "hostedAi" = "standard"): Promise<void> {
-  const { url } = await startCheckout(await pagePlayer(), period, tier);
-  redirect(url);
+/** The checkout's URL: the page opens it as an overlay (Creem's embed, #107) or goes there. */
+export async function checkoutAction(period: "month" | "year", tier: "standard" | "hostedAi" = "standard"): Promise<string> {
+  return (await startCheckout(await pagePlayer(), period, tier)).url;
 }
 
 export async function portalAction(): Promise<void> {

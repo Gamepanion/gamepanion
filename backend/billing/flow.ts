@@ -4,7 +4,8 @@
 import { emailOf } from "../auth/session";
 import { InvalidInputError, NotFoundError } from "../errors";
 import { logger } from "../log";
-import { paymentProvider, WebhookRejectedError, type PaymentEvent, type Period, type Plan, type Tier } from "../payments";
+import { config } from "../config";
+import { creemDeliveries, paymentProvider, soldProducts, WebhookRejectedError, type PaymentEvent, type Period, type Plan, type Tier } from "../payments";
 import { processState } from "../state";
 import type { Player } from "../types";
 import { siteUrl, subscribePath } from "../urls";
@@ -56,13 +57,45 @@ async function apply(e: PaymentEvent): Promise<void> {
   }
 }
 
-/** Applies a webhook's events; how many there were. Throws WebhookRejectedError for a bad signature. */
+async function applyAll(events: PaymentEvent[]): Promise<void> {
+  for (const e of events) await apply(e);
+}
+
+/** Applies a webhook's events; how many there were. Throws WebhookRejectedError for a bad signature. Not for Creem: its webhook is
+ * creemWebhook's. */
 export async function receiveWebhook(rawBody: string, headers: Headers): Promise<number> {
   const provider = paymentProvider();
-  if (!provider) throw new NotFoundError("Nothing is sold on this instance");
+  if (!provider?.parseWebhook) throw new NotFoundError("Nothing is sold on this instance");
   const events = await provider.parseWebhook(rawBody, headers);
-  for (const e of events) await apply(e);
+  await applyAll(events);
   return events.length;
+}
+
+/** Where the instance sells through Creem (#107): the webhook secret, and what each delivery does to the billing store, as the callbacks
+ * of @creem_io/nextjs's Webhook want them (app/api/payments/webhook); null otherwise. A callback that throws makes the route answer 500,
+ * so Creem delivers again. */
+export function creemWebhook() {
+  if (config.paymentProvider() !== "creem") return null;
+  const c = config.creem();
+  const sold = soldProducts(c);
+  const map = creemDeliveries((id) => sold.find(([, , p]) => p === id)?.[1] ?? "standard");
+  const on =
+    <T>(f: (x: T) => PaymentEvent[]) =>
+    (x: T) =>
+      applyAll(f(x));
+  return {
+    webhookSecret: c.webhookSecret,
+    onCheckoutCompleted: on(map.checkoutCompleted),
+    onSubscriptionActive: on(map.renewed),
+    onSubscriptionPaid: on(map.renewed),
+    onSubscriptionCanceled: on(map.cancelled),
+    onSubscriptionScheduledCancel: on(map.cancelled),
+    onSubscriptionExpired: on(map.ended),
+    onSubscriptionPaused: on(map.ended),
+    onSubscriptionUnpaid: on(map.ended),
+    onRefundCreated: on(map.refunded),
+    onDisputeCreated: on(map.refunded),
+  };
 }
 
 /** POST /api/payments/webhook: 200 {"received":n}; 400 for a bad signature; 404 without a provider. */
@@ -76,6 +109,9 @@ export async function paymentsWebhookRoute(req: Request): Promise<Response> {
     throw e;
   }
 }
+
+/** Whether the checkout opens as an overlay on the subscribe page. */
+export const checkoutOverlay = (): boolean => paymentProvider()?.overlay ?? false;
 
 /** The signed-in player's own portal at the provider; null before they ever bought. */
 export async function portalFor(p: Player): Promise<string | null> {
