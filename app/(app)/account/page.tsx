@@ -18,6 +18,7 @@ import {
 } from "@/backend";
 import { ActiveGame } from "@/components/ActiveGame";
 import { portalAction } from "../subscribe/actions";
+import { Group } from "@/components/icons";
 import { AccountNav } from "@/components/AccountNav";
 import { KeySection } from "@/components/KeySection";
 import { AccountCard, EmailCode } from "@/components/Account";
@@ -67,13 +68,7 @@ export default async function AccountPage() {
             <AccountCard name={profile.name} email={profile.email} />
           </div>
           <div className="space-y-8">
-            <section id="sign-in-ways-section" aria-labelledby="sign-in-ways" className="scroll-mt-6">
-              <h2 id="sign-in-ways" className="section-title">
-                <span className="seal">
-                  <ShieldCheck aria-hidden="true" />
-                </span>
-                {copy.signInWays}
-              </h2>
+            <Group id="sign-in-ways-section" icon={ShieldCheck} label={copy.signInWays}>
               <ul className="card divide-y divide-rule p-0">
                 {methods.emailCode && <EmailCode email={profile.email} />}
                 {profile.linked.map((p) => (
@@ -89,15 +84,9 @@ export default async function AccountPage() {
                 ))}
                 <Passkeys list={list} />
               </ul>
-            </section>
+            </Group>
             {sub.sold && (
-              <section id="subscription" aria-labelledby="subscription-title" className="scroll-mt-6">
-                <h2 id="subscription-title" className="section-title">
-                  <span className="seal">
-                    <CreditCard aria-hidden="true" />
-                  </span>
-                  {copy.subscriptionTitle}
-                </h2>
+              <Group id="subscription" icon={CreditCard} label={copy.subscriptionTitle}>
                 <div className="card space-y-4">
                   <p className="font-semibold">
                     {sub.subscribed
@@ -130,7 +119,7 @@ export default async function AccountPage() {
                     />
                   )}
                 </div>
-              </section>
+              </Group>
             )}
             <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} without={await chatWithoutOwnKey(player)} sold={sub.sold} />
             <YourData email={profile.email} mailed={methods.emailCode} exportPath={accountExportPath()} />

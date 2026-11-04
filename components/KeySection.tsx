@@ -5,6 +5,7 @@ import { KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { removeKeyAction, saveKeyAction, testKeyAction, type KeyResult } from "@/app/(app)/account/actions";
+import { Group } from "./icons";
 import { useCopy } from "./copy/client";
 
 export function KeySection({
@@ -47,13 +48,7 @@ export function KeySection({
     });
 
   return (
-    <section id="key" aria-labelledby="key-title" className="scroll-mt-6">
-      <h2 id="key-title" className="section-title">
-        <span className="seal">
-          <KeyRound aria-hidden="true" />
-        </span>
-        {copy.keyTitle}
-      </h2>
+    <Group id="key" icon={KeyRound} label={copy.keyTitle}>
       <div className="card space-y-3">
         <p>{copy.keyLead}</p>
         <p id={note} className="text-sm text-muted">
@@ -117,6 +112,6 @@ export function KeySection({
           {result ? words[result] : ""}
         </p>
       </div>
-    </section>
+    </Group>
   );
 }

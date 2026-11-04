@@ -180,11 +180,7 @@ h1 {
   .account-input::placeholder {
     @apply font-normal text-muted italic;
   }
-  /* A section's heading: its icon in a square tinted in the colour of the part it is in (the register's --c; violet outside it), then
-     its name, uppercase like a HUD label. */
-  .section-title {
-    @apply mb-2 flex w-fit items-center gap-2 text-xs font-extrabold tracking-[0.08em] text-ink uppercase;
-  }
+  /* A row's icon in a small square tinted in the colour of the part it is in (the register's --c; violet outside it). */
   .seal {
     @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md;
     background: color-mix(in oklab, var(--c, var(--accent)) 24%, var(--surface));

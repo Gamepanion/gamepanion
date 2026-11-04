@@ -67,25 +67,34 @@ export const CODEX_ICONS: Record<string, LucideIcon> = { boss: Skull, enemy: Swo
 
 export const QUEST_ICONS: Record<string, LucideIcon> = { open: CircleDot, blocked: Hourglass, done: CircleCheck, failed: CircleX, dropped: CircleSlash };
 
-/** A part of a tab, folding: every tab shows its content in these (open quests, weapons, bosses, goals, sessions, settings), so the
- * register reads the same everywhere. Its band is a native disclosure (keyboard and screen readers know it), larger than a tag chip,
- * with how many it holds where it holds a list (under a tag, how many of those; components/TagFilter.tsx) and a chevron that turns when
- * it folds. Open to start with, unless `open` is false (what is done). */
+/** A part of a page, folding: every tab, the account page and a session's page show their content in these (open quests, weapons,
+ * bosses, goals, sessions, settings, how you sign in), so they all read the same. Its band is a native disclosure (keyboard and screen
+ * readers know it), larger than a tag chip, with how many it holds where it holds a list (under a tag, how many of those;
+ * components/TagFilter.tsx) and a chevron that turns when it folds. Open to start with, unless `open` is false (what is done).
+ * `empty` is what it says, in a card, when it holds nothing (`count` 0, or no children); `card` puts what it holds in one card. */
 export function Group({
   icon: Icon,
   label,
   count,
   open = true,
+  id,
+  empty,
+  card = false,
   children,
 }: {
   icon: LucideIcon;
   label: ReactNode;
   count?: number;
   open?: boolean;
-  children: ReactNode;
+  /** For a link to it (the account page's table of contents). */
+  id?: string;
+  empty?: ReactNode;
+  card?: boolean;
+  children?: ReactNode;
 }) {
+  const nothing = empty !== undefined && (count === 0 || children === undefined || children === null || children === false);
   return (
-    <details open={open} className="group-fold" data-tag-scope>
+    <details open={open} id={id} className="group-fold scroll-mt-6" data-tag-scope>
       <summary className="group-heading">
         <Icon aria-hidden="true" />
         <h3 className="flex-1">{label}</h3>
@@ -96,9 +105,14 @@ export function Group({
         )}
         <ChevronDown aria-hidden="true" className="group-chevron" />
       </summary>
-      {children}
+      {nothing ? <p className="card text-muted">{empty}</p> : card ? <div className="card">{children}</div> : children}
     </details>
   );
+}
+
+/** Rows in one card, a rule between them: sessions, next steps, references, to-dos. `dashed` for what is only suggested. */
+export function CardList({ children, dashed = false }: { children: ReactNode; dashed?: boolean }) {
+  return <ul className={`card divide-y divide-rule py-1 ${dashed ? "border-dashed" : ""}`}>{children}</ul>;
 }
 
 /** The tile at the start of a card: what kind of thing the card is. */
