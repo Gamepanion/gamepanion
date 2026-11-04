@@ -47,7 +47,7 @@ test("a free player starts one game, and a second is refused with the subscribe 
   await file(fresh, { game: "Hollow Knight" });
   const err = await file(fresh, { game: "Celeste" }).catch((e) => e);
   expect(err).toBeInstanceOf(SubscriptionRequiredError);
-  expect(err.message).toMatch(/Free players keep one game, and Celeste would be a second.*\/subscribe\. Nothing was filed\./);
+  expect(err.message).toMatch(/Free players keep one game, and Celeste would be a second.*\/subscribe.*call subscription.*Nothing was filed\./);
   expect((await listPlaythroughs(fresh)).map((t) => t.game.title)).toEqual(["Hollow Knight"]);
   // All the playthroughs of the free game are fine: an NG+ too.
   await file(fresh, { game: "Hollow Knight", label: "NG+" });
