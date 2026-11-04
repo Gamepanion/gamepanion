@@ -1,4 +1,4 @@
-"""MkDocs hook: renders third-party-licenses.json (npm run generate, #48) as the list of the packages Gamepanion ships, in place of the
+"""MkDocs hook: renders third-party-licenses.json (npm run licenses, made in the docs build, #48) as the list of the packages Gamepanion ships, in place of the
 <!-- licenses --> marker of docs/reference/licenses.md: name, version, license and repository, the license's text folded away.
 
 Every piece of text from the data file is escaped; the markup has no blank lines (a blank line would end the raw HTML block).

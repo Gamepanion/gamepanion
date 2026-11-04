@@ -7,15 +7,20 @@
     "node": ">=22"
   },
   "scripts": {
+    "predev": "npm run licenses",
     "dev": "next dev",
+    "licenses": "node scripts/third-party-licenses.mjs",
+    "prebuild": "npm run licenses",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "pretypecheck": "npm run licenses",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "generate": "sh scripts/generate.sh",
+    "predemo": "npm run licenses",
     "demo": "sh scripts/demo.sh"
   },
   "dependencies": {
@@ -56,5 +61,8 @@
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "minimatch@^10": "^11.0.4"
   }
 }

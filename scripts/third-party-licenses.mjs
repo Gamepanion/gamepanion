@@ -1,5 +1,6 @@
 // The third-party packages Gamepanion ships (production dependencies, transitive, the platform's optional binaries left out), with their licenses, for the docs' licenses page (docs_hooks/licenses.py) and the about tool (#48, #111):
-// third-party-licenses.json, sorted by name. Run by `npm run generate`; CI fails when the committed file differs.
+// third-party-licenses.json, sorted by name. Made, not committed (git-ignored): `npm run licenses`, run before build, dev, demo and typecheck,
+// by vitest (globalSetup) and by the docs build.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -29,3 +30,6 @@ for (const [path, pkg] of Object.entries(lock.packages ?? {})) {
 }
 const list = [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 writeFileSync(join(root, "third-party-licenses.json"), JSON.stringify(list, null, 1) + "\n");
+
+// For vitest's globalSetup: the file is written on import, so the hook itself has nothing left to do.
+export default function setup() {}
