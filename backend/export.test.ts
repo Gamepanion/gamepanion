@@ -1,10 +1,16 @@
 // The export (#106): everything the player filed, spoilers included, as one document over the REST API and the account page's download,
 // and the MCP tool's link to that download; nothing of another player's. That the stored key stays out is keys.test.ts's, over every read-only tool.
-import { beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { resetAuthForTests } from "./auth/auth";
+import { resetSecretForTests } from "./secret";
 import { exportDownloadRoute, exportLog, EXPORTED_TABLES } from "./export";
 import { A_FIRST, B_FIRST, FULL, HINT, SPOILER_ITEM, SPOILER_SOURCE, seed, type Seed } from "./testing/fixtures";
 import { toolByName } from "./tools";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  resetSecretForTests();
+});
 
 let s: Seed;
 beforeEach(async () => {
@@ -36,6 +42,9 @@ test("the export tool returns only the link to the download, never the log", asy
 });
 
 test("the download needs a session", async () => {
+  // Better Auth needs the instance secret; given here, so nothing is written to DATA_DIR.
+  vi.stubEnv("GAMEPANION_SECRET", "s".repeat(40));
+  resetSecretForTests();
   await resetAuthForTests();
   expect((await exportDownloadRoute(new Request("http://localhost/account/export"))).status).toBe(401);
 });
