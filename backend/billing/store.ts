@@ -17,6 +17,8 @@ export type Subscription = {
   customerRef: string | null;
   status: "active" | "lapsed";
   validUntil: number | null;
+  /** False once cancelled: it stays active until `validUntil`, then ends instead of renewing. */
+  renews: boolean;
   updatedAt: number;
 };
 
@@ -29,6 +31,7 @@ interface BillingSchema {
     valid_until: number | null;
     updated_at: number;
     tier: ColumnType<string, string | undefined, string>;
+    renews: ColumnType<number, number | undefined, number>;
   };
   ai_usage: { player_id: string; month: string; tokens: number; seconds: number };
   active_game: { player_id: string; game_id: string; chosen_at: number };
@@ -73,15 +76,27 @@ const migrations: Record<string, Migration> = {
         .execute();
     },
   },
+  "003_renews": {
+    // Whether a subscription renews: cancelled ones keep their period but say they end.
+    async up(db: Kysely<any>) {
+      await db.schema
+        .alterTable("subscriptions")
+        .addColumn("renews", "integer", (c) => c.notNull().defaultTo(1))
+        .execute();
+    },
+  },
 };
 
-const view = (r: { [K in keyof BillingSchema["subscriptions"]]: K extends "tier" ? string : BillingSchema["subscriptions"][K] }): Subscription => ({
+const view = (r: {
+  [K in keyof BillingSchema["subscriptions"]]: K extends "tier" ? string : K extends "renews" ? number : BillingSchema["subscriptions"][K];
+}): Subscription => ({
   providerRef: r.provider_ref,
   tier: r.tier === "hostedAi" ? "hostedAi" : "standard",
   playerId: r.player_id,
   customerRef: r.customer_ref,
   status: r.status as Subscription["status"],
   validUntil: r.valid_until,
+  renews: r.renews !== 0,
   updatedAt: r.updated_at,
 });
 
@@ -90,15 +105,26 @@ const later = (a: number | null, b: number | null) => (a === null || b === null 
 
 function store(d: Kysely<BillingSchema>) {
   return {
-    /** A subscription started: one row per reference, however often the event arrives. */
-    async upsertStarted(e: { providerRef: string; playerId: string; customerRef: string | null; validUntil: number | null; tier?: Subscription["tier"] }) {
+    /** A subscription started: one row per reference, however often and in whatever order its events arrive. A row that lapsed (ended,
+     * refunded) stays lapsed unless the event brings a later period: a late event never revives a refunded subscription. */
+    async upsertStarted(e: {
+      providerRef: string;
+      playerId: string;
+      customerRef: string | null;
+      validUntil: number | null;
+      tier?: Subscription["tier"];
+      renews?: boolean;
+    }) {
       const before = await d.selectFrom("subscriptions").selectAll().where("provider_ref", "=", e.providerRef).executeTakeFirst();
+      const validUntil = before ? later(before.valid_until, e.validUntil) : e.validUntil;
+      const revived = before?.status !== "lapsed" || (e.validUntil !== null && before.valid_until !== null && e.validUntil > before.valid_until);
       const row = {
         player_id: e.playerId,
         customer_ref: e.customerRef ?? before?.customer_ref ?? null,
-        status: "active",
+        status: revived ? "active" : "lapsed",
         tier: e.tier ?? before?.tier ?? "standard",
-        valid_until: before ? later(before.valid_until, e.validUntil) : e.validUntil,
+        valid_until: validUntil,
+        renews: e.renews === undefined ? (before?.renews ?? 1) : e.renews ? 1 : 0,
         updated_at: Date.now(),
       };
       await d
@@ -108,12 +134,17 @@ function store(d: Kysely<BillingSchema>) {
         .execute();
     },
     /** A new end of the paid period (never earlier than the one kept); false for a reference the store doesn't know. */
-    async setPeriod(providerRef: string, validUntil: number | null, status?: Subscription["status"]): Promise<boolean> {
+    async setPeriod(providerRef: string, validUntil: number | null, status?: Subscription["status"], renews?: boolean): Promise<boolean> {
       const before = await d.selectFrom("subscriptions").selectAll().where("provider_ref", "=", providerRef).executeTakeFirst();
       if (!before) return false;
       await d
         .updateTable("subscriptions")
-        .set({ valid_until: later(before.valid_until, validUntil), ...(status ? { status } : {}), updated_at: Date.now() })
+        .set({
+          valid_until: later(before.valid_until, validUntil),
+          ...(status ? { status } : {}),
+          ...(renews === undefined ? {} : { renews: renews ? 1 : 0 }),
+          updated_at: Date.now(),
+        })
         .where("provider_ref", "=", providerRef)
         .execute();
       return true;

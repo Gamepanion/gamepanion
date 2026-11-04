@@ -2,12 +2,25 @@
 // The player's own Anthropic key on the account page (/account#key, ADR 0021): a field to paste it, "Test key" (one cheap call), "Save
 // key", and once saved only its last four characters. The field is never filled from the server: the key doesn't come back.
 import { KeyRound } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { removeKeyAction, saveKeyAction, testKeyAction, type KeyResult } from "@/app/(app)/account/actions";
 import { useCopy } from "./copy/client";
 
-export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string | null }) {
+export function KeySection({
+  enabled,
+  last4,
+  without,
+  sold,
+}: {
+  enabled: boolean;
+  last4: string | null;
+  /** What the chat runs on while no key is stored (chatWithoutOwnKey). */
+  without: "instance" | "needsKey" | "none";
+  /** Whether the instance sells plans: then its own key is "Gamepanion's AI". */
+  sold: boolean;
+}) {
   const copy = useCopy();
   const router = useRouter();
   const field = useId();
@@ -51,7 +64,22 @@ export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string
           <p className="text-sm">{copy.keyOff}</p>
         ) : (
           <>
-            <p className="font-semibold">{last4 ? copy.keyStored(last4) : copy.keyNone}</p>
+            <p className="font-semibold">
+              {last4 ? (
+                copy.keyStored(last4)
+              ) : without === "instance" ? (
+                copy.keyNoneInstance(sold)
+              ) : without === "needsKey" ? (
+                <>
+                  {copy.keyNoneNeeded}{" "}
+                  <Link href="/subscribe" className="text-accent underline">
+                    {copy.seePlans}
+                  </Link>
+                </>
+              ) : (
+                copy.keyNone
+              )}
+            </p>
             <form
               className="space-y-3"
               onSubmit={(e) => {

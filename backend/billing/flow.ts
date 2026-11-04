@@ -37,8 +37,8 @@ async function apply(e: PaymentEvent): Promise<void> {
       if (!(await b.setPeriod(e.providerRef, e.validUntil, "active"))) log.warn({ ref: e.providerRef }, "renewed: unknown subscription, skipped");
       return;
     case "cancelled":
-      // Paid until the period's end: it stays active until then.
-      if (!(await b.setPeriod(e.providerRef, e.validUntil))) log.warn({ ref: e.providerRef }, "cancelled: unknown subscription, skipped");
+      // Paid until the period's end: it stays active until then, and doesn't renew.
+      if (!(await b.setPeriod(e.providerRef, e.validUntil, undefined, false))) log.warn({ ref: e.providerRef }, "cancelled: unknown subscription, skipped");
       return;
     case "ended":
       if (!(await b.lapse(e.providerRef))) log.warn({ ref: e.providerRef }, "ended: unknown subscription, skipped");
@@ -109,10 +109,17 @@ export const yearlySaving = (plans: Plan[]): number | null => {
  * they have a portal. */
 export async function subscriptionOf(
   p: Player,
-): Promise<{ sold: boolean; subscribed: boolean; hostedAi: boolean; validUntil: number | null; portal: boolean }> {
-  if (!paymentProvider()) return { sold: false, subscribed: false, hostedAi: false, validUntil: null, portal: false };
+): Promise<{ sold: boolean; subscribed: boolean; hostedAi: boolean; validUntil: number | null; renews: boolean; portal: boolean }> {
+  if (!paymentProvider()) return { sold: false, subscribed: false, hostedAi: false, validUntil: null, renews: false, portal: false };
   const subs = await (await billing()).ofPlayer(p.id);
   const live = subs.filter((s) => s.status === "active" && (s.validUntil === null || s.validUntil > Date.now()));
   const best = live.find((s) => s.tier === "hostedAi") ?? live[0];
-  return { sold: true, subscribed: !!best, hostedAi: best?.tier === "hostedAi", validUntil: best?.validUntil ?? null, portal: subs.some((s) => s.customerRef) };
+  return {
+    sold: true,
+    subscribed: !!best,
+    hostedAi: best?.tier === "hostedAi",
+    validUntil: best?.validUntil ?? null,
+    renews: best?.renews ?? false,
+    portal: subs.some((s) => s.customerRef),
+  };
 }

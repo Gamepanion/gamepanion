@@ -22,11 +22,22 @@ export {
 } from "./auth/session";
 export type { SignInMethods } from "./auth/methods";
 export { mcpRoute } from "./mcp";
-export { chatEnabled, chatNeedsKey, chatRoute, voiceEnabled, voiceRoute } from "./chat-route";
+export { chatEnabled, chatNeedsKey, chatRoute, chatWithoutOwnKey, voiceEnabled, voiceRoute } from "./chat-route";
 export type { AboutKind, ChatLink } from "./chat";
 export { dispatch as apiRoute } from "./http/api";
 export { apiResourceMetadataRoute } from "./http/metadata";
-export { accountExportPath, accountKeyPath, mcpResource as mcpUrl, PLAYTHROUGH_TABS, safeNext, siteUrl, tabPath, todoPath, type PlaythroughTab } from "./urls";
+export {
+  accountExportPath,
+  accountKeyPath,
+  licensesUrl,
+  mcpResource as mcpUrl,
+  PLAYTHROUGH_TABS,
+  safeNext,
+  siteUrl,
+  tabPath,
+  todoPath,
+  type PlaythroughTab,
+} from "./urls";
 
 // What the pages read, as the signed-in player sees it: through the same gate as the tools, never asking for spoilers unless the
 // player asked on the page.
@@ -42,7 +53,6 @@ export { InvalidInputError, NotFoundError } from "./errors";
 export { operatorLinks, readOperatorPage } from "./operator";
 export { checkoutOverlay, paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 export { ACTIVE_GAME_CHANGE_DAYS, accessOf, chooseActiveGame, isFrozen, nextActiveGameChange } from "./access";
-export { thirdPartyLicenses } from "./licenses";
 export { exportDownloadRoute } from "./export";
 export { keyStatus, keyStorageEnabled, removeKey, saveKey, testKey } from "./keys";
 export {

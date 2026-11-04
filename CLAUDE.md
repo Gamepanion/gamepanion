@@ -34,6 +34,7 @@ Gamepanion: a spoiler-free companion for the games you play (quest log, build, i
 - Accessible: keyboard reachable with visible focus, no meaning in colour alone (the register's tabs use the Okabe-Ito colours and their names), a name for every control without text (the flags are named by their language), reduced motion respected.
 - `backend/` is framework-free and the frontend imports it only through `backend/index.ts` (enforced by eslint).
 - Env vars are `GAMEPANION_*`, except `PUBLIC_URL`, `DATA_DIR`, `PORT`, `TZ`. Keep `backend/config.ts`, `.env.example` and `docs/self-hosting/configuration.md` in step; `compose.yaml` reads `.env` whole (`env_file`), so a new setting doesn't touch it.
+- Dependabot's patch and minor pull requests merge by themselves once `check` and `generate` are green (`.github/workflows/dependabot-automerge.yml`): the one exception to merging only when asked. Majors wait for review.
 - Architectural decisions go to `docs/adr/NNNN-*.md` (MADR). Never commit superpowers artifacts (`.superpowers/`, specs, plans).
 - `next dev` writes a "nextjs-agent-rules" block into `AGENTS.md`; it is git-ignored, don't commit it.
 

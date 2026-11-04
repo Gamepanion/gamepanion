@@ -29,8 +29,12 @@ export const accountExportPath = () => "/account/export";
 export const accountDataPath = () => "/account#data";
 /** Where a player subscribes (#48). */
 export const subscribePath = () => "/subscribe";
-/** The operator's pages and the licenses (#48). */
-export const aboutPath = (page: "imprint" | "privacy" | "terms" | "licenses") => `/${page}`;
+/** The operator's pages (#48). */
+export const aboutPath = (page: "imprint" | "privacy" | "terms") => `/${page}`;
+/** The third-party licenses: a page of the docs, generated from third-party-licenses.json (docs_hooks/licenses.py). */
+export const LICENSES_URL = "https://docs.gamepanion.app/reference/licenses/";
+/** The same page in the docs' language for `locale` (German under /de/). */
+export const licensesUrl = (locale: string) => (locale === "de" ? LICENSES_URL.replace(".app/", ".app/de/") : LICENSES_URL);
 /** The account page. */
 export const accountPath = () => "/account";
 /** The home page: what the player is playing, or, with nothing filed, how to start. */

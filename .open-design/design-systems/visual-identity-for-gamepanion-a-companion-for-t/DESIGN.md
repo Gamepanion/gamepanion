@@ -14,8 +14,8 @@ Dark first; the light theme is kept for players whose system asks for it.
 - **border `#2E2A3A`**: hairline structure between rows and around the frame (1.41:1, structure only, never a control's only edge).
 - **accent `#A77BFF`**: violet. The one brand hit: the primary button, one headline phrase, the hard offset shadow. At most two visible uses per screen. 6.46:1 on bg; text on it uses **accent-on `#12082A`** (6.33:1). Hover **`#BC9BFF`**.
 - **signal `#C6F432`**: lime, used sparingly for "done" and the eyebrow that names a section. 15.30:1 on bg. Never next to the violet in the same element.
-- **Status:** success `#009E73`, warn `#E69F00`, danger `#D55E00`, taken from Okabe-Ito so they survive colour blindness.
-- **Register tabs** keep the Okabe-Ito colours with their names: Quests orange `#E69F00`, Build sky blue `#56B4E9`, Items bluish green `#009E73`, Codex reddish purple `#CC79A7`. The colour is a 4px left edge; the name is always written.
+- **Status:** success `#009E73`, danger `#D55E00`, taken from Okabe-Ito so they survive colour blindness. No amber warning colour: a warning is said in words, and the chosen state of a control is the accent.
+- **Register tabs** keep the Okabe-Ito colours with their names: the app's own mapping is in `docs/internals/brand.md`. The colour is a 4px left edge; the name is always written.
 - **Light theme:** bg `#F7F6FA`, fg `#14121A` (17.25:1), accent text `#6B3FD6` (5.90:1).
 
 ## Typography
