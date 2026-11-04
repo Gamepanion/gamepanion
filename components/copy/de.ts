@@ -127,6 +127,8 @@ export const de: Copy = {
   keyRemoved: "Entfernt.",
 
   // Die Kontoseite: wer angemeldet ist, und wie man sich anmeldet
+  theme: "Farbschema",
+  themes: { system: "Farben des Systems", light: "Hell", dark: "Dunkel" },
   account: "Konto",
   signedInAs: "Angemeldet als",
   noName: "Noch kein Name",

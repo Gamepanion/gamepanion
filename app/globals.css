@@ -3,61 +3,41 @@
 @source not "../.open-design";
 
 /* Violet arcade (ADR 0018, docs/internals/brand.md): a near-black ground, one violet accent, lime for what's done, Atkinson set heavy,
-   sharp corners and a hard offset shadow. Dark first; the light theme follows the system setting. The variable names are the app's
+   sharp corners and a hard offset shadow. Each colour is light-dark(light, dark): the system's scheme picks, unless the player chose one. The variable names are the app's
    own roles: --paper the ground, --ink the text, --rule the hairlines. */
 :root {
-  --paper: #f7f6fa;
-  --surface: #ffffff;
-  --surface-2: #eeebf5;
-  --ink: #14121a;
-  --muted: #5a556a;
-  --rule: #dad6e3;
-  --accent: #6b3fd6;
-  --accent-soft: #6b3fd6;
-  --on-accent: #ffffff;
-  --signal: #6b3fd6;
-  --error: #b42318;
+  --paper: light-dark(#f7f6fa, #0c0b10);
+  --surface: light-dark(#ffffff, #17151f);
+  --surface-2: light-dark(#eeebf5, #221f2c);
+  --ink: light-dark(#14121a, #f2f0f7);
+  --muted: light-dark(#5a556a, #a49fb4);
+  --rule: light-dark(#dad6e3, #2e2a3a);
+  --accent: light-dark(#6b3fd6, #a77bff);
+  --accent-soft: light-dark(#6b3fd6, #c9b4ff);
+  --on-accent: light-dark(#ffffff, #12082a);
+  --signal: light-dark(#6b3fd6, #c6f432);
+  --error: light-dark(#b42318, #ff8a80);
   --glass: var(--surface);
   /* The register's tabs (components/Register.tsx): the Okabe-Ito colours, told apart with every common kind of colour blindness, warm and
      cool in turn, so neighbours stay apart with red-green colour blindness and in grey; each tab carries its name as well, never the colour alone. */
-  --tab-overview: #cc79a7;
+  --tab-overview: light-dark(#cc79a7, #d98cb6);
   --tab-character: #e69f00;
-  --tab-quests: #0072b2;
+  --tab-quests: light-dark(#0072b2, #3a9ad9);
   --tab-items: #f0e442;
-  --tab-codex: #56b4e9;
-  --tab-sessions: #d55e00;
-  --tab-notes: #009e73;
-  --tab-settings: #7c7f93;
-  --tab-todos: #8f6bd8;
-  --tab-references: #b0875a;
+  --tab-codex: light-dark(#56b4e9, #7cc6ef);
+  --tab-sessions: light-dark(#d55e00, #ec7a2c);
+  --tab-notes: light-dark(#009e73, #1fb487);
+  --tab-settings: light-dark(#7c7f93, #a5a8bd);
+  --tab-todos: light-dark(#8f6bd8, #a98ae6);
+  --tab-references: light-dark(#b0875a, #c9a27a);
+  color-scheme: light dark;
+}
+/* The colour scheme the player chose in the header (components/ThemeSwitch.tsx): light or dark; without a choice, the system's. */
+:root[data-theme="light"] {
   color-scheme: light;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0c0b10;
-    --surface: #17151f;
-    --surface-2: #221f2c;
-    --ink: #f2f0f7;
-    --muted: #a49fb4;
-    --rule: #2e2a3a;
-    --accent: #a77bff;
-    --accent-soft: #c9b4ff;
-    --on-accent: #12082a;
-    --signal: #c6f432;
-    --error: #ff8a80;
-    --tab-overview: #d98cb6;
-    --tab-character: #e69f00;
-    --tab-quests: #3a9ad9;
-    --tab-items: #f0e442;
-    --tab-codex: #7cc6ef;
-    --tab-sessions: #ec7a2c;
-    --tab-notes: #1fb487;
-    --tab-settings: #a5a8bd;
-    --tab-todos: #a98ae6;
-    --tab-references: #c9a27a;
-    color-scheme: dark;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -213,6 +193,22 @@ h1 {
 .plan-marked {
   @apply border-accent;
   box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* The colour scheme switch in the header (components/ThemeSwitch.tsx): three small buttons, the one in use filled. */
+.theme-switch {
+  @apply ml-1 flex items-center rounded-md border border-rule p-0.5;
+}
+.theme-switch button {
+  @apply inline-flex size-7 items-center justify-center rounded-sm text-muted hover:text-ink;
+}
+.theme-switch button svg {
+  @apply size-4;
+}
+.theme-switch button[aria-pressed="true"] {
+  @apply bg-accent text-on-accent;
+}
+.theme-switch button:focus-visible {
+  @apply outline-2 outline-offset-1 outline-ink;
 }
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
