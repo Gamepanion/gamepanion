@@ -54,10 +54,9 @@ const subscription = (id: string, end = END, status = "active") => ({
   metadata: { player_id: "p1" },
   mode: "test",
 });
-const checkout = (o: { player?: string; product?: string; sub?: string; requestId?: string }) => ({
+const checkout = (o: { player?: string; product?: string; sub?: string }) => ({
   id: "ch_1",
   object: "checkout",
-  request_id: o.requestId,
   status: "completed",
   product: product(o.product ?? "prod_m"),
   customer,
@@ -108,11 +107,10 @@ test("checkout.completed makes the player from metadata a subscriber until paid-
   expect((await accessOf(p1)).subscribed).toBe(true);
 });
 
-test("without metadata the checkout's request_id names the player; with neither the delivery fails, so Creem sends it again", async () => {
+test("a completed checkout that names no player fails, so Creem sends it again; it files nothing", async () => {
   sellWithCreem();
-  expect(await deliver("checkout.completed", checkout({ requestId: "p1", sub: "sub_2" }))).toBe(200);
-  expect((await subs()).map((s) => s.providerRef)).toEqual(["sub_2"]);
   expect(await deliver("checkout.completed", checkout({ sub: "sub_3" }))).toBe(500);
+  expect(await subs()).toEqual([]);
 });
 
 test("paid moves paid-until on; canceled and scheduled_cancel keep access until then; expired ends it", async () => {

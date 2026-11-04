@@ -6,7 +6,10 @@ import { createCreem, resetPlansForTests } from "./creem-api";
 import { createFake, fakeSignature } from "./fake";
 import { WebhookRejectedError } from "./types";
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 beforeEach(() => resetPlansForTests());
 
 test("payment provider: empty is off, unknown is refused, creem names what is missing", () => {
@@ -38,14 +41,25 @@ test("the fake signs and parses its own events; plans are a monthly and a yearly
 type Call = { method: string; url: string; body: string };
 function creem(handler: (c: Call) => Response | Promise<Response>, apiKey = "creem_test_k") {
   const calls: Call[] = [];
-  const f = (async (input: Request | string | URL, init?: RequestInit) => {
+  vi.stubGlobal("fetch", async (input: Request | string | URL, init?: RequestInit) => {
     const req = input instanceof Request ? input : new Request(input, init);
     const c = { method: req.method, url: req.url, body: await req.text() };
     calls.push(c);
     return handler(c);
-  }) as unknown as typeof fetch;
-  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y", fetch: f }), calls };
+  });
+  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y" }), calls };
 }
+const subscriptionJson = {
+  id: "sub_1",
+  object: "subscription",
+  mode: "test",
+  product: "prod_m",
+  customer: "cust_1",
+  collection_method: "charge_automatically",
+  status: "canceled",
+  created_at: "2026-10-19T00:00:00.000Z",
+  updated_at: "2026-10-19T00:00:00.000Z",
+};
 const productJson = (id: string, price: number) => ({
   id,
   object: "product",
@@ -63,7 +77,7 @@ const productJson = (id: string, price: number) => ({
   updated_at: "2026-10-19T00:00:00.000Z",
 });
 
-test("createCheckout sends product, success_url, request_id and metadata.player_id, to the sandbox for a test key", async () => {
+test("createCheckout sends product, success_url and metadata.player_id, to the sandbox for a test key", async () => {
   const answer = () =>
     Response.json({ id: "ch_1", object: "checkout", mode: "test", status: "pending", product: "prod_y", checkout_url: "https://pay.example/c" });
   const { p, calls } = creem(answer);
@@ -74,20 +88,14 @@ test("createCheckout sends product, success_url, request_id and metadata.player_
   expect(JSON.parse(calls[0].body)).toEqual({
     product_id: "prod_y",
     success_url: "https://g.example/subscribe",
-    request_id: "p1",
     metadata: { player_id: "p1" },
     customer: { email: "a@b.c" },
   });
   const live = creem(answer, "creem_live");
   await live.p.createCheckout({ period: "month", playerId: "p1", email: null, successUrl: "https://g.example/subscribe" });
   expect(live.calls[0].url).toBe("https://api.creem.io/v1/checkouts");
-  const monthOnly = createCreem({ apiKey: "creem_test_k", productId: "prod_m", fetch: (async () => new Response()) as unknown as typeof fetch });
+  const monthOnly = createCreem({ apiKey: "creem_test_k", productId: "prod_m" });
   await expect(monthOnly.createCheckout({ period: "year", playerId: "p1", email: null, successUrl: "x" })).rejects.toThrow(/no product/);
-});
-
-test("an answer that doesn't fit the SDK's schema is read as it came: the checkout still opens", async () => {
-  const { p } = creem(() => Response.json({ checkout_url: "https://pay.example/c" }));
-  expect(await p.createCheckout({ period: "month", playerId: "p1", email: null, successUrl: "x" })).toEqual({ url: "https://pay.example/c" });
 });
 
 test("plans() reads both products, keeps them five minutes, and keeps the last list while Creem is down", async () => {
@@ -122,15 +130,13 @@ test("plans() reads both products, keeps them five minutes, and keeps the last l
   expect((await gone.p.plans()).map((x) => x.period)).toEqual(["month"]);
 });
 
-test("portalUrl asks for the customer's billing links; cancel ends a sub_ subscription at once and ignores other references", async () => {
+test("portalUrl asks for the customer's billing links; cancel ends the subscription at once", async () => {
   const { p, calls } = creem(({ url }) =>
-    url.endsWith("/customers/billing") ? Response.json({ customer_portal_link: "https://portal.example" }) : Response.json({ id: "sub_1" }),
+    url.endsWith("/customers/billing") ? Response.json({ customer_portal_link: "https://portal.example" }) : Response.json(subscriptionJson),
   );
   expect(await p.portalUrl("cust_1")).toBe("https://portal.example");
   expect(JSON.parse(calls[0].body)).toEqual({ customer_id: "cust_1" });
   await p.cancel("sub_1");
   expect(calls[1].url).toBe("https://test-api.creem.io/v1/subscriptions/sub_1/cancel");
   expect(JSON.parse(calls[1].body)).toEqual({ mode: "immediate" });
-  await p.cancel("ord_1");
-  expect(calls).toHaveLength(2);
 });
