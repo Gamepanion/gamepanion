@@ -67,29 +67,33 @@ export const CODEX_ICONS: Record<string, LucideIcon> = { boss: Skull, enemy: Swo
 
 export const QUEST_ICONS: Record<string, LucideIcon> = { open: CircleDot, blocked: Hourglass, done: CircleCheck, failed: CircleX, dropped: CircleSlash };
 
-/** A section's heading: its picture in a small seal, tinted in the colour of the part it is in, then its name. */
-export function Heading({ icon: Icon, children, className = "" }: { icon: LucideIcon; children: ReactNode; className?: string }) {
+/** A part of a tab, folding: every tab shows its content in these (open quests, weapons, bosses, goals, sessions, settings), so the
+ * register reads the same everywhere. Its band is a native disclosure (keyboard and screen readers know it), larger than a tag chip,
+ * with how many it holds where it holds a list (under a tag, how many of those; components/TagFilter.tsx) and a chevron that turns when
+ * it folds. Open to start with, unless `open` is false (what is done). */
+export function Group({
+  icon: Icon,
+  label,
+  count,
+  open = true,
+  children,
+}: {
+  icon: LucideIcon;
+  label: ReactNode;
+  count?: number;
+  open?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <h3 className={`section-title ${className}`}>
-      <span className="seal">
-        <Icon aria-hidden="true" />
-      </span>
-      {children}
-    </h3>
-  );
-}
-
-/** A group inside a part (Weapons, Bosses), folding: its band is a native disclosure (keyboard and screen readers know it), larger than
- * a tag chip, with how many it holds (under a tag, how many of those; components/TagFilter.tsx) and a chevron that turns when it folds. Open to start with. */
-export function Group({ icon: Icon, label, count, children }: { icon: LucideIcon; label: ReactNode; count: number; children: ReactNode }) {
-  return (
-    <details open className="group-fold" data-tag-scope>
+    <details open={open} className="group-fold" data-tag-scope>
       <summary className="group-heading">
         <Icon aria-hidden="true" />
         <h3 className="flex-1">{label}</h3>
-        <span className="group-count" data-tag-count={count}>
-          {count}
-        </span>
+        {count !== undefined && (
+          <span className="group-count" data-tag-count={count}>
+            {count}
+          </span>
+        )}
         <ChevronDown aria-hidden="true" className="group-chevron" />
       </summary>
       {children}

@@ -238,7 +238,7 @@ export const en = {
   noTodos: "Nothing on your list. Tell Claude what you want to remember to do.",
   suggestedTodos: "Suggested by Claude",
   suggestedTodosLead: "Not on your list until you tell Claude you want them.",
-  closedTodos: (n: number) => `Done and dropped (${n})`,
+  closedTodosTitle: "Done and dropped",
   todoStatus: { open: "Open", done: "Done", dropped: "Dropped" } as Record<string, string>,
   noCodex: "Nobody and nowhere recorded yet. Tell Claude who you met.",
   noSessions: "No sessions yet.",
