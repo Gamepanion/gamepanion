@@ -118,6 +118,25 @@ export const en = {
   changeEmailFailed: "That didn't work. Check the code, or ask for a new one.",
   linkedProvider: "Linked to this account",
 
+  // Your data, on the account page (#106)
+  dataTitle: "Your data",
+  exportLead:
+    "Everything you filed, in one JSON file: your games, playthroughs, sessions with what you said, quests, items, builds and codex, spoilers included. Free on every plan.",
+  exportButton: "Download my data",
+  deleteTitle: "Delete your account",
+  deleteLead:
+    "Deletes your account and everything you filed, at once, and cancels a running subscription. It can't be undone. The backups keep it for up to 31 more days, then it is gone too.",
+  deleteStart: "Delete my account",
+  deleteConfirmMailed: (email: string) => `Gamepanion mails a code to ${email}. Paste it here to delete the account.`,
+  deleteConfirmFresh: "To be sure it is you, this works only within a day of signing in. Sign out and in again if it is refused.",
+  deleteSendCode: "Send the code",
+  deleteCodeSent: (email: string) => `The code is on its way to ${email}. It works once, for an hour.`,
+  deleteCodeLabel: "Code from the mail",
+  deleteNow: "Delete for good",
+  deleteFailed: "That didn't work. Check the code, or ask for a new one.",
+  deleteStale: "You signed in more than a day ago. Sign out, sign in again, and delete it then.",
+  accountDeleted: "Your account and everything in it are deleted.",
+
   // Passkeys, on the account page
   passkeys: "Passkeys",
   passkeysLead:

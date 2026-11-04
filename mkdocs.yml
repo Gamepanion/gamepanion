@@ -86,6 +86,7 @@ nav:
           - "One SQLite file, with full-text search": adr/0022-one-sqlite-file-with-full-text-search.md
           - "A subscription, one game free": adr/0023-a-subscription-one-game-free.md
           - The hosted-AI tier: adr/0024-the-hosted-ai-tier.md
+          - Exporting the log and deleting the account: adr/0025-export-and-deleting-the-account.md
           - Creem's official packages: adr/0026-creems-official-packages.md
 
 theme:

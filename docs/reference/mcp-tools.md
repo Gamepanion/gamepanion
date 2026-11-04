@@ -69,3 +69,7 @@ The link to the account page's key section (`/account#key`), where the player st
 - **`hiddenItems`:** the items marked as hints or spoilers.
 
 `next` has Claude name the threads left behind first, read out the rest one quest at a time, and, if the player wants more than their log holds, say that what follows is Claude's own knowledge of the game, at the level they asked for.
+
+## export
+
+The link to the download of everything the player filed (`/account/export`): one JSON file with every table of the log, spoilers included ([ADR 0025](../adr/0025-export-and-deleting-the-account.md)). Only the link: the file never goes through the chat, so it neither fills Claude's context nor puts spoilers in front of it. The browser the player is signed in with downloads it; `GET /api/v1/export` gives scripts the same document. No tool deletes an account: that is on the account page only.

@@ -5,8 +5,8 @@ import { mailCopy } from "./copy";
 
 const log = logger("mail");
 
-/** What a code is for: signing in, or confirming the new address of an email change (the account page). */
-export type CodePurpose = "sign-in" | "change-email";
+/** What a code is for: signing in, confirming the new address of an email change, or deleting the account (both on the account page). */
+export type CodePurpose = "sign-in" | "change-email" | "delete-account";
 export type Mailer = (to: string, code: string, opts: { purpose: CodePurpose; link?: string }) => Promise<void>;
 
 // An SMTP server that never answers (a blocked port) fails the request within these, logged, instead of hanging the sign-in.
@@ -26,7 +26,9 @@ export async function sendCode(to: string, code: string, opts: { purpose: CodePu
   const mail =
     opts.purpose === "change-email"
       ? { subject: mailCopy.changeSubject(code), text: mailCopy.changeText(code) }
-      : { subject: mailCopy.codeSubject(code), text: mailCopy.codeText(code, opts.link) };
+      : opts.purpose === "delete-account"
+        ? { subject: mailCopy.deleteSubject, text: mailCopy.deleteText(code, opts.link ?? "") }
+        : { subject: mailCopy.codeSubject(code), text: mailCopy.codeText(code, opts.link) };
   try {
     const { createTransport } = await import("nodemailer");
     await createTransport({ url: smtp.url, ...TIMEOUTS }).sendMail({ from: smtp.from, to, ...mail });

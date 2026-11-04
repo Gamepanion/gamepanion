@@ -1,12 +1,13 @@
 import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { accessOf, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
+import { accessOf, accountExportPath, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
 import { ActiveGame } from "@/components/ActiveGame";
 import { portalAction } from "../subscribe/actions";
 import { KeySection } from "@/components/KeySection";
 import { AccountCard, EmailCode } from "@/components/Account";
 import { Passkeys } from "@/components/Passkeys";
+import { YourData } from "@/components/YourData";
 import { serverCopy, serverLocale } from "@/components/copy/server";
 import { pagePlayer } from "../viewer";
 
@@ -17,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 // The player's account: the account card (their name, renamed in place, and address; #61), then every way they sign in:
 // email codes (and moving to another address), the providers they linked, their passkeys (ADR 0015); then their own Anthropic key for
-// the in-app chat (ADR 0021).
+// the in-app chat (ADR 0021); last their data: the download, and deleting the account (#106).
 export default async function AccountPage() {
   const player = await pagePlayer();
   const key = await keyStatus(player);
@@ -94,6 +95,7 @@ export default async function AccountPage() {
             </section>
           )}
           <KeySection enabled={keyStorageEnabled()} last4={key?.last4 ?? null} />
+          <YourData email={profile.email} mailed={methods.emailCode} exportPath={accountExportPath()} />
         </div>
       </div>
     </div>
