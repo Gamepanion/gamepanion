@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPlaythrough, isFrozen, PLAYTHROUGH_TABS, type PlaythroughTab } from "@/backend";
-import { serverCopy } from "@/components/copy/server";
+import { ACTIVE_GAME_CHANGE_DAYS, getPlaythrough, isFrozen, nextActiveGameChange, PLAYTHROUGH_TABS, type PlaythroughTab } from "@/backend";
+import { serverCopy, serverLocale } from "@/components/copy/server";
 import { Sheet } from "../../../playthrough/Sheet";
 import { orNotFound, pagePlayer } from "../../../viewer";
 
@@ -16,12 +16,15 @@ export default async function PlaythroughPage({ params }: PageProps<"/p/[id]/[[.
   const p = await pagePlayer();
   const t = await orNotFound(getPlaythrough(p, id));
   const copy = await serverCopy();
+  const frozen = await isFrozen(p, t.game.id);
+  const next = frozen ? await nextActiveGameChange(p) : null;
+  const day = next ? new Intl.DateTimeFormat(await serverLocale(), { dateStyle: "long" }).format(new Date(next)) : null;
   return (
     <div className="px-4 pt-6 pb-20 lg:px-14">
       {/* A game past a free player's one (#48): readable, not filed into. */}
-      {(await isFrozen(p, t.game.id)) && (
+      {frozen && (
         <p role="note" className="card mb-4 border-accent">
-          {copy.frozenNotice}{" "}
+          {copy.frozenNotice(ACTIVE_GAME_CHANGE_DAYS, day)}{" "}
           <Link href="/subscribe" className="font-semibold text-accent underline">
             {copy.frozenSubscribe}
           </Link>

@@ -5,9 +5,22 @@ import { KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { removeKeyAction, saveKeyAction, testKeyAction, type KeyResult } from "@/app/(app)/account/actions";
+import { Group } from "./icons";
 import { useCopy } from "./copy/client";
 
-export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string | null }) {
+export function KeySection({
+  enabled,
+  last4,
+  without,
+  sold,
+}: {
+  enabled: boolean;
+  last4: string | null;
+  /** What the chat runs on while no key is stored (chatWithoutOwnKey). */
+  without: "instance" | "needsKey" | "none";
+  /** Whether the instance sells plans: then its own key is "Gamepanion's AI". */
+  sold: boolean;
+}) {
   const copy = useCopy();
   const router = useRouter();
   const field = useId();
@@ -35,13 +48,7 @@ export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string
     });
 
   return (
-    <section id="key" aria-labelledby="key-title" className="scroll-mt-6">
-      <h2 id="key-title" className="section-title">
-        <span className="seal">
-          <KeyRound aria-hidden="true" />
-        </span>
-        {copy.keyTitle}
-      </h2>
+    <Group id="key" icon={KeyRound} label={copy.keyTitle}>
       <div className="card space-y-3">
         <p>{copy.keyLead}</p>
         <p id={note} className="text-sm text-muted">
@@ -51,7 +58,14 @@ export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string
           <p className="text-sm">{copy.keyOff}</p>
         ) : (
           <>
-            <p className="font-semibold">{last4 ? copy.keyStored(last4) : copy.keyNone}</p>
+            <p className="font-semibold">
+              {last4 ? copy.keyStored(last4) : without === "instance" ? copy.keyNoneInstance(sold) : without === "needsKey" ? copy.keyNoneNeeded : copy.keyNone}
+            </p>
+            {!last4 && without === "needsKey" && (
+              <a href="/subscribe" className="button-primary inline-block">
+                {copy.seePlans}
+              </a>
+            )}
             <form
               className="space-y-3"
               onSubmit={(e) => {
@@ -98,6 +112,6 @@ export function KeySection({ enabled, last4 }: { enabled: boolean; last4: string
           {result ? words[result] : ""}
         </p>
       </div>
-    </section>
+    </Group>
   );
 }

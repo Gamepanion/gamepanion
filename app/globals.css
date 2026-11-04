@@ -4,7 +4,7 @@
 
 /* Violet arcade (ADR 0018, docs/internals/brand.md): a near-black ground, one violet accent, lime for what's done, Atkinson set heavy,
    sharp corners and a hard offset shadow. Dark first; the light theme follows the system setting. The variable names are the app's
-   own roles: --paper the ground, --ink the text, --rule the hairlines, --hint what warns (spoilers above none). */
+   own roles: --paper the ground, --ink the text, --rule the hairlines. */
 :root {
   --paper: #f7f6fa;
   --surface: #ffffff;
@@ -16,7 +16,6 @@
   --accent-soft: #6b3fd6;
   --on-accent: #ffffff;
   --signal: #6b3fd6;
-  --hint: #9a5b00;
   --error: #b42318;
   --glass: var(--surface);
   /* The register's tabs (components/Register.tsx): the Okabe-Ito colours, told apart with every common kind of colour blindness, warm and
@@ -46,7 +45,6 @@
     --accent-soft: #c9b4ff;
     --on-accent: #12082a;
     --signal: #c6f432;
-    --hint: #e69f00;
     --error: #ff8a80;
     --tab-overview: #d98cb6;
     --tab-character: #e69f00;
@@ -73,7 +71,6 @@
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
   --color-signal: var(--signal);
-  --color-hint: var(--hint);
   --color-error: var(--error);
   --font-sans: var(--font-text), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-code), ui-monospace, monospace;
@@ -183,11 +180,7 @@ h1 {
   .account-input::placeholder {
     @apply font-normal text-muted italic;
   }
-  /* A section's heading: its icon in a square tinted in the colour of the part it is in (the register's --c; violet outside it), then
-     its name, uppercase like a HUD label. */
-  .section-title {
-    @apply mb-2 flex w-fit items-center gap-2 text-xs font-extrabold tracking-[0.08em] text-ink uppercase;
-  }
+  /* A row's icon in a small square tinted in the colour of the part it is in (the register's --c; violet outside it). */
   .seal {
     @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md;
     background: color-mix(in oklab, var(--c, var(--accent)) 24%, var(--surface));
@@ -204,6 +197,43 @@ h1 {
   }
 }
 
+/* The subscribe page's plans (components/Plans.tsx): cards in a row, their four rows shared through a subgrid so they line up; the
+   subscription is edged in the accent, at the same padding as the others. */
+.plans {
+  @apply grid gap-4;
+}
+.plan {
+  @apply row-span-4 grid gap-4;
+  grid-template-rows: subgrid;
+}
+.plan-marked {
+  @apply border-accent;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* The account page's table of contents (components/AccountNav.tsx), beside its sections on a wide screen: quiet links, the section being
+   read marked by an accent edge and bold, not by colour alone. */
+.account-nav ul {
+  @apply space-y-1 border-l border-rule;
+}
+.account-nav a {
+  @apply -ml-px block border-l-2 border-transparent py-1 pl-3 text-sm text-muted hover:text-ink;
+}
+.account-nav a[aria-current] {
+  @apply border-accent font-semibold text-ink;
+}
+.account-nav a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
+}
+/* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
+.header-link {
+  @apply inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold text-muted hover:bg-surface hover:text-ink;
+}
+.header-link svg {
+  @apply size-4;
+}
+.header-link:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
+}
 /* The playthrough switcher in the header (components/Switcher.tsx, ADR 0019): a button saying where you are, and its menu. */
 .switcher-button {
   @apply flex w-full max-w-full min-w-0 items-center gap-2 rounded-md border border-rule bg-surface px-2 py-1.5 text-left font-semibold hover:border-accent sm:w-auto;
@@ -728,8 +758,7 @@ h1 {
   @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent disabled:opacity-40;
 }
 
-/* A playthrough's two settings (ADR 0016), under its title: each a row of levels in one bar, the chosen level filled. Spoilers
-   above none fill in the hint colour, so a page that gives things away says so at a glance. */
+/* A playthrough's two settings (ADR 0016), under its title: each a row of levels in one bar, the chosen level filled in the accent. */
 .settings {
   @apply grid gap-6;
 }
@@ -760,10 +789,6 @@ h1 {
 .dial-levels input:checked + span {
   @apply bg-accent font-semibold;
   color: var(--on-accent);
-}
-.dial-levels[data-warn] input:checked + span {
-  @apply bg-hint;
-  color: var(--surface);
 }
 .dial-levels input:focus-visible + span {
   @apply outline-2 outline-offset-1 outline-accent;
@@ -888,6 +913,56 @@ h1 {
 }
 .gp-chat__app {
   @apply relative flex flex-col items-center gap-1 text-xs font-bold;
+}
+/* The chat plays once (#97): your message, Claude's answer and its arrow to Gamepanion, the pause, then the question and the briefing.
+   Each line comes in after the one before; an arrow draws after the answer it belongs to. Without motion everything is there at once. */
+@media (prefers-reduced-motion: no-preference) {
+  .gp-chat__log > li {
+    animation: gp-chat-in 0.45s ease-out both;
+  }
+  .gp-chat__log > li:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+  .gp-chat__log > li:nth-child(2) {
+    animation-delay: 1.4s;
+  }
+  .gp-chat__log > li:nth-child(3) {
+    animation-delay: 2.7s;
+  }
+  .gp-chat__log > li:nth-child(4) {
+    animation-delay: 3.5s;
+  }
+  .gp-chat__log > li:nth-child(5) {
+    animation-delay: 4.6s;
+  }
+  .gp-chat__call {
+    animation: gp-chat-call 0.5s ease-out both;
+    transform-origin: left center;
+  }
+  .gp-chat__log > li:nth-child(2) .gp-chat__call {
+    animation-delay: 1.9s;
+  }
+  .gp-chat__log > li:nth-child(5) .gp-chat__call {
+    animation-delay: 5.1s;
+  }
+}
+@keyframes gp-chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes gp-chat-call {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 @media (max-width: 30rem) {
   .gp-chat {

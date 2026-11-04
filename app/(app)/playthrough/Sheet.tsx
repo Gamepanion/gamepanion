@@ -31,7 +31,7 @@ import { PlaythroughSettings } from "@/components/PlaythroughSettings";
 import { TagFilter } from "@/components/TagFilter";
 import { TodoCheck } from "@/components/TodoCheck";
 import { Register } from "@/components/Register";
-import { CODEX_ICONS, Group, Heading, itemIcon, PART_ICONS, QUEST_ICONS, Tile } from "@/components/icons";
+import { CardList, CODEX_ICONS, Group, itemIcon, PART_ICONS, QUEST_ICONS, Tile } from "@/components/icons";
 import { TalkAbout } from "@/components/chat/Chat";
 import { CalendarDays, Crosshair, Footprints, Sparkles, Sword } from "lucide-react";
 
@@ -100,12 +100,10 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
             todos: <Todos todos={todos} />,
             character: (
               <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-                <section>
-                  <Heading icon={Crosshair}>{copy.goals}</Heading>
-                  {build.goals.length === 0 ? <p className="card text-muted">{copy.noGoals}</p> : <Goals goals={build.goals} run={t.id} />}
-                </section>
-                <section>
-                  <Heading icon={Sparkles}>{copy.build}</Heading>
+                <Group icon={Crosshair} label={copy.goals} count={build.goals.length} empty={copy.noGoals}>
+                  <Goals goals={build.goals} run={t.id} />
+                </Group>
+                <Group icon={Sparkles} label={copy.build}>
                   <div className="card space-y-2">
                     <div className="flex items-start justify-between gap-3">
                       {build.plan?.mainStat ? <p className="font-semibold">{copy.mainStat(build.plan.mainStat)}</p> : <span />}
@@ -139,17 +137,17 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
                       <p className="text-muted">{copy.noBuild}</p>
                     )}
                   </div>
-                </section>
+                </Group>
               </div>
             ),
             quests: (
               <TagFilter tags={tagsInUse([...open, ...closed])} label={copy.tags}>
                 <div className="space-y-6">
-                  <Group icon={QUEST_ICONS.open} label={copy.openQuests} count={open.length}>
-                    {open.length === 0 ? <p className="card text-muted">{copy.noOpenQuests}</p> : <Quests quests={open} run={t.id} />}
+                  <Group icon={QUEST_ICONS.open} label={copy.openQuests} count={open.length} empty={copy.noOpenQuests}>
+                    <Quests quests={open} run={t.id} />
                   </Group>
                   {closed.length > 0 && (
-                    <Group icon={QUEST_ICONS.done} label={copy.closedQuests} count={closed.length}>
+                    <Group icon={QUEST_ICONS.done} label={copy.closedQuests} count={closed.length} open={false}>
                       <Quests quests={closed} run={t.id} />
                     </Group>
                   )}
@@ -159,7 +157,7 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
             // The inventory in the game's groups; on a wide screen two columns of cards.
             items:
               items.length === 0 ? (
-                <p className="card text-muted">{copy.noItems}</p>
+                <Group icon={PART_ICONS.items} label={copy.tabs.items} count={0} empty={copy.noItems} />
               ) : (
                 <TagFilter tags={tagsInUse(items)} label={copy.tags}>
                   <div className="space-y-6">
@@ -177,7 +175,7 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
               ),
             codex:
               codex.length === 0 ? (
-                <p className="card text-muted">{copy.noCodex}</p>
+                <Group icon={PART_ICONS.codex} label={copy.tabs.codex} count={0} empty={copy.noCodex} />
               ) : (
                 <TagFilter tags={tagsInUse(codex)} label={copy.tags}>
                   <div className="space-y-6">
@@ -196,11 +194,9 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
                   </div>
                 </TagFilter>
               ),
-            sessions:
-              sessions.length === 0 ? (
-                <p className="card text-muted">{copy.noSessions}</p>
-              ) : (
-                <ul className="card divide-y divide-rule py-1">
+            sessions: (
+              <Group icon={PART_ICONS.sessions} label={copy.tabs.sessions} count={sessions.length} empty={copy.noSessions}>
+                <CardList>
                   {sessions.map((s) => (
                     <li key={s.id} className="flex items-center gap-2">
                       <Link href={s.url} className="flex flex-1 gap-3 py-2 hover:text-accent">
@@ -210,24 +206,23 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
                       <TalkAbout kind="session" id={s.id} name={s.playedOn} playthroughId={t.id} />
                     </li>
                   ))}
-                </ul>
-              ),
+                </CardList>
+              </Group>
+            ),
             // What the game is, and the player's own notes on it and on this run.
             notes: !hasNotes ? (
-              <p className="card text-muted">{copy.noNotes}</p>
+              <Group icon={PART_ICONS.notes} label={copy.tabs.notes} empty={copy.noNotes} />
             ) : (
-              <div className="card space-y-3">
+              <div>
                 {(t.game.description || t.game.notes) && (
-                  <div>
-                    <h4 className="font-semibold">{t.game.title}</h4>
+                  <Group icon={PART_ICONS.notes} label={t.game.title} card>
                     <Notes description={t.game.description} notes={t.game.notes} />
-                  </div>
+                  </Group>
                 )}
                 {t.notes && (
-                  <div>
-                    <h4 className="font-semibold">{t.label}</h4>
+                  <Group icon={PART_ICONS.notes} label={t.label} card>
                     <Notes notes={t.notes} />
-                  </div>
+                  </Group>
                 )}
               </div>
             ),
@@ -235,9 +230,9 @@ export async function Sheet({ player: p, playthrough: t, tab }: { player: Player
             references: <References game={t.game} />,
             // How much Claude adds on its own, and what shows without asking (ADR 0016).
             settings: (
-              <div className="card">
+              <Group icon={PART_ICONS.settings} label={copy.tabs.settings} card>
                 <PlaythroughSettings playthroughId={t.id} settings={t.settings} />
-              </div>
+              </Group>
             ),
           }[tab]
         }
@@ -549,25 +544,21 @@ async function Todos({ todos }: { todos: TodoView[] }) {
   const mine = todos.filter((t) => t.status === "open" && !t.suggested);
   const suggested = todos.filter((t) => t.status === "open" && t.suggested);
   const closed = todos.filter((t) => t.status !== "open");
-  if (!todos.length) return <p className="card text-muted">{copy.noTodos}</p>;
   return (
     <div className="space-y-6">
-      <section>
-        <Heading icon={PART_ICONS.todos}>{copy.todos}</Heading>
-        {mine.length === 0 ? <p className="card text-muted">{copy.noTodos}</p> : <TodoList todos={mine} />}
-      </section>
+      <Group icon={PART_ICONS.todos} label={copy.todos} count={mine.length} empty={copy.noTodos}>
+        <TodoList todos={mine} />
+      </Group>
       {suggested.length > 0 && (
-        <section>
-          <Heading icon={Sparkles}>{copy.suggestedTodos}</Heading>
+        <Group icon={Sparkles} label={copy.suggestedTodos} count={suggested.length}>
           <p className="mb-2 text-sm text-muted">{copy.suggestedTodosLead}</p>
           <TodoList todos={suggested} suggested />
-        </section>
+        </Group>
       )}
       {closed.length > 0 && (
-        <details className="card">
-          <summary className="cursor-pointer font-semibold">{copy.closedTodos(closed.length)}</summary>
+        <Group icon={QUEST_ICONS.done} label={copy.closedTodosTitle} count={closed.length} open={false}>
           <TodoList todos={closed} />
-        </details>
+        </Group>
       )}
     </div>
   );
@@ -576,7 +567,7 @@ async function Todos({ todos }: { todos: TodoView[] }) {
 async function TodoList({ todos, suggested }: { todos: TodoView[]; suggested?: boolean }) {
   const copy = await serverCopy();
   return (
-    <ul className={`card divide-y divide-rule py-1 ${suggested ? "border-dashed" : ""}`}>
+    <CardList dashed={suggested}>
       {todos.map((t) => (
         <li key={t.id} id={`todo-${t.id}`} className="todo">
           {t.status === "dropped" ? (
@@ -598,7 +589,7 @@ async function TodoList({ todos, suggested }: { todos: TodoView[]; suggested?: b
           )}
         </li>
       ))}
-    </ul>
+    </CardList>
   );
 }
 
@@ -628,7 +619,7 @@ async function LinkedTodos({ todos, run }: { todos: { id: string; text: string; 
 // are that card's sources and stay on it.
 async function References({ game }: { game: PlaythroughView["game"] }) {
   const copy = await serverCopy();
-  if (!game.references.length) return <p className="card text-muted">{copy.noReferences}</p>;
+  if (!game.references.length) return <Group icon={PART_ICONS.references} label={copy.tabs.references} count={0} empty={copy.noReferences} />;
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted">{copy.referencesLead}</p>
@@ -636,10 +627,9 @@ async function References({ game }: { game: PlaythroughView["game"] }) {
         const list = game.references.filter((x) => x.trust === level);
         return (
           list.length > 0 && (
-            <section key={level}>
-              <Heading icon={PART_ICONS.references}>{copy.trustLevel[level]}</Heading>
+            <Group key={level} icon={PART_ICONS.references} label={copy.trustLevel[level]} count={list.length}>
               <p className="mb-2 text-sm text-muted">{copy.trustHint[level]}</p>
-              <ul className="card divide-y divide-rule py-1">
+              <CardList>
                 {list.map((x) => (
                   <li key={x.url} className="py-2">
                     <a href={x.url} className="font-semibold text-accent" target="_blank" rel="noopener noreferrer">
@@ -653,8 +643,8 @@ async function References({ game }: { game: PlaythroughView["game"] }) {
                     {x.facts && <p className="text-sm text-muted">{x.facts}</p>}
                   </li>
                 ))}
-              </ul>
-            </section>
+              </CardList>
+            </Group>
           )
         );
       })}
@@ -671,59 +661,49 @@ async function Overview({ player, playthrough: t }: { player: Player; playthroug
   const goals = b.build.goals.filter((g) => g.status === "open");
   const sections: Record<(typeof BRIEFING_SECTIONS)[number], ReactNode> = {
     lastSession: b.lastSession && (
-      <section key="lastSession">
-        <Heading icon={CalendarDays}>{copy.lastSession}</Heading>
+      <Group key="lastSession" icon={CalendarDays} label={copy.lastSession}>
         <SessionCard session={b.lastSession} />
-      </section>
+      </Group>
     ),
     openQuests: (
-      <section key="openQuests">
-        <Heading icon={Footprints}>{copy.nextSteps}</Heading>
-        {b.openQuests.length === 0 ? (
-          <p className="card text-muted">{copy.noOpenQuests}</p>
-        ) : (
-          <ul className="card divide-y divide-rule py-1">
-            {b.openQuests.map((q) => (
-              <li key={q.id}>
-                <Link href={q.url} className="flex items-center gap-3 py-2 hover:text-accent">
-                  <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
-                  <span className="min-w-0">
-                    <span className="font-semibold">{q.name}</span>
-                    {q.status === "blocked" ? (
-                      <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
-                    ) : (
-                      q.nextStep && <span className="block text-sm">{q.nextStep}</span>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <Group key="openQuests" icon={Footprints} label={copy.nextSteps} count={b.openQuests.length} empty={copy.noOpenQuests}>
+        <CardList>
+          {b.openQuests.map((q) => (
+            <li key={q.id}>
+              <Link href={q.url} className="flex items-center gap-3 py-2 hover:text-accent">
+                <Tile icon={QUEST_ICONS[q.status]} muted={q.status === "blocked"} />
+                <span className="min-w-0">
+                  <span className="font-semibold">{q.name}</span>
+                  {q.status === "blocked" ? (
+                    <span className="block text-sm text-muted">{copy.waitingOnGame}</span>
+                  ) : (
+                    q.nextStep && <span className="block text-sm">{q.nextStep}</span>
+                  )}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </CardList>
+      </Group>
     ),
     todos: b.todos.length > 0 && (
-      <section key="todos">
-        <Heading icon={PART_ICONS.todos}>{copy.todos}</Heading>
+      <Group key="todos" icon={PART_ICONS.todos} label={copy.todos} count={b.todos.length}>
         <TodoList todos={b.todos} />
-      </section>
+      </Group>
     ),
     suggestedTodos: b.suggestedTodos.length > 0 && (
-      <section key="suggestedTodos">
-        <Heading icon={Sparkles}>{copy.suggestedTodos}</Heading>
+      <Group key="suggestedTodos" icon={Sparkles} label={copy.suggestedTodos} count={b.suggestedTodos.length}>
         <TodoList todos={b.suggestedTodos} suggested />
-      </section>
+      </Group>
     ),
     goals: goals.length > 0 && (
-      <section key="goals">
-        <Heading icon={Crosshair}>{copy.goals}</Heading>
+      <Group key="goals" icon={Crosshair} label={copy.goals} count={goals.length}>
         <Goals goals={goals} run={t.id} />
-      </section>
+      </Group>
     ),
     bosses: b.bosses.length > 0 && (
-      <section key="bosses">
-        <Heading icon={CODEX_ICONS.boss}>{copy.inTheWay}</Heading>
-        <ul className="card divide-y divide-rule py-1">
+      <Group key="bosses" icon={CODEX_ICONS.boss} label={copy.inTheWay} count={b.bosses.length}>
+        <CardList>
           {b.bosses.map((x) => (
             <li key={x.id}>
               <Link href={x.url} className="flex items-center gap-3 py-2 hover:text-accent">
@@ -733,13 +713,12 @@ async function Overview({ player, playthrough: t }: { player: Player; playthroug
               </Link>
             </li>
           ))}
-        </ul>
-      </section>
+        </CardList>
+      </Group>
     ),
     equipped: b.equipped.length > 0 && (
-      <section key="equipped">
-        <Heading icon={Sword}>{copy.equipped}</Heading>
-        <ul className="card divide-y divide-rule py-1">
+      <Group key="equipped" icon={Sword} label={copy.equipped} count={b.equipped.length}>
+        <CardList>
           {b.equipped.map((i) => (
             <li key={i.id}>
               <Link href={i.url} className="flex items-center gap-3 py-2 hover:text-accent">
@@ -752,8 +731,8 @@ async function Overview({ player, playthrough: t }: { player: Player; playthroug
               </Link>
             </li>
           ))}
-        </ul>
-      </section>
+        </CardList>
+      </Group>
     ),
   };
   return <div className="space-y-6">{BRIEFING_SECTIONS.map((s) => sections[s])}</div>;

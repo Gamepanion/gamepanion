@@ -162,6 +162,11 @@ function store(d: Kysely<BillingSchema>) {
     async ofPlayer(playerId: string): Promise<Subscription[]> {
       return (await d.selectFrom("subscriptions").selectAll().where("player_id", "=", playerId).orderBy("updated_at", "desc").execute()).map(view);
     },
+    /** The player's choice of active game and when they made it; null before they ever chose. */
+    async choice(playerId: string): Promise<{ gameId: string; chosenAt: number } | null> {
+      const r = await d.selectFrom("active_game").select(["game_id", "chosen_at"]).where("player_id", "=", playerId).executeTakeFirst();
+      return r ? { gameId: r.game_id, chosenAt: r.chosen_at } : null;
+    },
     async chosenGame(playerId: string): Promise<string | null> {
       return (await d.selectFrom("active_game").select("game_id").where("player_id", "=", playerId).executeTakeFirst())?.game_id ?? null;
     },

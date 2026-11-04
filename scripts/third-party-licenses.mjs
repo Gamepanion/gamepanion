@@ -1,4 +1,4 @@
-// The third-party packages Gamepanion ships (production dependencies, transitive, the platform's optional binaries left out), with their licenses, for the licenses page (#48):
+// The third-party packages Gamepanion ships (production dependencies, transitive, the platform's optional binaries left out), with their licenses, for the docs' licenses page (docs_hooks/licenses.py) and the about tool (#48, #111):
 // third-party-licenses.json, sorted by name. Run by `npm run generate`; CI fails when the committed file differs.
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

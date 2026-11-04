@@ -33,11 +33,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
           <Switcher runs={runs} />
         </div>
-        <div className="flex items-center gap-3">
+        {/* The languages, a hairline, then the account and signing out as two quiet buttons of the switcher's height; on a phone
+            only their icons, named for screen readers. */}
+        <div className="flex items-center gap-1">
           <LanguageSwitch />
-          <Link href="/account" className="flex items-center gap-1 text-sm text-muted hover:text-accent">
-            <UserRound aria-hidden="true" className="size-4" />
-            {copy.account}
+          <span aria-hidden="true" className="mx-2 h-6 border-l border-rule" />
+          <Link href="/account" className="header-link" aria-label={copy.account}>
+            <UserRound aria-hidden="true" />
+            <span className="hidden sm:inline">{copy.account}</span>
           </Link>
           <SignOutButton />
         </div>
