@@ -4,7 +4,8 @@ import { chatEnabled, chatNeedsKey, listPlaythroughs, voiceEnabled } from "@/bac
 import { Follow } from "@/components/Follow";
 import { Footer } from "@/components/Footer";
 import { ChatProvider } from "@/components/chat/Chat";
-import { DisplayMenu } from "@/components/DisplayMenu";
+import { LanguageMenu } from "@/components/LanguageMenu";
+import { ThemeMenu } from "@/components/ThemeMenu";
 import { pickTheme, THEME_COOKIE } from "@/components/theme";
 import { cookies } from "next/headers";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -35,10 +36,11 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
           <Switcher runs={runs} />
         </div>
-        {/* How the app looks (language, colour scheme) behind one button, a hairline, then the account and signing out as two quiet buttons of the switcher's height; on a phone
+        {/* The language and the colour scheme, a menu each, a hairline, then the account and signing out as two quiet buttons of the switcher's height; on a phone
             only their icons, named for screen readers. */}
         <div className="flex items-center gap-1">
-          <DisplayMenu theme={pickTheme((await cookies()).get(THEME_COOKIE)?.value)} />
+          <LanguageMenu />
+          <ThemeMenu theme={pickTheme((await cookies()).get(THEME_COOKIE)?.value)} />
           <span aria-hidden="true" className="mx-2 h-6 border-l border-rule" />
           <Link href="/account" className="header-link" aria-label={copy.account}>
             <UserRound aria-hidden="true" />

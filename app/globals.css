@@ -5,7 +5,10 @@
 /* Violet arcade (ADR 0018, docs/internals/brand.md): a near-black ground, one violet accent, lime for what's done, Atkinson set heavy,
    sharp corners and a hard offset shadow. Each colour is light-dark(light, dark): the system's scheme picks, unless the player chose one. The variable names are the app's
    own roles: --paper the ground, --ink the text, --rule the hairlines. */
-:root {
+/* Declared on :root, and again on anything that draws in a scheme of its own (a preview tile, [data-scheme]): light-dark() is resolved
+   where a variable is declared, so each of them gets its own scheme's colours from the same one list. */
+:root,
+[data-scheme] {
   --paper: light-dark(#f7f6fa, #0c0b10);
   --surface: light-dark(#ffffff, #17151f);
   --surface-2: light-dark(#eeebf5, #221f2c);
@@ -33,10 +36,12 @@
   color-scheme: light dark;
 }
 /* The colour scheme the player chose in the header (components/ThemeSwitch.tsx): light or dark; without a choice, the system's. */
-:root[data-theme="light"] {
+:root[data-theme="light"],
+[data-scheme="light"] {
   color-scheme: light;
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+[data-scheme="dark"] {
   color-scheme: dark;
 }
 
@@ -194,28 +199,35 @@ h1 {
   @apply border-accent;
   box-shadow: inset 0 0 0 1px var(--accent);
 }
-/* How the app looks (components/DisplayMenu.tsx): a panel under its header button, two groups of choices, the one in use marked by
-   its radio and bold. */
-.display-menu {
-  @apply absolute top-full right-0 z-30 mt-1 w-60 space-y-3 rounded-md border border-rule bg-paper p-3 shadow-lg;
+/* The header's language and colour scheme menus (components/LanguageMenu.tsx, ThemeMenu.tsx): a panel under the button, one choice per
+   row, the one in use bold and edged in the accent. */
+.header-menu {
+  @apply absolute top-full right-0 z-30 mt-1 w-64 rounded-md border border-rule bg-paper p-1 shadow-lg;
 }
-.display-menu legend {
-  @apply mb-1 text-xs font-extrabold tracking-[0.08em] text-muted uppercase;
+.header-menu-item {
+  @apply flex cursor-pointer items-center gap-3 rounded border-l-2 border-transparent px-2 py-1.5 text-sm hover:bg-surface-2;
 }
-.display-menu label {
-  @apply flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-surface-2;
+.header-menu-item:has(input:checked) {
+  @apply border-accent font-semibold;
 }
-.display-menu label:has(input:checked) {
-  @apply font-semibold;
+.header-menu-item:has(input:focus-visible) {
+  @apply outline-2 -outline-offset-2 outline-ink;
 }
-.display-menu input {
+.header-menu-item input:not(.sr-only) {
   @apply accent-[var(--accent)];
 }
-.display-menu label > svg {
-  @apply size-4 text-muted;
+/* A scheme's colours: three swatches (ground, accent, text), and a tile of them in the scheme's own ground. */
+.swatches {
+  @apply inline-flex gap-0.5;
 }
-.display-menu input:focus-visible {
-  @apply outline-2 outline-offset-2 outline-ink;
+.swatches > span {
+  @apply block size-3 rounded-[2px] ring-1 ring-rule;
+}
+.theme-tile {
+  @apply flex overflow-hidden rounded ring-1 ring-rule;
+}
+.theme-half {
+  @apply bg-surface px-1.5 py-1;
 }
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
