@@ -1,5 +1,5 @@
-// The export (#106): everything the player filed, spoilers included, as one document over MCP, the REST API and the account page's
-// download; nothing of another player's. That the stored key stays out is keys.test.ts's, over every read-only tool.
+// The export (#106): everything the player filed, spoilers included, as one document over the REST API and the account page's download,
+// and the MCP tool's link to that download; nothing of another player's. That the stored key stays out is keys.test.ts's, over every read-only tool.
 import { beforeEach, expect, test } from "vitest";
 import { exportDownloadRoute, exportLog, EXPORTED_TABLES } from "./export";
 import { A_FIRST, B_FIRST, FULL, HINT, SPOILER_ITEM, SPOILER_SOURCE, seed, type Seed } from "./testing/fixtures";
@@ -27,10 +27,11 @@ test("the export holds every table of the player's log, spoilers and transcripts
   expect(b).not.toContain(A_FIRST);
 });
 
-test("the export tool returns the same document, and next says not to read it out", async () => {
+test("the export tool returns only the link to the download, never the log", async () => {
   const out = await toolByName("export")!.run(s.a, {});
-  expect(JSON.stringify(out)).toContain(SPOILER_ITEM);
-  expect((out.next as string[]).join(" ")).toMatch(/don't read any of it out/);
+  expect(out.url).toBe("/account/export");
+  expect(JSON.stringify(out)).not.toContain(A_FIRST);
+  expect((out.next as string[]).join(" ")).toMatch(/\/account\/export/);
 });
 
 test("the download needs a session and answers an attachment", async () => {

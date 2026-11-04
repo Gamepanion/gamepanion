@@ -35,13 +35,12 @@ import {
   type Player,
   type SpoilerLevel,
 } from "./types";
-import { BackgroundJson, ExportJson } from "./http/schemas";
+import { BackgroundJson } from "./http/schemas";
 import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { isFrozen } from "./access";
-import { exportLog } from "./export";
-import { accountDataPath, accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
+import { accountDataPath, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -931,17 +930,15 @@ export const TOOLS: Tool[] = [
   tool({
     name: "export",
     description:
-      "Everything the player filed in Gamepanion as one JSON document: games, playthroughs with their settings, sessions with their transcripts, quests, items, builds, goals, codex, notes, tags, sources and to-dos, spoilers included. Only when the player asks for their data, an export or a backup. It is for keeping, not for reading out.",
+      "The link where the player downloads everything they filed in Gamepanion as one JSON file: games, playthroughs, sessions with their transcripts, quests, items, builds, codex, notes, tags and to-dos. Call it when the player asks for their data, an export or a backup. It returns only the link: the file itself never goes through this chat.",
     input: z.object({}),
-    output: ExportJson,
+    output: z.object({ url: Url.describe("The download, for the browser the player is signed in with") }),
     annotations: { readOnlyHint: true },
-    handler: async (p) =>
-      ({
-        ...(await exportLog(p)),
-        next: [
-          `This holds everything the player filed, spoilers they never asked to see included: don't read any of it out or summarise it. Offer to save it as a file, or give them the account page, ${inText(accountDataPath())}, where they download the same document.`,
-        ],
-      }) as never,
+    handler: async () =>
+      ok(z.object({ url: Url }), { url: accountExportPath() }, [
+        `Give the player this link, ${inText(accountExportPath())}: it downloads the file in the browser they are signed in with (they sign in first if not). The account page, ${inText(accountDataPath())}, has the same button.`,
+        "The file holds spoilers they may not have asked to see; if they share it with you, don't read it out.",
+      ]),
   }),
 ];
 
