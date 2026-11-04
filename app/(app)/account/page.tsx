@@ -1,7 +1,19 @@
 import { CreditCard, Link2, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { accessOf, accountExportPath, keyStatus, keyStorageEnabled, listPlaythroughs, passkeysOf, profileOf, signInMethods, subscriptionOf } from "@/backend";
+import {
+  ACTIVE_GAME_CHANGE_DAYS,
+  accessOf,
+  accountExportPath,
+  nextActiveGameChange,
+  keyStatus,
+  keyStorageEnabled,
+  listPlaythroughs,
+  passkeysOf,
+  profileOf,
+  signInMethods,
+  subscriptionOf,
+} from "@/backend";
 import { ActiveGame } from "@/components/ActiveGame";
 import { portalAction } from "../subscribe/actions";
 import { KeySection } from "@/components/KeySection";
@@ -90,7 +102,9 @@ export default async function AccountPage() {
                     </form>
                   )}
                 </div>
-                {access?.limited && games.length > 1 && <ActiveGame games={games} active={access.activeGameId} />}
+                {access?.limited && (
+                  <ActiveGame games={games} active={access.activeGameId} nextChange={await nextActiveGameChange(player)} days={ACTIVE_GAME_CHANGE_DAYS} />
+                )}
               </div>
             </section>
           )}

@@ -41,10 +41,17 @@ export const en = {
   subscriptionTitle: "Subscription",
   freePlan: "Free: one game, with all its playthroughs.",
   activeGame: "Your active game",
-  activeGameHint: "Without a subscription, new sessions go only into this game. The others stay readable.",
-  makeActive: "Make active",
+  noActiveGame: "None yet",
+  activeGameRule: (days: number) =>
+    `On the free plan, new sessions go into this one game. You can switch to another once every ${days} days; your other games stay readable.`,
+  activeGameNext: (day: string) => `Next switch possible on ${day}.`,
+  switchTo: "Switch to",
+  makeActive: "Switch",
+  switchConfirm: (game: string, day: string) => `Make ${game} your active game? You can't switch again until ${day}.`,
+  switchNow: "Yes, switch",
   seePlans: "See the plans",
-  frozenNotice: "This game is frozen: without a subscription, new sessions go only into your active game. You can still read everything here.",
+  frozenNotice: (days: number, next: string | null) =>
+    `This game is frozen: on the free plan, new sessions go only into your active game, which can switch once every ${days} days${next ? ` (next on ${next})` : ""}. You can still read everything here.`,
   frozenSubscribe: "Subscribe again",
   frozenChoose: "Choose your active game",
 

@@ -1,11 +1,11 @@
 // The free limit (#48, ADR 0023): one active game for a free player where the instance sells, every game for a subscriber, a free player
 // or an instance without a provider; the rest frozen, readable and correctable. The Review Focus of the plan, case by case.
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { accessOf, chooseActiveGame, SubscriptionRequiredError } from "./access";
+import { accessOf, chooseActiveGame, nextActiveGameChange, SubscriptionRequiredError } from "./access";
 import { receiveWebhook, setEmailLookupForTests } from "./billing/flow";
 import { billing, resetBillingForTests } from "./billing/store";
 import { correct } from "./correct";
-import { NotFoundError } from "./errors";
+import { InvalidInputError, NotFoundError } from "./errors";
 import { getPlaythrough, listPlaythroughs } from "./games";
 import { fakeSignature } from "./payments";
 import { record } from "./record";
@@ -139,4 +139,25 @@ test("accessOf of one player ignores the other's games and choices", async () =>
   const lies = await getPlaythrough(s.a, s.liesOfP);
   expect((await accessOf(s.a)).activeGameId).toBe(lies.game.id);
   expect((await accessOf(s.b)).activeGameId).toBe(elden.game.id);
+});
+
+test("the active game changes once every 30 days: the first choice is free, the next waits, choosing the same one changes nothing", async () => {
+  vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "");
+  const hk = await record(s.a, { game: "Hollow Knight", summary: "x", transcript: "x", playedOn: "2026-11-01" });
+  vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "fake");
+  const lies = await getPlaythrough(s.a, s.liesOfP);
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-04T12:00:00Z"));
+  expect(await nextActiveGameChange(s.a)).toBeNull();
+  await chooseActiveGame(s.a, lies.game.id);
+  expect(new Date((await nextActiveGameChange(s.a))!).toISOString().slice(0, 10)).toBe("2026-12-04");
+  await chooseActiveGame(s.a, lies.game.id);
+  const err = await chooseActiveGame(s.a, hk.playthrough.game.id).catch((e) => e);
+  expect(err).toBeInstanceOf(InvalidInputError);
+  expect(err.message).toMatch(/once every 30 days; next on 2026-12-04/);
+  expect((await accessOf(s.a)).activeGameId).toBe(lies.game.id);
+  vi.setSystemTime(new Date("2026-12-04T12:00:01Z"));
+  await chooseActiveGame(s.a, hk.playthrough.game.id);
+  expect((await accessOf(s.a)).activeGameId).toBe(hk.playthrough.game.id);
+  vi.useRealTimers();
 });
