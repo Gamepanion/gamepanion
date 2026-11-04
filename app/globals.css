@@ -244,10 +244,11 @@ h1 {
   @apply outline-2 outline-offset-2 outline-ink;
 }
 /* The playthrough switcher in the header (components/Switcher.tsx, ADR 0019): a button saying where you are, and its menu. */
-/* Quiet like the header's other buttons (.header-link): their height, no frame, a soft ground on hover; bold, being where you are. On a
+/* Quiet like the header's other buttons (.header-link): their height, no frame, a soft ground on hover; bold, being where you are. Its
+   baseline is its text's (the tile and the chevron centred), which the header lines up with the logo's name. On a
    phone, alone on its row, it keeps a hairline frame so it reads as a button. */
 .switcher-button {
-  @apply flex h-10 w-full max-w-full min-w-0 items-center gap-2 rounded-md px-2.5 text-left font-semibold text-ink hover:bg-surface sm:w-auto;
+  @apply flex min-h-10 w-full max-w-full min-w-0 items-baseline gap-2 rounded-md px-2.5 py-1.5 text-left font-semibold text-ink hover:bg-surface sm:w-auto;
   @apply max-sm:border max-sm:border-rule max-sm:bg-surface;
 }
 .switcher-button[aria-expanded="true"] {

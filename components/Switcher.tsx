@@ -111,12 +111,18 @@ export function Switcher({ runs }: { runs: SwitcherRun[] }) {
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onButtonKey}
       >
-        {here ? <GameTile title={here.game} size="sm" /> : <House aria-hidden="true" className="size-5 shrink-0 text-muted" />}
+        {here ? (
+          <span className="self-center">
+            <GameTile title={here.game} size="sm" />
+          </span>
+        ) : (
+          <House aria-hidden="true" className="size-5 shrink-0 self-center text-muted" />
+        )}
         <span className="truncate">
           <span className="sr-only">{copy.switcherWhere}: </span>
           {here ? `${here.game} · ${here.label}` : copy.contents}
         </span>
-        <ChevronDown aria-hidden="true" className={`size-4 shrink-0 text-muted ${open ? "rotate-180" : ""}`} />
+        <ChevronDown aria-hidden="true" className={`size-4 shrink-0 self-center text-muted ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div
