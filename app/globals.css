@@ -214,6 +214,20 @@ h1 {
   @apply border-accent;
   box-shadow: inset 0 0 0 1px var(--accent);
 }
+/* The account page's table of contents (components/AccountNav.tsx), beside its sections on a wide screen: quiet links, the section being
+   read marked by an accent edge and bold, not by colour alone. */
+.account-nav ul {
+  @apply space-y-1 border-l border-rule;
+}
+.account-nav a {
+  @apply -ml-px block border-l-2 border-transparent py-1 pl-3 text-sm text-muted hover:text-ink;
+}
+.account-nav a[aria-current] {
+  @apply border-accent font-semibold text-ink;
+}
+.account-nav a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
+}
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
   @apply inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold text-muted hover:bg-surface hover:text-ink;

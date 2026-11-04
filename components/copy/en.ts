@@ -123,6 +123,7 @@ export const en = {
   keyRemoved: "Removed.",
 
   // The account page: who is signed in, and how they sign in
+  accountSections: "On this page",
   account: "Account",
   signedInAs: "Signed in as",
   noName: "No name yet",
