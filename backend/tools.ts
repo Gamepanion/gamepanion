@@ -108,6 +108,7 @@ const Url = z.string().describe("Its page in the web app, as an absolute URL: gi
 
 const SubscriptionJson = z.object({
   sold: z.boolean().describe("Whether this instance sells subscriptions; false: every feature is open to everyone"),
+  free: z.boolean().describe("Whether the operator gave this player every game and the chat for free (GAMEPANION_FREE_PLAYERS): nothing to buy"),
   subscribed: z.boolean(),
   plan: z.enum(["standard", "hostedAi"]).nullable().describe("What the player has: the subscription, or with the in-app chat on the instance's AI"),
   validUntil: z.string().nullable().describe("When the paid period ends, YYYY-MM-DD"),
@@ -1054,6 +1055,7 @@ export const TOOLS: Tool[] = [
         : [];
       const base = {
         sold: sub.sold,
+        free: sub.free,
         subscribed: sub.subscribed,
         plan: sub.subscribed ? (sub.hostedAi ? "hostedAi" : "standard") : null,
         validUntil: sub.validUntil ? new Date(sub.validUntil).toISOString().slice(0, 10) : null,
@@ -1063,6 +1065,10 @@ export const TOOLS: Tool[] = [
       if (!sub.sold)
         return ok(SubscriptionJson, { ...base, url: null }, [
           "This Gamepanion instance sells nothing: every game and feature is open to every player. Tell the player there is nothing to buy.",
+        ]);
+      if (sub.free && !sub.subscribed && !plan)
+        return ok(SubscriptionJson, { ...base, url: null }, [
+          "The operator gave this player every game and the chat on Gamepanion's AI for free. Tell them they need no subscription and there is nothing to buy.",
         ]);
       const never = "Never ask for card or payment details in this chat: paying happens only on Creem's page.";
       if (plan && period) {

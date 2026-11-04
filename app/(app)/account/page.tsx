@@ -89,14 +89,16 @@ export default async function AccountPage() {
               <Group id="subscription" icon={CreditCard} label={copy.subscriptionTitle}>
                 <div className="card space-y-4">
                   <p className="font-semibold">
-                    {sub.subscribed
-                      ? sub.validUntil
-                        ? (sub.renews ? copy.renewsOn : copy.cancelledUntil)(date.format(new Date(sub.validUntil)))
-                        : copy.subscribed
-                      : copy.freePlan}
+                    {sub.free && !sub.subscribed
+                      ? copy.freeAccess
+                      : sub.subscribed
+                        ? sub.validUntil
+                          ? (sub.renews ? copy.renewsOn : copy.cancelledUntil)(date.format(new Date(sub.validUntil)))
+                          : copy.subscribed
+                        : copy.freePlan}
                   </p>
                   <div className="flex flex-wrap gap-3">
-                    {!sub.subscribed && (
+                    {!sub.subscribed && !sub.free && (
                       <a href="/subscribe" className="button-primary">
                         {copy.seePlans}
                       </a>

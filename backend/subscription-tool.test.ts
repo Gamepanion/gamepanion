@@ -45,6 +45,14 @@ test("a free player gets the plans and the plans page; with plan and period, a l
   await expect(run(s.a, { plan: "standard" })).rejects.toBeInstanceOf(InvalidInputError);
 });
 
+test("a player in GAMEPANION_FREE_PLAYERS has nothing to buy: no plans page, told they need no subscription", async () => {
+  sell();
+  vi.stubEnv("GAMEPANION_FREE_PLAYERS", "@example.com");
+  const out = await run(s.a, {});
+  expect(out).toMatchObject({ sold: true, free: true, subscribed: false, url: null });
+  expect(next(out)).toMatch(/need no subscription/);
+});
+
 test("a subscriber gets their plan, until when, and their own Creem portal", async () => {
   sell();
   const body = JSON.stringify([
