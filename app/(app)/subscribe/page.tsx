@@ -34,7 +34,7 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
       )}
       {sub.subscribed ? (
         <div className="card space-y-2">
-          <p className="font-semibold">{sub.validUntil ? copy.subscribedUntil(date.format(sub.validUntil)) : copy.subscribed}</p>
+          <p className="font-semibold">{sub.validUntil ? (sub.renews ? copy.renewsOn : copy.cancelledUntil)(date.format(sub.validUntil)) : copy.subscribed}</p>
           {sub.portal && (
             <form action={portalAction}>
               <button type="submit" className="button-secondary">

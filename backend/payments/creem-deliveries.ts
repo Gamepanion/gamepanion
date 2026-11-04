@@ -3,7 +3,7 @@
 // (billing/store.ts).
 //
 //   checkout.completed                                   started: who paid (metadata.player_id), the plan, paid-until
-//   subscription.active, subscription.paid               renewed: paid-until moves on
+//   subscription.active, subscription.paid               renewed: paid-until moves on (started when it names the player)
 //   subscription.canceled, subscription.scheduled_cancel cancelled: access stays until paid-until, nothing renews (Creem sends
 //                                                        `canceled` at once when someone cancels in the portal, the period still paid)
 //   subscription.expired, .paused, .unpaid               ended: access ends
@@ -40,6 +40,17 @@ function started(c: NormalizedCheckoutEntity, tierOf: (productId: string) => Tie
   ];
 }
 
+// A subscription event names the player too (the checkout's metadata is the subscription's): then it records the subscription whole,
+// whether or not the checkout's event came first, and whether it renews from Creem's own state. Without the player, it only moves what
+// is recorded.
+function fromSubscription(s: NormalizedSubscriptionEntity, tierOf: (productId: string) => Tier, kind: "renewed" | "cancelled"): PaymentEvent[] {
+  const playerId = s.metadata?.player_id;
+  const renews = kind === "renewed" && !s.canceled_at;
+  if (typeof playerId === "string")
+    return [{ type: "started", ...ofSubscription(s), playerId, customerRef: s.customer?.id ?? null, tier: tierOf(s.product.id), renews }];
+  return [{ type: kind, ...ofSubscription(s) }];
+}
+
 function refunded(r: NormalizedRefundEntity | NormalizedDisputeEntity): PaymentEvent[] {
   const providerRef = typeof r.subscription === "string" ? r.subscription : r.subscription?.id;
   return providerRef ? [{ type: "refunded", providerRef }] : [];
@@ -62,10 +73,10 @@ export async function parseCreemWebhook(rawBody: string, headers: Headers, secre
       return started(event.object, tierOf);
     case "subscription.active":
     case "subscription.paid":
-      return [{ type: "renewed", ...ofSubscription(event.object) }];
+      return fromSubscription(event.object, tierOf, "renewed");
     case "subscription.canceled":
     case "subscription.scheduled_cancel":
-      return [{ type: "cancelled", ...ofSubscription(event.object) }];
+      return fromSubscription(event.object, tierOf, "cancelled");
     case "subscription.expired":
     case "subscription.paused":
     case "subscription.unpaid":
