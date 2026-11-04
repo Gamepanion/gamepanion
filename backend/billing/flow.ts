@@ -2,6 +2,7 @@
 // store's rows (idempotent, never moving a period backwards), a refund also ends the subscription at the provider, and a subscriber gets
 // a link to their own portal. Without a payment provider there is nothing to buy: every entry here is "not found".
 import { emailOf } from "../auth/session";
+import { config, mayJoin } from "../config";
 import { InvalidInputError, NotFoundError } from "../errors";
 import { logger } from "../log";
 import { paymentProvider, WebhookRejectedError, type PaymentEvent, type Period, type Plan, type Tier } from "../payments";
@@ -105,17 +106,19 @@ export const yearlySaving = (plans: Plan[]): number | null => {
   return month && year && month.amount > 0 ? Math.round(100 * (1 - year.amount / (12 * month.amount))) : null;
 };
 
-/** What the account and subscribe pages show (#48): whether anything is sold, whether the player subscribes and until when, and whether
- * they have a portal. */
+/** What the account and subscribe pages show (#48): whether anything is sold, whether the player has it all for free (GAMEPANION_FREE_PLAYERS,
+ * so nothing to buy), whether they subscribe and until when, and whether they have a portal. */
 export async function subscriptionOf(
   p: Player,
-): Promise<{ sold: boolean; subscribed: boolean; hostedAi: boolean; validUntil: number | null; renews: boolean; portal: boolean }> {
-  if (!paymentProvider()) return { sold: false, subscribed: false, hostedAi: false, validUntil: null, renews: false, portal: false };
+): Promise<{ sold: boolean; free: boolean; subscribed: boolean; hostedAi: boolean; validUntil: number | null; renews: boolean; portal: boolean }> {
+  if (!paymentProvider()) return { sold: false, free: false, subscribed: false, hostedAi: false, validUntil: null, renews: false, portal: false };
+  const email = await playerEmail(p.id);
   const subs = await (await billing()).ofPlayer(p.id);
   const live = subs.filter((s) => s.status === "active" && (s.validUntil === null || s.validUntil > Date.now()));
   const best = live.find((s) => s.tier === "hostedAi") ?? live[0];
   return {
     sold: true,
+    free: !!email && mayJoin(email, config.freePlayers()),
     subscribed: !!best,
     hostedAi: best?.tier === "hostedAi",
     validUntil: best?.validUntil ?? null,

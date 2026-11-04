@@ -45,7 +45,9 @@ export default async function SubscribePage({ searchParams }: PageProps<"/subscr
         </div>
       ) : null}
       {/* A subscriber without the AI still sees the plans with it (#56); the others see every plan. */}
-      {sub.subscribed && sub.hostedAi ? null : !sub.subscribed && back ? (
+      {sub.free && !sub.subscribed ? (
+        <p className="card font-semibold">{copy.freeAccess}</p>
+      ) : sub.subscribed && sub.hostedAi ? null : !sub.subscribed && back ? (
         <p role="status" className="card">
           {copy.confirming}{" "}
           <a href="/subscribe" className="font-semibold text-accent underline">

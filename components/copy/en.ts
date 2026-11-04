@@ -35,6 +35,7 @@ export const en = {
   noPlans: "Subscriptions can't be bought right now. Try again later.",
   subscriptionTitle: "Subscription",
   freePlan: "Free: one game, with all its playthroughs.",
+  freeAccess: "Free from the operator: every game, and the chat on Gamepanion's AI.",
   activeGame: "Your active game",
   noActiveGame: "None yet",
   activeGameRule: (days: number) =>

@@ -37,6 +37,7 @@ export const de: Copy = {
   noPlans: "Abos können gerade nicht gekauft werden. Versuch es später noch einmal.",
   subscriptionTitle: "Abo",
   freePlan: "Kostenlos: ein Spiel, mit all seinen Durchläufen.",
+  freeAccess: "Vom Betreiber freigeschaltet: jedes Spiel, und der Chat über Gamepanions KI.",
   activeGame: "Dein aktives Spiel",
   noActiveGame: "Noch keins",
   activeGameRule: (days: number) =>
