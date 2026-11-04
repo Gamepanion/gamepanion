@@ -20,7 +20,7 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import { config, mayJoin } from "../config";
 import { openSqlite } from "../db/connect";
 import { logger } from "../log";
-import { deletePlayerLog } from "../players";
+import { cancelSubscriptions, deletePlayerLog } from "../players";
 import { secret } from "../secret";
 import { processState } from "../state";
 import { AUTH_PATH, apiResource, mcpResource, safeNext } from "../urls";
@@ -30,6 +30,9 @@ const log = logger("auth");
 
 /** Seconds an MCP access token lives: a JWT can't be revoked before it expires, so it is short; the client refreshes it. */
 export const ACCESS_TOKEN_SECONDS = 600;
+
+/** Seconds the code that confirms deleting an account works. */
+export const DELETE_CODE_SECONDS = 3600;
 
 // Whether this request comes from a login page an MCP client or a script sent the browser to: its signed query came along (the browser
 // client adds it to every request from that page). The body the endpoints see has it stripped, so a hook notes it first.
@@ -76,6 +79,29 @@ function options(database: Awaited<ReturnType<typeof openSqlite>>) {
     database,
     // Nothing turns telemetry on (V7): no `telemetry` option and no BETTER_AUTH_TELEMETRY.
     emailAndPassword: { enabled: false },
+    // Deleting the account (#106) is on the account page only, never over MCP. Where codes can be mailed, a code (and a link) to the
+    // address confirms it; elsewhere a session signed in within the last day does (Better Auth's freshAge). Before the user goes, a running
+    // subscription is cancelled at the provider; if that fails, nothing is deleted and the player can try again.
+    user: {
+      deleteUser: {
+        enabled: true,
+        deleteTokenExpiresIn: DELETE_CODE_SECONDS,
+        beforeDelete: async (user: { id: string }) => {
+          try {
+            await cancelSubscriptions({ id: user.id });
+          } catch (err) {
+            log.error({ err }, "cancelling the subscription of a deleted account failed");
+            throw new APIError("BAD_GATEWAY", { message: "The subscription could not be cancelled; nothing was deleted" });
+          }
+        },
+        ...(config.smtp()
+          ? {
+              sendDeleteAccountVerification: async ({ user, url, token }: { user: { email: string }; url: string; token: string }) =>
+                sendCode(user.email, token, { purpose: "delete-account", link: url }),
+            }
+          : {}),
+      },
+    },
     // A second sign-in joins a player only when its provider says the address is verified. A provider listed in trustedProviders would
     // join even without that, so none is listed (ADR 0006).
     account: { accountLinking: { enabled: true, trustedProviders: [] } },

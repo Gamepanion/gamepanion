@@ -44,7 +44,7 @@ flowchart LR
   asked -- no --> hidden
 ```
 
-A briefing never asks for more than `none`; `open_threads`, `item`, `missed` and the playthrough page do only when the player asked, and `missed` can't be called without asking. `correct` looks up the row it changes through the gate too, so another player's id is not found.
+A briefing never asks for more than `none`; `open_threads`, `item`, `missed` and the playthrough page do only when the player asked, and `missed` can't be called without asking. The export (`/api/v1/export` and the account page's download; the `export` tool only links to it) reads every level: it is the player's own log, handed to them whole (ADR 0025). `correct` looks up the row it changes through the gate too, so another player's id is not found.
 
 ## Data
 

@@ -6,6 +6,7 @@ import { briefing } from "../briefing";
 import { buildOf } from "../builds";
 import { codexOf } from "../codex";
 import { correct } from "../correct";
+import { exportLog } from "../export";
 import { getPlaythrough, listPlaythroughs } from "../games";
 import { itemsOf } from "../items";
 import { missed } from "../missed";
@@ -26,6 +27,7 @@ import {
   COMPONENTS,
   CorrectedJson,
   ErrorJson,
+  ExportJson,
   ItemListJson,
   MissedJson,
   PlaythroughJson,
@@ -230,6 +232,17 @@ const OPS: AnyOp[] = [
   }).handle(async ({ player, body }) => ({ status: 200, body: { changes: await correct(player, body.changes) } })),
   op({
     method: "GET",
+    path: `${API_PREFIX}/export`,
+    operationId: "exportLog",
+    summary: "Everything the player filed",
+    description:
+      "One JSON document with every game, playthrough and its settings, session and its transcript, quest, item, build, goal, codex entry, note, tag, source and to-do, spoilers included: it is the player's own log. Free on every plan. The same as the MCP tool export.",
+    tags: ["Export"],
+    params: {},
+    responses: { 200: { description: "The player's log", schema: ExportJson }, 401: E401 },
+  }).handle(async ({ player }) => ({ status: 200, body: await exportLog(player) })),
+  op({
+    method: "GET",
     path: `${API_PREFIX}/openapi.json`,
     operationId: "getOpenApi",
     summary: "This description",
@@ -314,6 +327,7 @@ export function openApiDocument(serverUrl: string): Json {
       { name: "Playthroughs", description: "The player's runs of their games: briefing, quests, items, build, and what may have been missed." },
       { name: "Sessions", description: "Filing a play session, and reading one back with its transcript." },
       { name: "Corrections", description: "Fixing or removing what was filed." },
+      { name: "Export", description: "Everything the player filed, as one document." },
       { name: "Meta", description: "About the API itself." },
     ],
     paths,

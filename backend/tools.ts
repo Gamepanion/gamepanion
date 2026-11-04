@@ -40,7 +40,7 @@ import { moreAbove } from "./hidden";
 import { search, SEARCH_KINDS, type Candidate } from "./search";
 import { keyStorageEnabled } from "./keys";
 import { isFrozen } from "./access";
-import { accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
+import { accountDataPath, accountExportPath, accountKeyPath, homePath, inText, playthroughPath, tabPath } from "./urls";
 
 export type Tool = {
   name: string;
@@ -926,6 +926,19 @@ export const TOOLS: Tool[] = [
       const m = await missed(p, ref, reveal);
       return ok(MissedJson, m, missedNext(m));
     },
+  }),
+  tool({
+    name: "export",
+    description:
+      "The link where the player downloads everything they filed in Gamepanion as one JSON file: games, playthroughs, sessions with their transcripts, quests, items, builds, codex, notes, tags and to-dos. Call it when the player asks for their data, an export or a backup. It returns only the link: the file itself never goes through this chat.",
+    input: z.object({}),
+    output: z.object({ url: Url.describe("The download, for the browser the player is signed in with") }),
+    annotations: { readOnlyHint: true },
+    handler: async () =>
+      ok(z.object({ url: Url }), { url: accountExportPath() }, [
+        `Give the player this link, ${inText(accountExportPath())}: it downloads the file in the browser they are signed in with (they sign in first if not). The account page, ${inText(accountDataPath())}, has the same button.`,
+        "The file holds spoilers they may not have asked to see; if they share it with you, don't read it out.",
+      ]),
   }),
 ];
 

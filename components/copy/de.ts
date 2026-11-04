@@ -121,6 +121,25 @@ export const de: Copy = {
   changeEmailFailed: "Das hat nicht geklappt. Prüf den Code oder fordere einen neuen an.",
   linkedProvider: "Mit diesem Konto verknüpft",
 
+  // Deine Daten, auf der Kontoseite (#106)
+  dataTitle: "Deine Daten",
+  exportLead:
+    "Alles, was du abgelegt hast, in einer JSON-Datei: deine Spiele, Durchläufe, Sitzungen mit dem, was du gesagt hast, Quests, Gegenstände, Builds und Kodex, Spoiler eingeschlossen. Kostenlos in jedem Tarif.",
+  exportButton: "Meine Daten herunterladen",
+  deleteTitle: "Konto löschen",
+  deleteLead:
+    "Löscht dein Konto und alles, was du abgelegt hast, sofort und kündigt ein laufendes Abo. Das lässt sich nicht rückgängig machen. Die Sicherungen behalten es noch bis zu 31 Tage, dann ist es auch dort weg.",
+  deleteStart: "Mein Konto löschen",
+  deleteConfirmMailed: (email: string) => `Gamepanion schickt einen Code an ${email}. Füg ihn hier ein, um das Konto zu löschen.`,
+  deleteConfirmFresh: "Damit sicher ist, dass du es bist, geht das nur bis einen Tag nach der Anmeldung. Wird es abgelehnt, melde dich ab und wieder an.",
+  deleteSendCode: "Code schicken",
+  deleteCodeSent: (email: string) => `Der Code ist unterwegs an ${email}. Er gilt einmal, für eine Stunde.`,
+  deleteCodeLabel: "Code aus der E-Mail",
+  deleteNow: "Endgültig löschen",
+  deleteFailed: "Das hat nicht geklappt. Prüf den Code oder fordere einen neuen an.",
+  deleteStale: "Deine Anmeldung ist mehr als einen Tag her. Melde dich ab und wieder an und lösche es dann.",
+  accountDeleted: "Dein Konto und alles darin sind gelöscht.",
+
   // Passkeys, auf der Kontoseite
   passkeys: "Passkeys",
   passkeysLead:
