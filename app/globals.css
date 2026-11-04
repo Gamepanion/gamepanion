@@ -202,7 +202,7 @@ h1 {
 /* The header's language and colour scheme menus (components/LanguageMenu.tsx, ThemeMenu.tsx): a panel under the button, one choice per
    row, the one in use bold and edged in the accent. */
 .header-menu {
-  @apply absolute top-full right-0 z-30 mt-1 w-64 rounded-md border border-rule bg-paper p-1 shadow-lg;
+  @apply absolute top-full right-0 z-30 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-rule bg-paper p-1 shadow-lg max-sm:right-auto max-sm:left-0;
 }
 .header-menu-item {
   @apply flex cursor-pointer items-center gap-3 rounded border-l-2 border-transparent px-2 py-1.5 text-sm hover:bg-surface-2;
@@ -223,11 +223,12 @@ h1 {
 .swatches > span {
   @apply block size-3 rounded-[2px] ring-1 ring-rule;
 }
+/* Every tile the same width, its swatches centred (in each half for System), so the names line up. */
 .theme-tile {
-  @apply flex overflow-hidden rounded ring-1 ring-rule;
+  @apply flex w-28 shrink-0 overflow-hidden rounded ring-1 ring-rule;
 }
 .theme-half {
-  @apply bg-surface px-1.5 py-1;
+  @apply flex flex-1 items-center justify-center bg-surface py-1.5;
 }
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {
