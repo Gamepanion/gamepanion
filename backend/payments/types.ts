@@ -34,10 +34,9 @@ export interface PaymentProvider {
   plans(): Promise<Plan[]>;
   /** The URL to send the player to; they come back to `successUrl`. `period` picks the product; throws when there is none for it. */
   createCheckout(o: { period: Period; tier?: Tier; playerId: string; email: string | null; successUrl: string }): Promise<{ url: string }>;
-  /** Verifies the signature over the raw body and returns its events (none for a kind Gamepanion doesn't use). Throws WebhookRejectedError.
-   * Only where the backend reads the webhook (the fake); Creem's is read by @creem_io/nextjs in the route (creem-deliveries.ts, #107). */
-  parseWebhook?(rawBody: string, headers: Headers): Promise<PaymentEvent[]>;
-  /** Whether the checkout opens as an overlay on the subscribe page (Creem's embed) rather than as a page of its own. */
+  /** Verifies the signature over the raw body and returns its events (none for a kind Gamepanion doesn't use). Throws WebhookRejectedError. */
+  parseWebhook(rawBody: string, headers: Headers): Promise<PaymentEvent[]>;
+  /** Whether the checkout opens as an overlay on the subscribe page (Creem's embed, #107) rather than as a page of its own. */
   overlay: boolean;
   /** The signed-in player's own customer portal: cancelling, the payment method, invoices. */
   portalUrl(customerRef: string): Promise<string>;

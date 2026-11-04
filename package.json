@@ -25,7 +25,6 @@
     "@better-auth/oauth-provider": "1.7.14",
     "@better-auth/passkey": "1.7.14",
     "@creem_io/embed": "^0.3.4",
-    "@creem_io/nextjs": "^0.6.4",
     "@creem_io/webhook-types": "^1.0.1",
     "@modelcontextprotocol/server": "2.3.1",
     "better-auth": "1.7.14",

@@ -1,11 +1,11 @@
 // Creem, the merchant of record (https://docs.creem.io; #48, ADR 0023), through its official SDK (`creem`, #107): the plans, the
 // checkout, the customer portal and cancelling. A key starting `creem_test_` talks to the sandbox. The checkout carries the player's id as
-// `metadata.player_id`; the completed checkout's delivery echoes it (creem-deliveries.ts). The webhook itself is the Next.js route
-// (app/api/payments/webhook), with @creem_io/nextjs; nothing here reads it.
+// `metadata.player_id`; the completed checkout's delivery echoes it. The webhook is read in creem-deliveries.ts.
 import { Creem } from "creem";
 import { CreemError } from "creem/models/errors";
 import { logger } from "../log";
 import { processState } from "../state";
+import { parseCreemWebhook } from "./creem-deliveries";
 import type { PaymentProvider, Period, Plan, Tier } from "./types";
 
 const log = logger("payments");
@@ -18,10 +18,11 @@ export type CreemOptions = {
   yearlyProductId?: string;
   hostedAiProductId?: string;
   hostedAiYearlyProductId?: string;
+  webhookSecret: string;
 };
 
 /** Every product sold, with what it is. */
-export const soldProducts = (o: Omit<CreemOptions, "apiKey">) =>
+export const soldProducts = (o: Omit<CreemOptions, "apiKey" | "webhookSecret">) =>
   (
     [
       ["month", "standard", o.productId],
@@ -39,8 +40,9 @@ export function resetPlansForTests(): void {
   for (const k of Object.keys(plansCache)) delete plansCache[k as keyof typeof plansCache];
 }
 
-export function createCreem({ apiKey, ...products }: CreemOptions): PaymentProvider {
+export function createCreem({ apiKey, webhookSecret, ...products }: CreemOptions): PaymentProvider {
   const sold = soldProducts(products);
+  const tierOf = (productId: string): Tier => sold.find(([, , id]) => id === productId)?.[1] ?? "standard";
   const test = apiKey.startsWith("creem_test_");
   const sdk = new Creem({ apiKey, server: test ? "test" : "prod" });
   const product = async (period: Period, tier: Tier, id: string): Promise<Plan | null> => {
@@ -83,6 +85,8 @@ export function createCreem({ apiKey, ...products }: CreemOptions): PaymentProvi
       if (!checkout.checkoutUrl) throw new Error("creem: the checkout has no checkout_url");
       return { url: checkout.checkoutUrl };
     },
+
+    parseWebhook: (rawBody, headers) => parseCreemWebhook(rawBody, headers, webhookSecret, tierOf),
 
     async portalUrl(customerRef) {
       return (await sdk.customers.generateBillingLinks({ customerId: customerRef })).customerPortalLink;

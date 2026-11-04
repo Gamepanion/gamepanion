@@ -8,8 +8,6 @@ import type { PaymentProvider } from "./types";
 export type { PaymentEvent, PaymentProvider, Period, Plan, Tier } from "./types";
 export { WebhookRejectedError } from "./types";
 export { fakeCancelled, fakeSignature } from "./fake";
-export { creemDeliveries } from "./creem-deliveries";
-export { soldProducts } from "./creem-api";
 
 export function paymentProvider(): PaymentProvider | null {
   switch (config.paymentProvider()) {

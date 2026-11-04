@@ -1,5 +1,5 @@
 // The payment providers (#48): the fake signs and parses its own events; Creem's SDK (#107) checkout, plans, portal and cancel against a
-// stand-in fetch. Creem's deliveries are app/api/payments/webhook/route.test.ts's.
+// stand-in fetch. Creem's deliveries are creem-webhook.test.ts's.
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { config } from "../config";
 import { createCreem, resetPlansForTests } from "./creem-api";
@@ -47,7 +47,7 @@ function creem(handler: (c: Call) => Response | Promise<Response>, apiKey = "cre
     calls.push(c);
     return handler(c);
   });
-  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y" }), calls };
+  return { p: createCreem({ apiKey, productId: "prod_m", yearlyProductId: "prod_y", webhookSecret: "whsec" }), calls };
 }
 const subscriptionJson = {
   id: "sub_1",
@@ -94,7 +94,7 @@ test("createCheckout sends product, success_url and metadata.player_id, to the s
   const live = creem(answer, "creem_live");
   await live.p.createCheckout({ period: "month", playerId: "p1", email: null, successUrl: "https://g.example/subscribe" });
   expect(live.calls[0].url).toBe("https://api.creem.io/v1/checkouts");
-  const monthOnly = createCreem({ apiKey: "creem_test_k", productId: "prod_m" });
+  const monthOnly = createCreem({ apiKey: "creem_test_k", productId: "prod_m", webhookSecret: "whsec" });
   await expect(monthOnly.createCheckout({ period: "year", playerId: "p1", email: null, successUrl: "x" })).rejects.toThrow(/no product/);
 });
 

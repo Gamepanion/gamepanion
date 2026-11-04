@@ -1,27 +1,21 @@
-// Creem's deliveries (#107), signed with generateSignature and sent through this route as Creem sends them, into the billing store: who
+// Creem's deliveries (#107), signed with generateSignature and sent to /api/payments/webhook as Creem sends them, into the billing store: who
 // paid, paid-until, cancelling that keeps the paid period, ending, refunds that end access and cancel at Creem; twice or out of order
 // changes nothing. The shapes are Creem's (https://docs.creem.io/learn/webhooks/event-types, the types of @creem_io/webhook-types).
 import { generateSignature } from "@creem_io/webhook-types";
-import { NextRequest } from "next/server";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { accessOf } from "@/backend/access";
-import { setEmailLookupForTests } from "@/backend/billing/flow";
-import { billing, resetBillingForTests } from "@/backend/billing/store";
-import { resetDbForTests } from "@/backend/db/testing";
-import { POST } from "./route";
+import { accessOf } from "../access";
+import { paymentsWebhookRoute, setEmailLookupForTests } from "../billing/flow";
+import { billing, resetBillingForTests } from "../billing/store";
+import { resetDbForTests } from "../db/testing";
 
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
-  vi.restoreAllMocks();
   setEmailLookupForTests(null);
 });
 beforeEach(async () => {
   // The free-players check asks for the address; not the sign-in database here.
   setEmailLookupForTests(async () => "p1@example.com");
-  // @creem_io/nextjs logs every delivery to the console.
-  vi.spyOn(console, "log").mockImplementation(() => {});
-  vi.spyOn(console, "error").mockImplementation(() => {});
   await resetDbForTests();
   await resetBillingForTests();
 });
@@ -79,8 +73,8 @@ const refund = (sub: string) => ({
 let n = 0;
 async function deliver(eventType: string, object: unknown, signature?: string) {
   const body = JSON.stringify({ id: `evt_${++n}`, eventType, created_at: Date.now(), object });
-  const res = await POST(
-    new NextRequest("http://localhost/api/payments/webhook", {
+  const res = await paymentsWebhookRoute(
+    new Request("http://localhost/api/payments/webhook", {
       method: "POST",
       body,
       headers: { "creem-signature": signature ?? (await generateSignature(body, SECRET)), "content-type": "application/json" },
@@ -107,9 +101,10 @@ test("checkout.completed makes the player from metadata a subscriber until paid-
   expect((await accessOf(p1)).subscribed).toBe(true);
 });
 
-test("a completed checkout that names no player fails, so Creem sends it again; it files nothing", async () => {
+test("a completed checkout that names no player, or a body that isn't a delivery, is refused and files nothing", async () => {
   sellWithCreem();
-  expect(await deliver("checkout.completed", checkout({ sub: "sub_3" }))).toBe(500);
+  expect(await deliver("checkout.completed", checkout({ sub: "sub_3" }))).toBe(400);
+  expect(await deliver("checkout.completed", "not an object")).toBe(400);
   expect(await subs()).toEqual([]);
 });
 
@@ -137,6 +132,7 @@ test("paused and unpaid end access; a delivery for a subscription nobody bought 
   await deliver("subscription.unpaid", subscription("sub_9"));
   expect((await subs()).every((s) => s.status === "lapsed")).toBe(true);
   expect(await deliver("subscription.paid", subscription("sub_unknown"))).toBe(200);
+  expect(await deliver("subscription.past_due", subscription("sub_1"))).toBe(200);
 });
 
 test("refund.created and dispute.created end access at once and cancel the subscription at Creem", async () => {
