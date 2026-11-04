@@ -30,7 +30,8 @@ export const de: Copy = {
 
   subscribeTitle: "Abonnieren",
   subscribed: "Du hast ein Abo. Jedes Spiel ist offen.",
-  subscribedUntil: (day: string) => `Du hast ein Abo bis ${day}. Jedes Spiel ist offen.`,
+  renewsOn: (day: string) => `Du hast ein Abo, es verlängert sich am ${day}. Jedes Spiel ist offen.`,
+  cancelledUntil: (day: string) => `Gekündigt: Dein Abo läuft bis ${day} und endet dann. Bis dahin ist jedes Spiel offen.`,
   managePlan: "Abo verwalten",
   confirming: "Deine Zahlung wird bestätigt …",
   reload: "Neu laden",
