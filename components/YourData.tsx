@@ -6,6 +6,7 @@ import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { authClient } from "./auth-client";
+import { Group } from "./icons";
 import { useCopy } from "./copy/client";
 
 const AFTER = "/login?deleted=1";
@@ -38,13 +39,7 @@ export function YourData({ email, mailed, exportPath }: { email: string; mailed:
   }
 
   return (
-    <section id="data" aria-labelledby="data-title" className="scroll-mt-6">
-      <h2 id="data-title" className="section-title">
-        <span className="seal">
-          <Download aria-hidden="true" />
-        </span>
-        {copy.dataTitle}
-      </h2>
+    <Group id="data" icon={Download} label={copy.dataTitle}>
       <div className="card space-y-5">
         <div className="space-y-3">
           <p>{copy.exportLead}</p>
@@ -113,6 +108,6 @@ export function YourData({ email, mailed, exportPath }: { email: string; mailed:
           )}
         </div>
       </div>
-    </section>
+    </Group>
   );
 }

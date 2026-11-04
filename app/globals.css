@@ -165,11 +165,7 @@ h1 {
   .account-input::placeholder {
     @apply font-normal text-muted italic;
   }
-  /* A section's heading: its icon in a square tinted in the colour of the part it is in (the register's --c; violet outside it), then
-     its name, uppercase like a HUD label. */
-  .section-title {
-    @apply mb-2 flex w-fit items-center gap-2 text-xs font-extrabold tracking-[0.08em] text-ink uppercase;
-  }
+  /* A row's icon in a small square tinted in the colour of the part it is in (the register's --c; violet outside it). */
   .seal {
     @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md;
     background: color-mix(in oklab, var(--c, var(--accent)) 24%, var(--surface));
@@ -239,6 +235,20 @@ h1 {
 .icon-middle {
   align-self: baseline;
   transform: translateY(calc(50% - 0.5cap));
+}
+/* The account page's table of contents (components/AccountNav.tsx), beside its sections on a wide screen: quiet links, the section being
+   read marked by an accent edge and bold, not by colour alone. */
+.account-nav ul {
+  @apply space-y-1 border-l border-rule;
+}
+.account-nav a {
+  @apply -ml-px block border-l-2 border-transparent py-1 pl-3 text-sm text-muted hover:text-ink;
+}
+.account-nav a[aria-current] {
+  @apply border-accent font-semibold text-ink;
+}
+.account-nav a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
 }
 /* The header's account and sign-out buttons: as tall as the switcher, quiet until hovered. */
 .header-link {

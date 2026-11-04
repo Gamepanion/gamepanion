@@ -2,10 +2,10 @@
 // The player's own Anthropic key on the account page (/account#key, ADR 0021): a field to paste it, "Test key" (one cheap call), "Save
 // key", and once saved only its last four characters. The field is never filled from the server: the key doesn't come back.
 import { KeyRound } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { removeKeyAction, saveKeyAction, testKeyAction, type KeyResult } from "@/app/(app)/account/actions";
+import { Group } from "./icons";
 import { useCopy } from "./copy/client";
 
 export function KeySection({
@@ -48,13 +48,7 @@ export function KeySection({
     });
 
   return (
-    <section id="key" aria-labelledby="key-title" className="scroll-mt-6">
-      <h2 id="key-title" className="section-title">
-        <span className="seal">
-          <KeyRound aria-hidden="true" />
-        </span>
-        {copy.keyTitle}
-      </h2>
+    <Group id="key" icon={KeyRound} label={copy.keyTitle}>
       <div className="card space-y-3">
         <p>{copy.keyLead}</p>
         <p id={note} className="text-sm text-muted">
@@ -65,21 +59,13 @@ export function KeySection({
         ) : (
           <>
             <p className="font-semibold">
-              {last4 ? (
-                copy.keyStored(last4)
-              ) : without === "instance" ? (
-                copy.keyNoneInstance(sold)
-              ) : without === "needsKey" ? (
-                <>
-                  {copy.keyNoneNeeded}{" "}
-                  <Link href="/subscribe" className="text-accent underline">
-                    {copy.seePlans}
-                  </Link>
-                </>
-              ) : (
-                copy.keyNone
-              )}
+              {last4 ? copy.keyStored(last4) : without === "instance" ? copy.keyNoneInstance(sold) : without === "needsKey" ? copy.keyNoneNeeded : copy.keyNone}
             </p>
+            {!last4 && without === "needsKey" && (
+              <a href="/subscribe" className="button-primary inline-block">
+                {copy.seePlans}
+              </a>
+            )}
             <form
               className="space-y-3"
               onSubmit={(e) => {
@@ -126,6 +112,6 @@ export function KeySection({
           {result ? words[result] : ""}
         </p>
       </div>
-    </section>
+    </Group>
   );
 }
