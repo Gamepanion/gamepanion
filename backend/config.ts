@@ -118,6 +118,9 @@ export const config = {
   },
   // Speaking into the chat: a Whisper server with the OpenAI-compatible POST /v1/audio/transcriptions (such as speaches); no trailing
   // slash. Unset: the chat takes typing only.
+  // Where the report page (/report) posts a problem or an idea: the endpoint of a form in an inbox such as noticebox. Unset: no page,
+  // and reporting goes to a new GitHub issue.
+  reportEndpoint: (): string | undefined => env("GAMEPANION_REPORT_ENDPOINT").trim() || undefined,
   transcribeUrl: (): string | undefined => env("GAMEPANION_TRANSCRIBE_URL").trim().replace(/\/+$/, "") || undefined,
   transcribeModel: (): string => env("GAMEPANION_TRANSCRIBE_MODEL").trim() || "deepdml/faster-whisper-large-v3-turbo-ct2",
   // Payments (#48, ADR 0023): only for an operator who sells. Empty: every feature, no limits, nothing sold (V7).

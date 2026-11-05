@@ -1,6 +1,6 @@
-import { UserRound } from "lucide-react";
+import { Bug, UserRound } from "lucide-react";
 import Link from "next/link";
-import { chatEnabled, chatNeedsKey, listPlaythroughs, voiceEnabled } from "@/backend";
+import { chatEnabled, chatNeedsKey, listPlaythroughs, reportUrl, voiceEnabled } from "@/backend";
 import { Follow } from "@/components/Follow";
 import { Footer } from "@/components/Footer";
 import { ChatProvider } from "@/components/chat/Chat";
@@ -39,9 +39,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
           <Switcher runs={runs} />
         </div>
-        {/* The language and the colour scheme, a menu each, a hairline, then the account and signing out as two quiet buttons of the
-            switcher's height. On a phone all of it behind one menu button (PhoneMenu), beside the logo. */}
+        {/* Reporting a problem (a new GitHub issue; its label from lg up, the icon alone before), the language and the colour scheme, a
+            menu each, a hairline, then the account and signing out as two quiet buttons of the switcher's height. On a phone all of it
+            behind one menu button (PhoneMenu), beside the logo. */}
         <div className="hidden items-baseline gap-1 sm:flex">
+          <a href={reportUrl()} className="header-link" title={copy.reportProblem}>
+            <Bug aria-hidden="true" className="icon-middle" />
+            <span className="sr-only lg:not-sr-only">{copy.reportProblem}</span>
+          </a>
           <LanguageMenu />
           <ThemeMenu theme={theme} />
           <span aria-hidden="true" className="mx-2 h-6 self-center border-l border-rule" />
@@ -51,7 +56,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           </Link>
           <SignOutButton />
         </div>
-        <PhoneMenu theme={theme} />
+        <PhoneMenu theme={theme} reportHref={reportUrl()} />
       </header>
       <ChatProvider
         enabled={await chatEnabled(player)}
@@ -62,8 +67,11 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         needsKey={await chatNeedsKey(player)}
       >
         <Follow>
-          {children}
-          <Footer />
+          {/* At least the height of the scrolling area, so the footer sits at its bottom on a short page. */}
+          <div className="flex min-h-full flex-col">
+            {children}
+            <Footer />
+          </div>
         </Follow>
       </ChatProvider>
     </div>

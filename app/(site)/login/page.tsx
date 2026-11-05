@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const query = await searchParams;
   const copy = await serverCopy();
   return (
-    <main>
+    <main className="flex min-h-dvh flex-col">
       {/* After deleting the account (#106): the account page sends the browser here. */}
       {query.deleted !== undefined && (
         <p role="status" className="mx-auto max-w-5xl px-4 pt-6 font-semibold lg:px-8">
@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </p>
       )}
       <SignIn copy={copy} methods={signInMethods()} next={safeNext(query.next)} refused={refusedSignIn(query)} />
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto w-full max-w-5xl">
         <Footer />
       </div>
     </main>

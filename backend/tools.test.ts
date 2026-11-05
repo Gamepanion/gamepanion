@@ -13,7 +13,7 @@ import { TOOLS, toolByName } from "./tools";
 const run = (name: string, p: { id: string }, args: unknown) => toolByName(name)!.run(p, args);
 const next = (out: Record<string, unknown>) => (out.next as string[]).join("\n");
 
-test("the table has record, briefing, open_threads, item, codex, correct, chat_key, missed, export, about and subscription, each with an English description and a next in its output", () => {
+test("the table has record, briefing, open_threads, item, codex, correct, chat_key, missed, export, about, report and subscription, each with an English description and a next in its output", () => {
   expect(TOOLS.map((t) => t.name)).toEqual([
     "record",
     "briefing",
@@ -25,6 +25,7 @@ test("the table has record, briefing, open_threads, item, codex, correct, chat_k
     "missed",
     "export",
     "about",
+    "report",
     "subscription",
   ]);
   for (const t of TOOLS) {
@@ -363,4 +364,30 @@ test("without references, item asks Claude to suggest one; correct replaces a ga
   await expect(run("record", s.a, { playthroughId: s.liesOfP, summary: "x", transcript: "x", references: [{ url: "ftp://nope" }] })).rejects.toBeInstanceOf(
     InvalidInputError,
   );
+});
+
+test("report links a new GitHub issue with the title and text Claude wrote, or the blank form of its kind", async () => {
+  const out = await run("report", { id: "p" }, { kind: "bug", title: "Briefing shows no quests", body: "The briefing was empty after filing." });
+  const url = new URL(out.url as string);
+  expect(url.origin + url.pathname).toBe("https://github.com/gamepanion/gamepanion/issues/new");
+  expect(url.searchParams.get("title")).toBe("Briefing shows no quests");
+  expect(url.searchParams.get("body")).toBe("The briefing was empty after filing.");
+  expect(out.github).toBe(out.url);
+  expect(next(out)).toMatch(/public/);
+  const blank = new URL((await run("report", { id: "p" }, { kind: "idea" })).url as string);
+  expect(blank.searchParams.get("body")).toMatch(/What I'd like/);
+  await expect(run("report", { id: "p" }, { kind: "complaint" })).rejects.toBeInstanceOf(InvalidInputError);
+});
+
+test("with a report endpoint, report links the report page filled in, and GitHub only besides", async () => {
+  vi.stubEnv("GAMEPANION_REPORT_ENDPOINT", "https://inbox.example.org/f/gamepanion-report");
+  try {
+    const out = await run("report", { id: "p" }, { kind: "idea", title: "Dark map", body: "A map tab." });
+    expect(out.url).toBe("/report?kind=idea&title=Dark+map&text=A+map+tab.");
+    expect(out.github as string).toMatch(/^https:\/\/github.com\/gamepanion\/gamepanion\/issues\/new\?/);
+    expect(next(out)).toMatch(/No GitHub account needed/);
+    expect((await run("report", { id: "p" }, {})).url).toBe("/report");
+  } finally {
+    vi.unstubAllEnvs();
+  }
 });

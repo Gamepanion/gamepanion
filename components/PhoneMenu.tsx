@@ -1,8 +1,9 @@
 "use client";
-// The header on a phone: everything beside the logo behind one button (the language, the colour scheme, the account and signing out),
+// The header on a phone: everything beside the logo behind one button (the language, the colour scheme, reporting a problem, the
+// account and signing out),
 // so the logo and the switcher keep the row. The same choices as the header's own menus (LanguageChoices, ThemeChoices), one list
 // each.
-import { Menu, UserRound, X } from "lucide-react";
+import { Bug, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useId, useState } from "react";
 import { useCopy } from "./copy/client";
@@ -12,7 +13,7 @@ import { currentTheme, type Theme } from "./theme";
 import { ThemeChoices } from "./ThemeMenu";
 import { usePopover } from "./usePopover";
 
-export function PhoneMenu({ theme: initial }: { theme: Theme }) {
+export function PhoneMenu({ theme: initial, reportHref }: { theme: Theme; reportHref: string }) {
   const copy = useCopy();
   const id = useId();
   const [theme, setTheme] = useState<Theme>(initial);
@@ -39,6 +40,10 @@ export function PhoneMenu({ theme: initial }: { theme: Theme }) {
           <LanguageChoices name={`${id}-lang`} legend />
           <ThemeChoices name={`${id}-theme`} theme={theme} onPick={setTheme} legend />
           <div className="border-t border-rule pt-1">
+            <a href={reportHref} className="header-menu-item">
+              <Bug aria-hidden="true" className="size-4" />
+              {copy.reportProblem}
+            </a>
             <Link href="/account" className="header-menu-item">
               <UserRound aria-hidden="true" className="size-4" />
               {copy.account}
