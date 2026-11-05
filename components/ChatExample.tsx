@@ -1,5 +1,5 @@
 // What Gamepanion is, in one picture (#97): a chat window between you and Claude, and Gamepanion beside it, with an arrow wherever
-// Claude uses it (record when you tell, briefing when you ask). Invented game, nothing interactive; the docs landing draws the same
+// Claude uses it (record when you tell, pointing into Gamepanion; briefing when you ask, pointing back out of it). Invented game, nothing interactive; the docs landing draws the same
 // (docs/index.md, .gp-chat in docs/stylesheets/extra.css).
 import { UserRound } from "lucide-react";
 import { ClaudeMark } from "./chat/ClaudeMark";
@@ -30,7 +30,7 @@ export function ChatExample({ copy, className = "" }: { copy: Copy; className?: 
                   {l.text}
                 </p>
                 {l.tool && (
-                  <span className="gp-chat__call">
+                  <span className={l.tool === "record" ? "gp-chat__call" : "gp-chat__call gp-chat__call--back"}>
                     <span className="sr-only">{c.uses} </span>
                     <span className="gp-chat__tool">{l.tool}</span>
                   </span>

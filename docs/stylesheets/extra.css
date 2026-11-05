@@ -562,6 +562,13 @@
   border-block: 5px solid transparent;
   border-left: 8px solid var(--gp-accent);
 }
+/* What Gamepanion gives back (briefing): the head on the chat's side, pointing at it. */
+.gp-chat__call--back::after {
+  right: auto;
+  left: -1px;
+  border-left: 0;
+  border-right: 8px solid var(--gp-accent);
+}
 .gp-chat__tool {
   position: absolute;
   bottom: 0.25rem;
@@ -629,6 +636,9 @@
   .gp-chat__call {
     animation: gp-chat-call 0.5s ease-out both;
     transform-origin: left center;
+  }
+  .gp-chat__call--back {
+    transform-origin: right center;
   }
   .gp-chat__log > li:nth-child(2) .gp-chat__call {
     animation-delay: 1.9s;
