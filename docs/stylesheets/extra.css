@@ -569,9 +569,12 @@
   border-left: 0;
   border-right: 8px solid var(--gp-accent);
 }
+/* The tool's name starts at the chat's edge, so a long one (open_threads) runs over the rail, never into the window. */
 .gp-chat__tool {
   position: absolute;
+  left: 0.3rem;
   bottom: 0.25rem;
+  white-space: nowrap;
   padding: 0 0.25rem;
   border-radius: 0.125rem;
   background: var(--gp-bg);

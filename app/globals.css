@@ -943,8 +943,9 @@ h1 {
   border-left: 0;
   border-right: 8px solid var(--accent);
 }
+/* The tool's name starts at the chat's edge, so a long one runs over the rail, never into the window. */
 .gp-chat__tool {
-  @apply absolute bottom-1 rounded-sm bg-paper px-1 font-mono text-xs font-semibold text-accent;
+  @apply absolute bottom-1 left-1 whitespace-nowrap rounded-sm bg-paper px-1 font-mono text-xs font-semibold text-accent;
 }
 /* The rail: Gamepanion in the middle of a line the arrows end on. */
 /* The rail: Gamepanion at the top, level with the window's head, and a line down from it that the arrows end on. */
