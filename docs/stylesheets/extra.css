@@ -569,9 +569,12 @@
   border-left: 0;
   border-right: 8px solid var(--gp-accent);
 }
+/* The tool's name starts at the chat's edge, so a long one (open_threads) runs over the rail, never into the window. */
 .gp-chat__tool {
   position: absolute;
+  left: 0.3rem;
   bottom: 0.25rem;
+  white-space: nowrap;
   padding: 0 0.25rem;
   border-radius: 0.125rem;
   background: var(--gp-bg);
@@ -605,45 +608,97 @@
   width: 2.25rem;
   height: 2.25rem;
 }
+/* Claude searching the web: a step of its own on Claude's side, dashed (it reads, it doesn't talk), with what it read. */
+.md-typeset .gp-chat__web {
+  align-self: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+  max-width: 80%;
+  margin-right: 2.25rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px dashed color-mix(in oklab, var(--gp-fg) 35%, transparent);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: var(--md-default-fg-color--light);
+}
+.gp-chat__web > svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+}
+.md-typeset .gp-chat__web ul {
+  display: contents;
+}
+.md-typeset .gp-chat__web li {
+  margin: 0;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--gp-surface);
+  color: var(--gp-fg);
+  list-style: none;
+}
+/* A screenshot sent with a message: a chip on top of the bubble. */
+.gp-chat__shot {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  margin-bottom: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--gp-accent-on) 18%, transparent);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+.gp-chat__shot svg {
+  flex-shrink: 0;
+  width: 0.8rem;
+  height: 0.8rem;
+}
 @media (max-width: 30rem) {
   .gp-chat {
     --rail: 6.75rem;
     --pad: 0.75rem;
   }
+  .md-typeset .gp-chat__bubble {
+    max-width: 85%;
+  }
 }
 
-/* The chat plays once (#97): your message, Claude's answer and its arrow to Gamepanion, the pause, then the question and the briefing.
+/* The landing's chat (gp-chat--play) plays once (#97); the examples page shows its chats still.: your message, Claude's answer and its arrow to Gamepanion, the pause, then the question and the briefing.
    Each line comes in after the one before; an arrow draws after the answer it belongs to. Without motion everything is there at once. */
 @media (prefers-reduced-motion: no-preference) {
-  .gp-chat__log > li {
+  .gp-chat--play .gp-chat__log > li {
     animation: gp-chat-in 0.45s ease-out both;
   }
-  .gp-chat__log > li:nth-child(1) {
+  .gp-chat--play .gp-chat__log > li:nth-child(1) {
     animation-delay: 0.3s;
   }
-  .gp-chat__log > li:nth-child(2) {
+  .gp-chat--play .gp-chat__log > li:nth-child(2) {
     animation-delay: 1.4s;
   }
-  .gp-chat__log > li:nth-child(3) {
+  .gp-chat--play .gp-chat__log > li:nth-child(3) {
     animation-delay: 2.7s;
   }
-  .gp-chat__log > li:nth-child(4) {
+  .gp-chat--play .gp-chat__log > li:nth-child(4) {
     animation-delay: 3.5s;
   }
-  .gp-chat__log > li:nth-child(5) {
+  .gp-chat--play .gp-chat__log > li:nth-child(5) {
     animation-delay: 4.6s;
   }
-  .gp-chat__call {
+  .gp-chat--play .gp-chat__call {
     animation: gp-chat-call 0.5s ease-out both;
     transform-origin: left center;
   }
-  .gp-chat__call--back {
+  .gp-chat--play .gp-chat__call--back {
     transform-origin: right center;
   }
-  .gp-chat__log > li:nth-child(2) .gp-chat__call {
+  .gp-chat--play .gp-chat__log > li:nth-child(2) .gp-chat__call {
     animation-delay: 1.9s;
   }
-  .gp-chat__log > li:nth-child(5) .gp-chat__call {
+  .gp-chat--play .gp-chat__log > li:nth-child(5) .gp-chat__call {
     animation-delay: 5.1s;
   }
 }
