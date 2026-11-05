@@ -21,13 +21,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Phone first: the web app is for looking things up next to the screen. The browser's bar takes the page's ground: the scheme the player
-// chose, else the system's.
+// chose, else the system's. Where the browser can (Chrome on Android), the keyboard shrinks the page, so the chat's field stays above it;
+// Safari ignores it, and the chat follows the visible area itself (components/chat/Chat.tsx).
 export async function generateViewport(): Promise<Viewport> {
   const theme = pickTheme((await cookies()).get(THEME_COOKIE)?.value);
   const light = { color: "#f7f6fa", media: "(prefers-color-scheme: light)" };
   const dark = { color: "#0c0b10", media: "(prefers-color-scheme: dark)" };
   return {
     viewportFit: "cover",
+    interactiveWidget: "resizes-content",
     themeColor: theme === "light" ? light.color : theme === "dark" ? dark.color : [light, dark],
   };
 }
