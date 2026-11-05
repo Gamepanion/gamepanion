@@ -14,6 +14,7 @@ hooks:
   - docs_hooks/roadmap.py
   - docs_hooks/adr.py
   - docs_hooks/licenses.py
+  - docs_hooks/chat_examples.py
 
 # English is the site; German pages sit next to their English ones (index.de.md) and are built under /de/. A page with no German version
 # shows the English one there (#10).
@@ -35,6 +36,7 @@ plugins:
           site_description: Ein spoilerfreier Begleiter für die Spiele, die du spielst. Du erzählst es Claude beim Spielen; Gamepanion merkt es sich und zeigt nie, was du noch nicht gefunden hast.
           nav_translations:
             Home: Start
+            What it looks like: So sieht es aus
             What Gamepanion stands for: Wofür Gamepanion steht
             Where Gamepanion is going: Wohin Gamepanion geht
             Self-hosting: Selbst hosten
@@ -51,6 +53,7 @@ plugins:
 # Decisions sits inside Internals: with navigation.sections only a second-level group collapses (#71).
 nav:
   - Home: index.md
+  - What it looks like: examples.md
   - What Gamepanion stands for: values.md
   - Where Gamepanion is going: roadmap.md
   - Self-hosting:

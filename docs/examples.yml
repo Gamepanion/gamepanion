@@ -1,0 +1,129 @@
+# The example chats of the docs (docs_hooks/chat_examples.py): the landing page shows `how-it-works`, the examples page all of them.
+# One invented game, so no real game's names are on the site. Each line is one of:
+#   you / claude: what is said (en, and de for the German pages); `screenshot: true` on yours shows an attached screenshot
+#   tool: on Claude's line, the Gamepanion tool it used; record and correct point into Gamepanion, the others back out of it
+#   web: Claude searching the web on the sites the player keeps as references; `sources` names what it read
+#   later: a pause between two sittings
+examples:
+  - id: how-it-works
+    title: Tell it, get it back
+    title_de: Erzählen, zurückbekommen
+    summary: You tell Claude what happened, Claude files it in your Gamepanion, and later gives it back.
+    summary_de: Du erzählst Claude, was passiert ist, Claude legt es in deinem Gamepanion ab und gibt es dir später zurück.
+    lines:
+      - you: Lit the second beacon in the drowned chapel. The ferryman wants three river pearls.
+        de: Das zweite Leuchtfeuer in der versunkenen Kapelle brennt. Der Fährmann will drei Flussperlen.
+      - claude: "Filed: the second beacon is lit, and The Ferryman’s Debt is open."
+        de: "Abgelegt: Das zweite Leuchtfeuer brennt, und Die Schuld des Fährmanns ist offen."
+        tool: record
+      - later: Two days later
+        de: Zwei Tage später
+      - you: Where was I?
+        de: Wo war ich?
+      - claude: "At the drowned chapel. Next: three river pearls for the ferryman."
+        de: "In der versunkenen Kapelle. Als Nächstes: drei Flussperlen für den Fährmann."
+        tool: briefing
+
+  - id: build
+    title: Your build, from a screenshot
+    title_de: Dein Build, aus einem Screenshot
+    summary: A screenshot of the stats screen is enough. Claude files the numbers and says what is next in your plan.
+    summary_de: Ein Screenshot des Werte-Bildschirms reicht. Claude legt die Zahlen ab und sagt, was in deinem Plan als Nächstes kommt.
+    lines:
+      - you: Levelled up. Vigor is at 20 now.
+        de: Aufgestiegen. Ausdauer ist jetzt bei 20.
+        screenshot: true
+      - claude: "Filed. Vigor 20 is reached; next in your plan is Dexterity towards 40, now 18."
+        de: "Abgelegt. Ausdauer 20 ist erreicht; als Nächstes in deinem Plan: Geschick Richtung 40, jetzt 18."
+        tool: record
+
+  - id: looked-up
+    title: Claude looks it up
+    title_de: Claude schlägt nach
+    summary: Gamepanion never searches the web; Claude does, on the sites you trust, and files what it found with the link. How much it adds on its own is your background setting.
+    summary_de: Gamepanion sucht nie im Web; Claude tut es, auf den Seiten, denen du vertraust, und legt das Gefundene mit dem Link ab. Wie viel es von sich aus ergänzt, ist deine Einstellung für Hintergrund.
+    lines:
+      - you: The merchant at the pier sold me a gold-coin sapling. Planted it at the camp.
+        de: Die Händlerin am Steg hat mir einen Goldmünz-Setzling verkauft. Im Lager eingepflanzt.
+      - web:
+          - Your wiki
+          - A guide site
+        de:
+          - Dein Wiki
+          - Eine Guide-Seite
+      - claude: "Filed the tree, with what your wiki says: one fruit every ten minutes, eight at most. Keep them; the guide says they pay for a respec later."
+        de: "Den Baum abgelegt, mit dem, was dein Wiki sagt: eine Frucht alle zehn Minuten, höchstens acht. Heb sie auf; laut dem Guide bezahlt man damit später das Umverteilen."
+        tool: record
+
+  - id: boss
+    title: Lost to a boss
+    title_de: Gegen einen Boss verloren
+    summary: Claude counts the attempt, looks up the fight, and has it ready when you go back in.
+    summary_de: Claude zählt den Versuch, schlägt den Kampf nach und hat ihn parat, wenn du wieder reingehst.
+    lines:
+      - you: Tried the Bell Warden. Got through the first phase, then flattened.
+        de: Den Glockenwächter probiert. Die erste Phase geschafft, dann platt gemacht.
+      - web:
+          - "Your wiki: Bell Warden"
+        de:
+          - "Dein Wiki: Glockenwächter"
+      - claude: "Filed: attempt 1, with the link. Your wiki says the second phase pauses after each sweep: one or two hits, then sidestep. Weak to lightning."
+        de: "Abgelegt: Versuch 1, mit dem Link. Laut deinem Wiki macht die zweite Phase nach jedem Schwung eine Pause: ein, zwei Treffer, dann seitlich ausweichen. Schwach gegen Blitz."
+        tool: record
+      - later: The next evening
+        de: Am nächsten Abend
+      - you: Bell Warden again. Anything I should know?
+        de: Wieder der Glockenwächter. Was sollte ich wissen?
+      - claude: "From last time: after each sweep, one or two hits, then sidestep. Lightning helps, and you have two storm flasks."
+        de: "Vom letzten Mal: nach jedem Schwung ein, zwei Treffer, dann seitlich ausweichen. Blitz hilft, und du hast zwei Sturmflaschen."
+        tool: codex
+
+  - id: item
+    title: Is it worth it?
+    title_de: Lohnt sich das?
+    summary: Claude weighs a new find against your build, your plan and how much you carry.
+    summary_de: Claude wägt einen neuen Fund gegen deinen Build, deinen Plan und deine Traglast ab.
+    lines:
+      - you: Found a hooked glaive. Worth switching from the rapier?
+        de: Eine Hakenglefe gefunden. Lohnt sich der Wechsel vom Rapier?
+      - claude: "Not for your build: it scales on Strength, and you would go from 64 % to 77 % load, past the light roll."
+        de: "Nicht für deinen Build: Sie skaliert mit Stärke, und du kämst von 64 % auf 77 % Traglast, über die leichte Rolle hinaus."
+        tool: item
+      - you: That glaive was the +2 one, by the way.
+        de: Die Glefe war übrigens die +2.
+      - claude: "Fixed: Hooked Glaive +2."
+        de: "Korrigiert: Hakenglefe +2."
+        tool: correct
+
+  - id: hint
+    title: A hint, only when you ask
+    title_de: Ein Hinweis, nur wenn du fragst
+    summary: Claude never spoils on its own. When there is more than your spoiler setting shows, it asks first, once.
+    summary_de: Claude spoilert nie von sich aus. Gibt es mehr, als deine Spoiler-Einstellung zeigt, fragt es zuerst, einmal.
+    lines:
+      - you: Where do I find the wine for the old woman at the window?
+        de: Wo finde ich den Wein für die alte Frau am Fenster?
+      - claude: There are hints for this. Want them?
+        de: Dazu gibt es Hinweise. Willst du sie?
+        tool: open_threads
+      - you: Just a hint.
+        de: Nur einen Hinweis.
+      - claude: "A hint: it is in an area you have not reached yet, and something stronger guards it. Until then the quest just runs along."
+        de: "Ein Hinweis: Er liegt in einem Gebiet, das du noch nicht erreicht hast, und etwas Stärkeres bewacht ihn. Bis dahin läuft die Quest einfach mit."
+        tool: open_threads
+
+  - id: missed
+    title: Did I miss anything?
+    title_de: Hab ich was verpasst?
+    summary: Before moving on, ask what you left behind. Claude warns you first and lets you choose how much to hear.
+    summary_de: Bevor du weiterziehst, frag, was du liegen gelassen hast. Claude warnt dich vorher und lässt dich wählen, wie viel du hören willst.
+    lines:
+      - you: Did I miss anything in the harbour?
+        de: Hab ich im Hafen was verpasst?
+      - claude: That may give things away. Hints, or full spoilers?
+        de: Das kann etwas verraten. Hinweise oder volle Spoiler?
+      - you: Hints.
+        de: Hinweise.
+      - claude: "One thing: the net-mender had more to say after the bells rang."
+        de: "Eine Sache: Die Netzflickerin hatte nach dem Glockenläuten noch mehr zu sagen."
+        tool: missed
