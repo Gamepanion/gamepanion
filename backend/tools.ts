@@ -14,6 +14,7 @@ import { itemsOf, type ItemView } from "./items";
 import { missed, STALE_AFTER, type Missed } from "./missed";
 import { questsOf, type QuestView } from "./quests";
 import { record, type Recorded } from "./record";
+import { githubIssueUrl, REPORT_KINDS, reportEndpoint, reportUrl } from "./report";
 import { ChangeInput, Day, RecordInput, Spoiler } from "./schemas";
 import { tagsInPlaythrough } from "./tags-in-use";
 import { goalLabel, type GoalView } from "./goals";
@@ -106,6 +107,10 @@ function tool<I extends z.ZodObject, O extends z.ZodObject>(t: {
 
 const Url = z.string().describe("Its page in the web app, as an absolute URL: give it to the player when they may want to look");
 
+const ReportJson = z.object({
+  url: z.string().describe("Where the player sends it: the report page, filled in, or without one a new GitHub issue"),
+  github: z.string().describe("A new issue on Gamepanion's GitHub, filled in, for a player with an account there"),
+});
 const SubscriptionJson = z.object({
   sold: z.boolean().describe("Whether this instance sells subscriptions; false: every feature is open to everyone"),
   free: z.boolean().describe("Whether the operator gave this player every game and the chat for free (GAMEPANION_FREE_PLAYERS): nothing to buy"),
@@ -1034,6 +1039,38 @@ export const TOOLS: Tool[] = [
         ...(plans.length ? ["Prices are in minor units (499 EUR is 4.99 €); say whether tax is included."] : []),
         ...(url ? [`Give the player the page, ${inText(url)}.`] : []),
         "It is the operator's text, not legal advice: for a dispute, point to the operator's contact in the imprint.",
+      ]);
+    },
+  }),
+  tool({
+    name: "report",
+    description:
+      "A link to report a problem with Gamepanion, or to suggest an idea, to its makers. Call it when the player says something in Gamepanion is broken, behaves oddly or is missing, and wants to tell someone. Write the title and the text from what they told you; the link opens a form filled in with them, which the player checks and sends themselves. Nothing is sent from here. Not for a mistake in what was filed (that is correct) or a question about the game.",
+    input: z.object({
+      kind: z.enum(REPORT_KINDS).optional().describe("bug (something is broken or wrong) or idea (something to add or change). Default bug"),
+      title: z.string().max(200).optional().describe("A short title, in English"),
+      body: z
+        .string()
+        .max(4000)
+        .optional()
+        .describe("In English: what happened, what the player expected and how to get there, or for an idea what and why. Without it, a blank form"),
+    }),
+    output: ReportJson,
+    annotations: { readOnlyHint: true },
+    handler: async (_p, { kind = "bug", title, body }) => {
+      const github = githubIssueUrl(kind, title, body);
+      const keepOut =
+        "Before you give a link, check that the text holds nothing private (their email, their transcripts, anything about them) and no spoilers from their log; leave those out.";
+      if (!reportEndpoint())
+        return ok(ReportJson, { url: github, github }, [
+          `Give the player this link: ${github}. It opens a new issue on Gamepanion's GitHub with what you wrote; they read it, change what they like and send it with their GitHub account (they need one).`,
+          `The issue is public. ${keepOut}`,
+        ]);
+      const url = reportUrl(kind, title, body);
+      return ok(ReportJson, { url, github }, [
+        `Give the player the report page, ${inText(url)}: it opens filled in with what you wrote; they read it, change what they like, may add their email for an answer, and send it. No GitHub account needed; it goes to the instance's operator.`,
+        `Only if they have a GitHub account and would rather, a public issue there: ${github}.`,
+        keepOut,
       ]);
     },
   }),

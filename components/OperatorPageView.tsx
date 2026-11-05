@@ -12,7 +12,7 @@ export async function OperatorPageView({ page }: { page: "imprint" | "privacy" |
   if (text === null) notFound();
   const copy = await serverCopy();
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col px-4 py-8">
       <Link href="/" aria-label={copy.appName}>
         <Wordmark />
       </Link>

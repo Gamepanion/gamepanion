@@ -51,6 +51,7 @@ export { todosOf, type TodoView } from "./todos";
 export { getSession, latestSession, sessionsOf, type SessionSummary, type SessionView } from "./sessions";
 export { InvalidInputError, NotFoundError } from "./errors";
 export { operatorLinks, readOperatorPage } from "./operator";
+export { githubIssueUrl, REPORT_KINDS, reportEndpoint, reportUrl, type ReportKind } from "./report";
 export { checkoutOverlay, paymentsWebhookRoute, portalFor, pricingPlans, startCheckout, subscriptionOf } from "./billing/flow";
 export { ACTIVE_GAME_CHANGE_DAYS, accessOf, chooseActiveGame, isFrozen, nextActiveGameChange, switchBackOn } from "./access";
 export { exportDownloadRoute } from "./export";

@@ -244,6 +244,7 @@ test("an MCP client signs the player in and calls the tools as them; nothing els
     "missed",
     "export",
     "about",
+    "report",
     "subscription",
   ]);
   const filed = await (
