@@ -198,13 +198,19 @@ function ChatSheet({
     if (!busy) field.current?.focus();
   }, [busy]);
 
-  // Where the browser doesn't shrink the page for the keyboard (Safari on iOS), the sheet follows the visible area itself.
-  const [visible, setVisible] = useState<{ top: number; bottom: number } | null>(null);
+  // Where the browser doesn't shrink the page for the keyboard (Safari on iOS), the overlay follows the visible area itself: it sits on the
+  // visual viewport (its top and height, which also move when Safari pans the page to the field), and while the keyboard takes part of the
+  // screen the sheet fills what is left, so its header and the field both stay in view.
+  const [visible, setVisible] = useState<{ top: number; height: number; keyboard: boolean } | null>(null);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const fit = () =>
-      setVisible(vv.height < window.innerHeight - 1 ? { top: vv.offsetTop, bottom: Math.max(0, window.innerHeight - vv.height - vv.offsetTop) } : null);
+    const fit = () => {
+      const full = document.documentElement.clientHeight;
+      const keyboard = vv.height < full - 80;
+      setVisible(keyboard || vv.offsetTop > 0 ? { top: vv.offsetTop, height: vv.height, keyboard } : null);
+    };
+    fit();
     vv.addEventListener("resize", fit);
     vv.addEventListener("scroll", fit);
     return () => {
@@ -289,7 +295,7 @@ function ChatSheet({
   }
 
   return (
-    <div className="chat-overlay" onKeyDown={keys}>
+    <div className="chat-overlay" onKeyDown={keys} style={visible ? { top: visible.top, height: visible.height, bottom: "auto" } : undefined}>
       <div className="chat-backdrop" onClick={onClose} />
       <section
         ref={sheet}
@@ -297,7 +303,7 @@ function ChatSheet({
         aria-modal="true"
         aria-label={copy.chatTitle}
         className="chat-sheet"
-        style={visible ? { top: visible.top, bottom: visible.bottom, height: "auto" } : undefined}
+        style={visible?.keyboard ? { top: 0, height: "auto" } : undefined}
       >
         <header className="flex items-center gap-2 px-4 pt-4 pb-2">
           <h2 className="flex min-w-0 flex-1 items-center gap-2 text-xl font-bold">
