@@ -31,7 +31,7 @@
     "@better-auth/passkey": "1.7.14",
     "@creem_io/embed": "^0.3.4",
     "@creem_io/webhook-types": "^1.0.1",
-    "@modelcontextprotocol/server": "2.3.1",
+    "@modelcontextprotocol/server": "2.4.0",
     "better-auth": "1.7.14",
     "better-sqlite3": "^13.0.3",
     "creem": "^1.13.0",
