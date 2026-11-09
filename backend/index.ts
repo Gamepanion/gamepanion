@@ -23,7 +23,7 @@ export {
 export type { SignInMethods } from "./auth/methods";
 export { mcpRoute } from "./mcp";
 export { chatEnabled, chatNeedsKey, chatRoute, chatWithoutOwnKey, voiceEnabled, voiceRoute } from "./chat-route";
-export type { AboutKind, ChatLink } from "./chat";
+export type { AboutKind, ChatLink, ChatPicture } from "./chat";
 export { dispatch as apiRoute } from "./http/api";
 export { apiResourceMetadataRoute } from "./http/metadata";
 export {

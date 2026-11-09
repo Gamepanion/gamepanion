@@ -2,20 +2,23 @@
 // The in-app chat (ADR 0013): a sheet over the book where the player asks Claude, tells what happened or corrects what is on the page,
 // by typing or, with a transcription server, by speaking. It opens from the button at the bottom of every page, or from the button on a
 // card, with that card as what the chat is about (a chip the player can remove). The conversation is kept on this device; the server
-// gets it whole with every message (backend/chat-route.ts). When Claude filed or changed something, the page fetches again. Modelled on
+// gets it whole with every message (backend/chat-route.ts). Pictures (a screenshot of the stats, an item) go with the message they are
+// attached to and are never kept (ADR 0027, usePictures). When Claude filed or changed something, the page fetches again. Modelled on
 // freundebuch's ChatSheet.
-import { AudioLines, MessageSquareText, Mic, SendHorizontal, SquarePen, Trash2, X } from "lucide-react";
+import { AudioLines, ImageIcon, ImagePlus, MessageSquareText, Mic, SendHorizontal, SquarePen, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import type { AboutKind, ChatLink } from "@/backend";
 import { useCopy, useLocale } from "../copy/client";
 import { ClaudeMark } from "./ClaudeMark";
+import { imagesIn, MAX_PICTURES, usePictures, type Pending } from "./usePictures";
 import { canRecord, useVoice } from "./useVoice";
 
 /** What a card's button hands the chat: the row, its name for the chip, and the playthrough it is in. */
 export type About = { kind: AboutKind; id: string; name: string; playthroughId: string };
-type Turn = { role: "user" | "assistant"; content: string; links?: ChatLink[]; filed?: boolean };
+/** `shared`: how many pictures went with the player's message; `previews`: those pictures while the page is open (never stored). */
+type Turn = { role: "user" | "assistant"; content: string; links?: ChatLink[]; filed?: boolean; shared?: number; previews?: string[] };
 
 const ChatContext = createContext<{ enabled: boolean; open: (about?: About, run?: string) => void }>({ enabled: false, open: () => {} });
 
@@ -33,7 +36,7 @@ function load(playerId: string): Turn[] {
 }
 function save(playerId: string, t: Turn[]) {
   try {
-    if (t.length) localStorage.setItem(keyOf(playerId), JSON.stringify(t));
+    if (t.length) localStorage.setItem(keyOf(playerId), JSON.stringify(t.map((x) => ({ ...x, previews: undefined }))));
     else localStorage.removeItem(keyOf(playerId));
   } catch {}
 }
@@ -167,6 +170,8 @@ function ChatSheet({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pictures = usePictures();
+  const picker = useRef<HTMLInputElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const sheet = useRef<HTMLElement>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -253,21 +258,35 @@ function ChatSheet({
     () => false,
   );
 
-  /** Sends the field, or `offered` (words spoken in); `spoken` words go into the field when sending fails. */
+  /** Adds pictures picked, pasted or dropped, and says when some didn't fit or couldn't be read. */
+  async function attach(files: File[]) {
+    if (!files.length) return;
+    setError(null);
+    const problem = await pictures.add(files);
+    if (problem) setError(problem === "tooMany" ? copy.picturesTooMany(MAX_PICTURES) : copy.pictureUnreadable);
+  }
+
+  /** Sends the field and the pictures under it, or `offered` (words spoken in, with the pictures); `spoken` words go into the field
+   * when sending fails, and the pictures back under it. */
   async function send(offered?: string, spoken = false) {
     const text = (offered ?? draft).trim();
-    if (!text || busy) return;
+    if ((!text && !pictures.pending.length) || busy || pictures.working) return;
     setBusy(true);
     setError(null);
-    const asked: Turn[] = [...turns, { role: "user", content: text }];
+    const attached: Pending[] = pictures.take();
+    const mine: Turn = { role: "user", content: text, ...(attached.length ? { shared: attached.length, previews: attached.map((p) => p.preview) } : {}) };
+    const asked: Turn[] = [...turns, mine];
     setTurns(asked);
     if (!offered) setDraft("");
     const playthroughId = about?.playthroughId ?? run;
+    const sent = recentTurns(asked).map(({ role, content, filed, shared }) => ({ role, content, filed, ...(shared ? { shared } : {}) }));
+    // The pictures themselves go only with this message: the latest turn carries them instead of their number.
+    sent[sent.length - 1] = { role: "user", content: text, filed: undefined, ...(attached.length ? { pictures: attached.map((p) => p.picture) } : {}) };
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        turns: recentTurns(asked).map(({ role, content, filed }) => ({ role, content, filed })),
+        turns: sent,
         context: { playthroughId, about: about ? { kind: about.kind, id: about.id } : undefined, language },
       }),
     }).catch(() => null);
@@ -279,7 +298,8 @@ function ChatSheet({
     if (failed && !body?.filed) {
       setTurns(turns);
       if (!offered || spoken) setDraft(text);
-      return setError(message);
+      pictures.restore(attached);
+      return setError(res?.status === 413 ? copy.picturesTooBig : message);
     }
     const next: Turn[] = [...asked, { role: "assistant", content: failed ? copy.filedThenFailed(message!) : body.reply, links: body.links, filed: body.filed }];
     setTurns(next);
@@ -354,9 +374,22 @@ function ChatSheet({
           )}
           {turns.map((t, i) =>
             t.role === "user" ? (
-              <p key={i} className="chat-bubble chat-mine">
-                {t.content}
-              </p>
+              <div key={i} className="flex max-w-[85%] flex-col items-end gap-1.5 self-end">
+                {t.previews?.length ? (
+                  <span className="flex flex-wrap justify-end gap-1.5">
+                    {t.previews.map((src, n) => (
+                      // eslint-disable-next-line @next/next/no-img-element -- an object URL of the player's own picture, never optimised
+                      <img key={src} src={src} alt={copy.pictureN(n + 1)} className="chat-picture" />
+                    ))}
+                  </span>
+                ) : t.shared ? (
+                  <span className="chat-shared">
+                    <ImageIcon aria-hidden="true" className="h-4 w-4" />
+                    {copy.picturesShared(t.shared)}
+                  </span>
+                ) : null}
+                {t.content && <p className="chat-bubble chat-mine max-w-full">{t.content}</p>}
+              </div>
             ) : (
               <div key={i} className="flex max-w-[85%] flex-col items-start gap-1.5 self-start">
                 <p className="chat-bubble chat-theirs">{t.content}</p>
@@ -404,12 +437,40 @@ function ChatSheet({
             )}
           </p>
         )}
+        {pictures.pending.length > 0 && (
+          <ul aria-label={copy.picturesToSend} className="mx-4 mt-2 flex flex-wrap gap-2">
+            {pictures.pending.map((p, n) => (
+              <li key={p.key} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element -- an object URL of the player's own picture, never optimised */}
+                <img src={p.preview} alt={copy.pictureN(n + 1)} className="chat-picture" />
+                <button
+                  type="button"
+                  aria-label={copy.removePicture(n + 1)}
+                  title={copy.removePicture(n + 1)}
+                  onClick={() => pictures.remove(p.key)}
+                  className="chat-picture-remove"
+                >
+                  <X aria-hidden="true" className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         <form
           className="chat-form"
           style={{ marginBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
           onSubmit={(e) => {
             e.preventDefault();
             send();
+          }}
+          onDragOver={(e) => {
+            if (e.dataTransfer.types.includes("Files")) e.preventDefault();
+          }}
+          onDrop={(e) => {
+            const files = imagesIn(e.dataTransfer.files);
+            if (!files.length) return;
+            e.preventDefault();
+            attach(files);
           }}
         >
           {recording.state === "recording" ? (
@@ -428,6 +489,27 @@ function ChatSheet({
             </>
           ) : (
             <>
+              <input
+                ref={picker}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={(e) => {
+                  attach(imagesIn(e.target.files));
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                aria-label={copy.addPicture}
+                title={copy.addPicture}
+                disabled={busy || pictures.working || pictures.pending.length >= MAX_PICTURES}
+                onClick={() => picker.current?.click()}
+                className="chat-icon-button -ml-2.5 disabled:opacity-40"
+              >
+                <ImagePlus aria-hidden="true" className={`h-5 w-5 ${pictures.working ? "motion-safe:animate-pulse" : ""}`} />
+              </button>
               <textarea
                 ref={field}
                 value={draft}
@@ -439,13 +521,20 @@ function ChatSheet({
                     send();
                   }
                 }}
+                onPaste={(e) => {
+                  // A copied picture comes as a file; copied text that carries a picture too (cells from a sheet) is pasted as text.
+                  const files = imagesIn(e.clipboardData.files);
+                  if (!files.length || e.clipboardData.types.includes("text/plain")) return;
+                  e.preventDefault();
+                  attach(files);
+                }}
                 enterKeyHint="enter"
                 aria-label={copy.message}
                 placeholder={copy.chatPlaceholder}
                 rows={1}
                 className="max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent py-2 leading-6 outline-none"
               />
-              {mic && !draft.trim() ? (
+              {mic && !draft.trim() && !pictures.pending.length ? (
                 <button
                   type="button"
                   aria-label={recording.state === "transcribing" ? copy.voiceTranscribing : copy.voiceRecord}
@@ -460,7 +549,13 @@ function ChatSheet({
                   <Mic aria-hidden="true" className={`h-5 w-5 ${recording.state === "transcribing" ? "motion-safe:animate-pulse" : ""}`} />
                 </button>
               ) : (
-                <button type="submit" aria-label={copy.send} title={copy.send} disabled={busy || !draft.trim()} className="chat-send">
+                <button
+                  type="submit"
+                  aria-label={copy.send}
+                  title={copy.send}
+                  disabled={busy || pictures.working || (!draft.trim() && !pictures.pending.length)}
+                  className="chat-send"
+                >
                   <SendHorizontal aria-hidden="true" className="h-5 w-5" />
                 </button>
               )}

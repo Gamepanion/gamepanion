@@ -4,7 +4,7 @@
 import * as z from "zod";
 import { playerFromHeaders } from "./auth/session";
 import type { Player } from "./types";
-import { ABOUT_KINDS, anthropicModel, chat, MAX_TURNS, type ChatModel } from "./chat";
+import { ABOUT_KINDS, anthropicModel, chat, MAX_PICTURE_CHARS, MAX_PICTURES, MAX_TURNS, PICTURE_TYPES, type ChatModel } from "./chat";
 import { config } from "./config";
 import { NotFoundError } from "./errors";
 import { processState } from "./state";
@@ -15,12 +15,31 @@ import { countUsage, HOSTED_RULES, operatorAi, quotaLeft, takeRate } from "./hos
 const MAX_CHARS = 200_000;
 // All turns of one message together: a long session fits, a runaway history doesn't (each tool round resends it).
 export const MAX_TOTAL_CHARS = 250_000;
+// The player's pictures (ADR 0027): base64 of a supported type, at most MAX_PICTURES, on their latest turn only.
+const Picture = z.object({
+  mediaType: z.enum(PICTURE_TYPES),
+  data: z
+    .string()
+    .min(1)
+    .max(MAX_PICTURE_CHARS)
+    .regex(/^[A-Za-z0-9+/]+={0,2}$/, "a picture must be base64"),
+});
+const Turn = z
+  .object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().max(MAX_CHARS),
+    filed: z.boolean().optional(),
+    pictures: z.array(Picture).max(MAX_PICTURES).optional(),
+    shared: z.number().int().min(0).max(MAX_PICTURES).optional(),
+  })
+  .refine((t) => t.content.trim() || t.pictures?.length || t.shared, "a turn needs words or a picture");
 const Body = z.object({
   turns: z
-    .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(MAX_CHARS), filed: z.boolean().optional() }))
+    .array(Turn)
     .min(1)
     .max(MAX_TURNS)
     .refine((t) => t[t.length - 1].role === "user", "the last turn must be the player's")
+    .refine((t) => t.slice(0, -1).every((x) => !x.pictures?.length), "pictures go with the latest message only")
     .refine((t) => t.reduce((n, x) => n + x.content.length, 0) <= MAX_TOTAL_CHARS, `at most ${MAX_TOTAL_CHARS} characters in all`),
   context: z
     .object({
@@ -141,7 +160,7 @@ export async function chatFor(player: Player, req: Request): Promise<Response> {
   const plan = await chatPlan(who.p);
   if (!plan) return json({ error: "not found", code: "not_found" }, 404);
   if ("needsKey" in plan) return json({ code: "needs_key" }, STATUS.needs_key);
-  const bytes = await readCapped(req, 4 * MAX_TOTAL_CHARS);
+  const bytes = await readCapped(req, 4 * MAX_TOTAL_CHARS + MAX_PICTURES * (MAX_PICTURE_CHARS + 100));
   if (!bytes) return json({ error: "The conversation is too long", code: "invalid_request" }, 413);
   let parsed: z.infer<typeof Body>;
   try {
