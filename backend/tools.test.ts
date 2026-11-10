@@ -158,7 +158,7 @@ test("briefing with nothing recorded tells Claude to ask what the player is play
   expect(next(out)).toMatch(/no game for this player yet/);
 });
 
-test("open_threads: open and blocked quests with their whole log, closed ones left out", async () => {
+test("open_threads: open and blocked quests with their log, closed ones left out", async () => {
   const out = await run("open_threads", s.a, { game: "Lies of P" });
   expect(out.reveal).toBe("none");
   const quests = out.quests as { id: string; entries: { kind: string; text: string; on: string }[] }[];
@@ -169,6 +169,33 @@ test("open_threads: open and blocked quests with their whole log, closed ones le
   ]);
   expect(quests.map((q) => q.id)).not.toContain(s.polendina);
   expect(next(out)).toMatch(/Name only what is listed here/);
+});
+
+test("open_threads lists a long log's last five entries and every earlier decision, counts the rest, and gives the whole log for one quest", async () => {
+  await run("record", s.a, {
+    playthroughId: s.liesOfP,
+    summary: "x",
+    transcript: "A long evening on Venigni's quest.",
+    quests: [
+      {
+        id: s.venigni,
+        name: "Venigni's Workers",
+        entries: [
+          { kind: "decision", text: "Told Venigni the truth" },
+          ...Array.from({ length: 7 }, (_, i) => ({ kind: "log" as const, text: `Step ${i + 1}` })),
+        ],
+      },
+    ],
+  });
+  const out = await run("open_threads", s.a, { game: "Lies of P" });
+  const venigni = (out.quests as { id: string; earlier: number; entries: { text: string }[] }[]).find((q) => q.id === s.venigni)!;
+  expect(venigni.entries.map((e) => e.text)).toEqual(["Told Venigni the truth", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7"]);
+  expect(venigni.earlier).toBe(4);
+  expect(next(out)).toMatch(/Older log entries are left out \(Venigni.*: 4\).*open_threads with quest/);
+  const whole = await run("open_threads", s.a, { game: "Lies of P", quest: s.venigni });
+  expect((whole.quests as { entries: unknown[]; earlier: number }[]).map((q) => [q.entries.length, q.earlier])).toEqual([[10, 0]]);
+  const none = await run("open_threads", s.a, { game: "Lies of P", quest: "Nothing like this" });
+  expect(next(none)).toMatch(/No open quest of Lies of P matches Nothing like this/);
 });
 
 test("open_threads with no open quest says not to suggest any", async () => {

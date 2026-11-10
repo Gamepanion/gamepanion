@@ -598,18 +598,45 @@ function briefingNext(b: Briefing, more: boolean): Next {
 const ThreadsJson = z.object({
   playthrough: PlaythroughShortJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
-  quests: z.array(QuestJson.extend({ entries: z.array(EntryJson).describe("Oldest first") })).describe("Open first, then blocked; most recently changed first"),
+  quests: z
+    .array(
+      QuestJson.extend({
+        entries: z.array(EntryJson).describe("Oldest first: without quest, the last few and every earlier decision; with quest, the whole log"),
+        earlier: z.number().describe("Older entries left out here; open_threads with quest gives them"),
+      }),
+    )
+    .describe("Open first, then blocked; most recently changed first"),
   todos: z.array(TodoJson).describe("The player's open to-dos"),
   suggestedTodos: z.array(TodoJson).describe("Open to-dos you proposed that the player hasn't taken yet"),
 });
 
-const threadsNext = (t: PlaythroughView | null, reveal: SpoilerLevel, quests: QuestView[], more: boolean, todos = 0): Next => {
+// A quest's log as open_threads lists it (ADR 0028): its last RECENT_ENTRIES entries, where the player is, and every earlier decision,
+// since a choice made long ago still shapes the quest. What is left out is counted, and the whole log is one call away (quest).
+const RECENT_ENTRIES = 5;
+const recentLog = (q: QuestView) => {
+  const from = Math.max(0, q.entries.length - RECENT_ENTRIES);
+  const entries = q.entries.filter((e, i) => i >= from || e.kind === "decision");
+  return { ...q, entries, earlier: q.entries.length - entries.length };
+};
+
+const threadsNext = (
+  t: PlaythroughView | null,
+  reveal: SpoilerLevel,
+  quests: QuestView[],
+  more: boolean,
+  todos = 0,
+  short: { name: string; earlier: number }[] = [],
+): Next => {
   if (!t) return ["The player has no such playthrough yet. Ask what they are playing."];
   if (!quests.length)
     return [
       `No quest is open in ${t.game.title} ${t.label}${todos ? ", but the to-do list isn't empty: name those" : ""}. Tell the player; don't suggest quests from your own knowledge of the game.`,
     ];
   const next: Next = [NO_ADDING.replace(", unless the player asks for hints (open_threads with reveal)", "")];
+  if (short.length)
+    next.push(
+      `Older log entries are left out (${short.map((q) => `${q.name}: ${q.earlier}`).join(", ")}); the decisions are all here. When the player asks about what happened earlier in one of them, call open_threads with quest (its id or name) for its whole log before you answer.`,
+    );
   if (more) next.push(offerMore(t));
   if (beyond(t, reveal))
     next.push(
@@ -876,25 +903,40 @@ export const TOOLS: Tool[] = [
   tool({
     name: "open_threads",
     description:
-      "The quests the player started and hasn't finished, with their whole log: what they did, the next steps and the choices made, and their open to-dos. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
+      "The quests the player started and hasn't finished, with their log: the latest steps and every choice made (with quest, one quest's whole log), and their open to-dos. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
     input: z.object({
       ...PlaythroughRefInput,
+      quest: z.string().optional().describe("One quest, by id or (part of) its name: its whole log"),
       reveal: Spoiler.optional().describe("Default: the player's spoiler setting. Higher only when the player asked for hints or spoilers just now"),
     }),
     output: ThreadsJson,
     annotations: { readOnlyHint: true },
-    handler: async (p, { reveal: asked, ...ref }) => {
+    handler: async (p, { reveal: asked, quest, ...ref }) => {
       const t = await findPlaythrough(p, ref);
       const reveal = revealFor(t, asked);
-      const quests = t ? await questsOf(p, t.id, { statuses: OPEN_STATUSES, reveal }) : [];
+      const all = t ? await questsOf(p, t.id, { statuses: OPEN_STATUSES, reveal }) : [];
+      const words = quest?.toLowerCase();
+      const quests = words ? all.filter((q) => q.id === quest || [q.name, q.localName].some((n) => n?.toLowerCase().includes(words))) : all;
       const ordered = [...quests.filter((q) => q.status === "open"), ...quests.filter((q) => q.status === "blocked")];
+      const listed = quest ? ordered.map((q) => ({ ...q, earlier: 0 })) : ordered.map(recentLog);
       const more = t ? await moreAbove(p, t.id, reveal, ["quest"]) : false;
       const todos = t ? await todosOf(p, t.id, { statuses: ["open"], reveal }) : [];
       const mine = todos.filter((x) => !x.suggested);
       return ok(
         ThreadsJson,
-        { playthrough: t, reveal, quests: ordered, todos: mine, suggestedTodos: todos.filter((x) => x.suggested) },
-        threadsNext(t, reveal, ordered, more, mine.length),
+        { playthrough: t, reveal, quests: listed, todos: mine, suggestedTodos: todos.filter((x) => x.suggested) },
+        quest && !ordered.length
+          ? [
+              `No open quest of ${t?.game.title ?? "this game"} matches ${quest}. Call open_threads without quest to see them all, or ask the player which one they mean.`,
+            ]
+          : threadsNext(
+              t,
+              reveal,
+              ordered,
+              more,
+              mine.length,
+              listed.filter((q) => q.earlier > 0),
+            ),
       );
     },
   }),
