@@ -16,6 +16,7 @@ hooks:
   - docs_hooks/licenses.py
   - docs_hooks/chat_examples.py
   - docs_hooks/openapi.py
+  - docs_hooks/mcp_tools.py
 
 # English is the site; German pages sit next to their English ones (index.de.md) and are built under /de/. A page with no German version
 # shows the English one there (#10).

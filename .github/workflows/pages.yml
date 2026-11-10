@@ -3,9 +3,11 @@ name: Publish docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", openapi.json, package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
+    paths:
+      ["docs/**", mkdocs.yml, "docs_hooks/**", openapi.json, mcp-tools.json, package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
   pull_request:
-    paths: ["docs/**", mkdocs.yml, "docs_hooks/**", openapi.json, package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
+    paths:
+      ["docs/**", mkdocs.yml, "docs_hooks/**", openapi.json, mcp-tools.json, package-lock.json, scripts/third-party-licenses.mjs, .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
