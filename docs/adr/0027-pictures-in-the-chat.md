@@ -20,6 +20,7 @@ Players want to show the in-app chat (ADR 0013) a screenshot: their stats, an it
 ## Considered Options
 
 * **Shrunk in the browser, sent with its message only, never stored.**
+* Uploaded whole and shrunk on the server, like freundebuch's shared files (its ADR 0014 and 0017): it takes the original at up to 15 MB, makes it a WebP with `sharp` (HEIC through libheif in WebAssembly), keeps it until it is reviewed and hands it to any Claude through its MCP `inbox`. freundebuch needs that: its files also come from an iPhone Shortcut and an Android share page, with no browser to shrink them, and they wait on the server for MCP clients to fetch. Gamepanion's pictures come only from the chat in a browser and go to Claude at once, so the original and its EXIF need not reach the server at all.
 * Stored on the server with the session, like notefeed's images.
 * Sent again with every later message, so Claude can look back at it.
 
@@ -31,9 +32,13 @@ Chosen: **shrunk in the browser, sent with its message only, never stored.**
 * `POST /api/chat` takes them as base64 (`image/jpeg`, `png`, `webp` or `gif`, at most 2 000 000 characters each) on the player's latest turn only and refuses them on any other. The server decodes nothing: it hands them to the Claude API as image blocks before the message's words.
 * An earlier message that had pictures reaches Claude as a note that it had them and no longer has them; the device keeps only their number, and the session's transcript marks them as `[picture]`. The chat's rules tell Claude to put what a picture shows into `record` with the message it came with.
 
+* Pictures exist only on `/api/chat`, which takes the session cookie alone. `/api/v1` and MCP take no pictures: over MCP the player's own Claude reads a screenshot itself and files what it shows with `record`, and a script on REST does the same with its own model. Taking pictures there would run a vision model on the operator's key for any API client.
+* A share-from-the-phone inbox for screenshots, filed later, would be a feature of its own (server-side shrinking, storage until review, an MCP tool), decided in its own ADR.
+
 ### Consequences
 
 * Good: no file storage, no decoder, no metadata leaving the device, and a picture costs its tokens once.
 * Good: what Claude read off a picture is in the log as words, like everything else.
 * Bad: Claude cannot look at an earlier picture again; the player sends it again when it matters.
+* Bad: the server trusts the browser to shrink; a script with a session cookie can send a larger picture, bounded by the 2 000 000-character cap. A browser that can't read a format (HEIC outside Safari) says the picture couldn't be read.
 * Neutral: the picture is processed by Anthropic like the rest of the conversation; the operator's privacy policy says so.
