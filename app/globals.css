@@ -787,6 +787,20 @@ h1 {
 .chat-form {
   @apply m-3 flex items-end gap-2 rounded-3xl border-2 border-rule bg-surface py-1.5 pr-1.5 pl-4 focus-within:border-accent;
 }
+/* The pictures under the field and in the player's bubble (ADR 0027): small tiles; the button on a tile takes it out again. */
+.chat-picture {
+  @apply h-16 w-16 rounded-lg border border-rule object-cover;
+}
+.chat-picture-remove {
+  @apply absolute -top-2 -right-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-rule bg-surface text-ink hover:border-accent;
+}
+.chat-picture-remove:focus-visible {
+  @apply outline-2 outline-offset-2 outline-ink;
+}
+/* In a chat stored earlier: that the message had pictures, which are not kept. */
+.chat-shared {
+  @apply inline-flex items-center gap-1.5 text-sm text-muted;
+}
 .chat-send {
   @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent disabled:opacity-40;
 }
