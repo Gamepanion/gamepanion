@@ -20,7 +20,7 @@ Players want to show the in-app chat (ADR 0013) a screenshot: their stats, an it
 ## Considered Options
 
 * **Shrunk in the browser, sent with its message only, never stored.**
-* Uploaded whole and shrunk on the server, like freundebuch's shared files (its ADR 0014 and 0017): it takes the original at up to 15 MB, makes it a WebP with `sharp` (HEIC through libheif in WebAssembly), keeps it until it is reviewed and hands it to any Claude through its MCP `inbox`. freundebuch needs that: its files also come from an iPhone Shortcut and an Android share page, with no browser to shrink them, and they wait on the server for MCP clients to fetch. Gamepanion's pictures come only from the chat in a browser and go to Claude at once, so the original and its EXIF need not reach the server at all.
+* Uploaded whole and shrunk on the server: the original taken at up to 15 MB, made smaller there (HEIC through a WebAssembly decoder), kept until it is reviewed and handed to any Claude through an MCP tool. That fits files shared from a phone's share sheet, with no browser to shrink them, that wait on the server for MCP clients to fetch. Gamepanion's pictures come only from the chat in a browser and go to Claude at once, so the original and its EXIF need not reach the server at all.
 * Stored on the server with the session, like notefeed's images.
 * Sent again with every later message, so Claude can look back at it.
 
