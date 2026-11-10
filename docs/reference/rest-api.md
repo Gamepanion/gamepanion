@@ -1,28 +1,12 @@
 # REST API
 
-`/api/v1` follows the MCP tools (V5): the same data, the same rules, the same domain functions. Every request is the signed-in player's, sees only their own log (V2), and gets no spoiler unless it asks with `reveal` (V1). What the tools add for Claude (`next`) is left out. The description is `openapi.json` in the repository, generated from the route table in `backend/http/api.ts`, and served by an instance at `/api/v1/openapi.json`.
+`/api/v1` follows the MCP tools (V5): the same data, the same rules, the same domain functions. Every request is the signed-in player's, sees only their own log (V2), and gets no spoiler unless it asks with `reveal` (V1). What the tools add for Claude (`next`) is left out. The description is `openapi.json` in the repository, generated from the route table in `backend/http/api.ts`, and served by an instance at `/api/v1/openapi.json` (with a token, like every route).
 
 ## Routes
 
-| Method and path | What |
-| --- | --- |
-| `GET /api/v1/playthroughs` | The player's playthroughs, most recently played first |
-| `GET /api/v1/playthroughs/{id}` | One playthrough |
-| `GET /api/v1/playthroughs/{id}/briefing` | Where the player was, as far as the playthrough's spoiler setting |
-| `GET /api/v1/playthroughs/{id}/quests` | Quests with their logs; `status` (comma-separated) and `reveal` |
-| `GET /api/v1/playthroughs/{id}/items` | Items with their tags; `name`, `tag`, `equipped=true` and `reveal` |
-| `GET /api/v1/playthroughs/{id}/tags` | The tags in use, with ids and counts, most used first |
-| `GET /api/v1/playthroughs/{id}/build` | The build plan and the stat snapshots |
-| `GET /api/v1/playthroughs/{id}/sessions` | The sessions, newest first |
-| `GET /api/v1/playthroughs/{id}/todos` | The to-dos, open first; `status` filters (`open,done,dropped`) |
-| `GET /api/v1/playthroughs/{id}/missed` | What may have been missed; `reveal=hint` or `full` is required |
-| `GET /api/v1/sessions/{id}` | One session, with its transcript |
-| `POST /api/v1/sessions` | File a session: the same body as the `record` tool; 201 |
-| `POST /api/v1/corrections` | Fix or remove what was filed: `{ "changes": [...] }`, as the `correct` tool |
-| `GET /api/v1/export` | Everything the player filed, spoilers included, as the `export` tool |
-| `GET /api/v1/openapi.json` | The description |
+Every route, with its parameters and its answers, as [`openapi.json`](openapi.json) describes them. Errors and their codes are in its description at the top. *Try it out* needs a token (see below) and an instance at `servers`.
 
-Errors are JSON, `{"error": "...", "code": "..."}`: 400 `invalid_request` or `invalid_input`, 401 `unauthorized`, 404 `not_found` (also for another player's ids), 409 `ambiguous`.
+<swagger-ui src="./openapi.json"/>
 
 ## Tokens
 
