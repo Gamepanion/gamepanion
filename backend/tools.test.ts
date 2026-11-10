@@ -196,6 +196,37 @@ test("item finds the player's items by part of their name, in either language, w
   expect((all.items as { name: string }[]).map((i) => i.name)).toEqual(["Puppet Saber", "Wintry Rapier"]);
 });
 
+test("item and codex without a name list many rows in short, without links; by name they come whole; reads carry the short playthrough", async () => {
+  const names = ["Acid Canister", "Electric Coil", "Fire Abrasive", "Throwing Cell", "Ergo Fragment", "Gold Coin Fruit"];
+  await run("record", s.a, {
+    playthroughId: s.liesOfP,
+    summary: "x",
+    transcript: "Picked up six things.",
+    items: names.map((name) => ({ name, kind: "consumable", description: `What ${name} is` })),
+    codex: names.map((name) => ({ name: `${name} Golem`, kind: "enemy", strategy: "Dodge left" })),
+  });
+  const list = await run("item", s.a, {});
+  expect(list.detail).toBe(false);
+  const rows = list.items as Record<string, unknown>[];
+  expect(rows.length).toBeGreaterThan(5);
+  for (const r of rows) {
+    expect(Object.keys(r)).not.toContain("url");
+    expect(Object.keys(r)).not.toContain("description");
+  }
+  expect(next(list)).toMatch(/This is the short list.*call item with its name/);
+  const one = await run("item", s.a, { name: "Acid Canister" });
+  expect(one.detail).toBe(true);
+  expect(one.items).toEqual([expect.objectContaining({ name: "Acid Canister", description: "What Acid Canister is", url: expect.any(String) })]);
+  const enemies = await run("codex", s.a, { kind: "enemy" });
+  expect(enemies.detail).toBe(false);
+  expect(enemies.entries).toEqual(expect.arrayContaining([expect.not.objectContaining({ strategy: expect.anything() })]));
+  // The game's references and inventory groups come with briefing only.
+  expect(Object.keys(list.playthrough as object).sort()).toEqual(["character", "game", "id", "label", "language", "settings", "status", "url"]);
+  expect(Object.keys((list.playthrough as { game: object }).game).sort()).toEqual(["id", "title"]);
+  const b = await run("briefing", s.a, { playthroughId: s.liesOfP });
+  expect(Object.keys((b.playthrough as { game: object }).game)).toEqual(expect.arrayContaining(["references", "itemKinds"]));
+});
+
 test("item with a name the player hasn't filed says to file it, and not to describe it from knowledge", async () => {
   const out = await run("item", s.a, { name: "Big Pipe Wrench" });
   expect(out.items).toEqual([]);

@@ -224,6 +224,13 @@ const PlaythroughJson = z.object({
   url: Url,
 });
 
+// The playthrough as every read but briefing gives it: which run, its settings and its link. The game's notes, references and inventory
+// groups come with briefing (references also in the next of item and codex, where Claude looks things up); repeating them in every
+// result cost the most of its tokens.
+const PlaythroughShortJson = PlaythroughJson.pick({ id: true, label: true, status: true, language: true, character: true, settings: true, url: true }).extend({
+  game: z.object({ id: z.string(), title: z.string() }),
+});
+
 const EntryJson = z.object({
   id: z.string().describe("For correct"),
   kind: z.enum(ENTRY_KINDS),
@@ -320,6 +327,27 @@ const ItemDetailJson = ItemJson.extend({
   spoiler: Spoiler.describe("none for what the player found; hint or full only when this call asked for them"),
 });
 
+// A list (item or codex without a name, of more than DETAIL_UP_TO rows) gives each row in short; one asked for by name, or a short list,
+// comes whole. A whole inventory with every description, background line and source was the largest result by far. A row has no link
+// (the lookup by name gives it), says nothing of being equipped (equipped lists that) and names its spoiler level only above none.
+const DETAIL_UP_TO = 5;
+const RowSpoiler = Spoiler.optional().describe("Only for a row above none, shown because this call asked for it");
+const ItemRowJson = ItemDetailJson.pick({ id: true, name: true, localName: true, kind: true, quantity: true, verdict: true }).extend({ spoiler: RowSpoiler });
+const CodexRowJson = CodexJson.pick({
+  id: true,
+  kind: true,
+  name: true,
+  localName: true,
+  location: true,
+  status: true,
+  beatenOn: true,
+  weaknesses: true,
+  resistances: true,
+}).extend({ spoiler: RowSpoiler });
+const row = <S extends z.ZodObject>(schema: S, x: { spoiler: SpoilerLevel }) => ({ ...schema.parse(x), spoiler: x.spoiler === "none" ? undefined : x.spoiler });
+const ROWS_NEXT = (what: "item" | "codex") =>
+  `This is the short list. For one ${what === "item" ? "item's numbers, notes" : "entry's strategy, notes"}, background and sources, call ${what} with its name.`;
+
 const PlanJson = z.object({
   summary: z.string().nullable(),
   mainStat: z.string().nullable(),
@@ -372,7 +400,7 @@ const alike = (rows: { id: string; name: string }[], similar: Map<string, Candid
 const RecordedJson = z.object({
   sessionId: z.string(),
   url: Url,
-  playthrough: PlaythroughJson,
+  playthrough: PlaythroughShortJson,
   quests: z.array(z.object({ id: z.string(), name: z.string(), status: z.enum(QUEST_STATUSES), created: z.boolean(), url: Url })),
   items: z.array(z.object({ id: z.string(), name: z.string(), created: z.boolean(), equipped: z.boolean(), url: Url })),
   newItemKinds: z.array(z.string()).describe("Inventory group keys this game hadn't had"),
@@ -509,7 +537,7 @@ const BriefingJson = z.object({
   }),
   bosses: z.array(CodexJson).describe("Bosses the player met and hasn't beaten yet, with their tries, weaknesses, strategy and counters"),
   equipped: z.array(ItemJson),
-  others: z.array(PlaythroughJson).describe("The player's other playthroughs, most recently played first"),
+  others: z.array(PlaythroughShortJson).describe("The player's other playthroughs, most recently played first"),
   tags: z
     .array(z.object({ id: z.string(), name: z.string(), count: z.number() }))
     .describe("The tags in use in this playthrough, most used first: reuse them when you file tags"),
@@ -568,7 +596,7 @@ function briefingNext(b: Briefing, more: boolean): Next {
 }
 
 const ThreadsJson = z.object({
-  playthrough: PlaythroughJson.nullable(),
+  playthrough: PlaythroughShortJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
   quests: z.array(QuestJson.extend({ entries: z.array(EntryJson).describe("Oldest first") })).describe("Open first, then blocked; most recently changed first"),
   todos: z.array(TodoJson).describe("The player's open to-dos"),
@@ -597,9 +625,12 @@ const CandidatesJson = z
   .describe("When the name matched nothing exactly and several entries could be meant: ask the player which one, then call again with its name");
 
 const ItemLookupJson = z.object({
-  playthrough: PlaythroughJson.nullable(),
+  playthrough: PlaythroughShortJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
-  items: z.array(ItemDetailJson).describe("The player's items whose name contains the one asked for (all of them without a name), equipped first"),
+  detail: z.boolean().describe("Whether items are whole; false: a short list, call again with a name for one item"),
+  items: z
+    .array(z.union([ItemDetailJson, ItemRowJson]))
+    .describe("The player's items whose name contains the one asked for (all of them without a name), equipped first; in short when there are many"),
   tags: z
     .array(z.object({ id: z.string(), name: z.string(), count: z.number() }))
     .describe("The tags in use in this playthrough, most used first: reuse them when you file tags"),
@@ -661,9 +692,12 @@ function itemNext(
 // ---- codex ----------------------------------------------------------------------------------------------------------------------
 
 const CodexLookupJson = z.object({
-  playthrough: PlaythroughJson.nullable(),
+  playthrough: PlaythroughShortJson.nullable(),
   reveal: Spoiler.describe("What this call was allowed to show"),
-  entries: z.array(CodexJson).describe("Bosses, then enemies, NPCs and places; what is still in the way first"),
+  detail: z.boolean().describe("Whether entries are whole; false: a short list, call again with a name for one entry"),
+  entries: z
+    .array(z.union([CodexJson, CodexRowJson]))
+    .describe("Bosses, then enemies, NPCs and places; what is still in the way first; in short when there are many"),
   tags: z
     .array(z.object({ id: z.string(), name: z.string(), count: z.number() }))
     .describe("The tags in use in this playthrough, most used first: reuse them when you file tags"),
@@ -741,7 +775,7 @@ const describe = (c: Corrected) =>
 // ---- missed ---------------------------------------------------------------------------------------------------------------------
 
 const MissedJson = z.object({
-  playthrough: PlaythroughJson.nullable(),
+  playthrough: PlaythroughShortJson.nullable(),
   reveal: z.enum(["hint", "full"]),
   hidden: z
     .array(QuestJson.extend({ hidden: z.array(EntryJson).describe("Only the entries above none") }))
@@ -867,7 +901,7 @@ export const TOOLS: Tool[] = [
   tool({
     name: "item",
     description:
-      "Look up the player's items: one by name (part of it is enough, in English or the game's language), or all of them without a name, with the build plan, the latest stats and what is equipped, to compare a new find with. Call it when the player asks about an item they have or whether a new one fits their build.",
+      "Look up the player's items: one by name (part of it is enough, in English or the game's language), or all of them without a name (more than five come as a short list: name, kind, count, verdict; ask by name for the rest), with the build plan, the latest stats and what is equipped, to compare a new find with. Call it when the player asks about an item they have or whether a new one fits their build.",
     input: z.object({
       ...PlaythroughRefInput,
       name: z.string().optional().describe("The item's name, or part of it"),
@@ -882,7 +916,7 @@ export const TOOLS: Tool[] = [
       if (!t)
         return ok(
           ItemLookupJson,
-          { playthrough: null, reveal, items: [], tags: [], build: { plan: null, goals: [], current: null }, equipped: [], candidates: [] },
+          { playthrough: null, reveal, detail: true, items: [], tags: [], build: { plan: null, goals: [], current: null }, equipped: [], candidates: [] },
           itemNext(t, name, [], reveal),
         );
       const [found, build, equipped, tags] = await Promise.all([
@@ -894,22 +928,25 @@ export const TOOLS: Tool[] = [
       // No name contains the player's words: what full-text search finds (ADR 0022); one is used, several are asked about.
       const candidates = name && !found.length ? await search(p, t.id, name, { kinds: ["item"], reveal }) : [];
       const items = candidates.length === 1 ? (await itemsOf(p, t.id, { tag, reveal })).filter((i) => i.id === candidates[0].id) : found;
+      const detail = !!name || items.length <= DETAIL_UP_TO;
       const body = {
         playthrough: t,
         reveal,
-        items,
+        detail,
+        items: detail ? items : items.map((i) => row(ItemRowJson, i)),
         tags,
         build: { plan: build.plan, goals: build.goals.map(goalJson), current: build.snapshots[0] ?? null },
         equipped,
         candidates: candidates.length > 1 ? candidates : [],
       };
-      return ok(ItemLookupJson, body, itemNext(t, name, items, reveal, await moreAbove(p, t.id, reveal, ["item"]), candidates));
+      const next = itemNext(t, name, items, reveal, await moreAbove(p, t.id, reveal, ["item"]), candidates);
+      return ok(ItemLookupJson, body, detail ? next : [ROWS_NEXT("item"), ...next]);
     },
   }),
   tool({
     name: "codex",
     description:
-      'The bosses, enemies, NPCs and places the player met in a playthrough: one by name (part of it is enough), or all of one kind, with weaknesses, resistances, the strategy, and the player\'s own items that are good or bad against it, with how many they have. Call it for "how do I beat this boss?", "what is this enemy weak to?", "what did that NPC want?".',
+      'The bosses, enemies, NPCs and places the player met in a playthrough: one by name (part of it is enough), or all of one kind (more than five come as a short list with their weaknesses and resistances; ask by name for the rest), with weaknesses, resistances, the strategy, and the player\'s own items that are good or bad against it, with how many they have. Call it for "how do I beat this boss?", "what is this enemy weak to?", "what did that NPC want?".',
     input: z.object({
       ...PlaythroughRefInput,
       name: z.string().optional().describe("The entry's name, or part of it"),
@@ -925,7 +962,7 @@ export const TOOLS: Tool[] = [
       if (!t)
         return ok(
           CodexLookupJson,
-          { playthrough: null, reveal, entries: [], tags: [], build: { plan: null, current: null }, equipped: [], candidates: [] },
+          { playthrough: null, reveal, detail: true, entries: [], tags: [], build: { plan: null, current: null }, equipped: [], candidates: [] },
           codexNext(t, name, [], reveal),
         );
       const [found, build, equipped, tags] = await Promise.all([
@@ -936,16 +973,19 @@ export const TOOLS: Tool[] = [
       ]);
       const candidates = name && !found.length ? await search(p, t.id, name, { kinds: ["codex"], reveal }) : [];
       const entries = candidates.length === 1 ? (await codexOf(p, t.id, { kind, tag, reveal })).filter((e) => e.id === candidates[0].id) : found;
+      const detail = !!name || entries.length <= DETAIL_UP_TO;
       const body = {
         playthrough: t,
         reveal,
-        entries,
+        detail,
+        entries: detail ? entries : entries.map((e) => row(CodexRowJson, e)),
         tags,
         build: { plan: build.plan, current: build.snapshots[0] ?? null },
         equipped,
         candidates: candidates.length > 1 ? candidates : [],
       };
-      return ok(CodexLookupJson, body, codexNext(t, name, entries, reveal, await moreAbove(p, t.id, reveal, ["codex"]), candidates));
+      const next = codexNext(t, name, entries, reveal, await moreAbove(p, t.id, reveal, ["codex"]), candidates);
+      return ok(CodexLookupJson, body, detail ? next : [ROWS_NEXT("codex"), ...next]);
     },
   }),
   tool({
