@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { chat, linksOf, type ChatModel } from "./chat";
-import { chatRoute, setChatModelForTests, voiceRoute } from "./chat-route";
+import { chatFor, chatRoute, setChatModelForTests, voiceRoute } from "./chat-route";
 import { itemsOf } from "./items";
 import { sessionsOf } from "./sessions";
 import { seed, SPOILER_ITEM, type Seed } from "./testing/fixtures";
@@ -91,6 +91,46 @@ test("record files the player's own words since the last filing as the session's
   const { getSession } = await import("./sessions");
   expect((await getSession(s.a, sessions[0].id)).transcript).toBe("Beat the Parade Master\n\nThe saber");
   expect(JSON.stringify(m.calls[0].tools)).not.toMatch(/"transcript"/);
+});
+
+test("pictures go to Claude with the latest message only; an earlier message's are a note, and the transcript marks them", async () => {
+  const picture = { mediaType: "image/jpeg" as const, data: "AAAA" };
+  const m = scripted(use("record", { playthroughId: s.liesOfP, summary: "Stats." }), say("Filed."));
+  const turns = [
+    { role: "user" as const, content: "My stats", shared: 1 },
+    { role: "assistant" as const, content: "Vigor 20?" },
+    { role: "user" as const, content: "", pictures: [picture, picture] },
+  ];
+  await chat(s.a, turns, { playthroughId: s.liesOfP }, m);
+  const sent = m.calls[0].messages;
+  expect(sent[0].content).toBe("[A picture was shared with this message; it is no longer attached.]\nMy stats");
+  expect(sent[2].content).toEqual([
+    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: "AAAA" } },
+    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: "AAAA" } },
+  ]);
+  const sessions = await sessionsOf(s.a, s.liesOfP);
+  const { getSession } = await import("./sessions");
+  expect((await getSession(s.a, sessions[0].id)).transcript).toBe("[picture] My stats\n\n[2 pictures]");
+});
+
+test("the route takes pictures on the latest message only, of a picture type, base64, at most four", async () => {
+  setChatModelForTests(scripted());
+  const post = (turns: unknown[]) => chatFor(s.a, new Request("http://localhost/api/chat", { method: "POST", body: JSON.stringify({ turns }) }));
+  const pic = { mediaType: "image/png", data: "iVBORw0KGgo=" };
+  expect((await post([{ role: "user", content: "", pictures: [pic] }])).status).toBe(200);
+  expect(
+    (
+      await post([
+        { role: "user", content: "x", pictures: [pic] },
+        { role: "assistant", content: "y" },
+        { role: "user", content: "z" },
+      ])
+    ).status,
+  ).toBe(400);
+  expect((await post([{ role: "user", content: "x", pictures: [{ mediaType: "image/svg+xml", data: "AAAA" }] }])).status).toBe(400);
+  expect((await post([{ role: "user", content: "x", pictures: [{ mediaType: "image/png", data: "<script>" }] }])).status).toBe(400);
+  expect((await post([{ role: "user", content: "x", pictures: Array(5).fill(pic) }])).status).toBe(400);
+  expect((await post([{ role: "user", content: " " }])).status).toBe(400);
 });
 
 test("a tool error goes back to Claude as an error result; an unknown tool too", async () => {

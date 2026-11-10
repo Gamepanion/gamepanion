@@ -94,6 +94,7 @@ nav:
           - The hosted-AI tier: adr/0024-the-hosted-ai-tier.md
           - Exporting the log and deleting the account: adr/0025-export-and-deleting-the-account.md
           - Creem's official packages: adr/0026-creems-official-packages.md
+          - Pictures in the chat: adr/0027-pictures-in-the-chat.md
 
 theme:
   name: material
