@@ -8,7 +8,7 @@ decision-makers: Marcel Bruckner
 
 ## Context and Problem Statement
 
-Players want to show the in-app chat (ADR 0013) a screenshot: their stats, an item's numbers, the quest log, faster than typing them. Over MCP this works already: the player's own Claude sees the picture, and the instructions tell it to write what it shows into `record`. The in-app chat took text only. notefeed takes pictures too, but it stores them and serves them to anyone with the read link, so it shrinks them in the browser and decodes, re-encodes and strips them on the server (its ADR 0049). Gamepanion's chat only has to hand a picture to Claude.
+Players want to show the in-app chat (ADR 0013) a screenshot: their stats, an item's numbers, the quest log, faster than typing them. Over MCP this works already: the player's own Claude sees the picture, and the instructions tell it to write what it shows into `record`. The in-app chat took text only. An app that stores pictures and serves them to anyone with a link has to shrink them in the browser and also decode, re-encode and strip them on the server. Gamepanion's chat only has to hand a picture to Claude.
 
 ## Decision Drivers
 
@@ -21,7 +21,7 @@ Players want to show the in-app chat (ADR 0013) a screenshot: their stats, an it
 
 * **Shrunk in the browser, sent with its message only, never stored.**
 * Uploaded whole and shrunk on the server: the original taken at up to 15 MB, made smaller there (HEIC through a WebAssembly decoder), kept until it is reviewed and handed to any Claude through an MCP tool. That fits files shared from a phone's share sheet, with no browser to shrink them, that wait on the server for MCP clients to fetch. Gamepanion's pictures come only from the chat in a browser and go to Claude at once, so the original and its EXIF need not reach the server at all.
-* Stored on the server with the session, like notefeed's images.
+* Stored on the server with the session, and shown again from there.
 * Sent again with every later message, so Claude can look back at it.
 
 ## Decision Outcome
