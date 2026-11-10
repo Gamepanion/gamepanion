@@ -99,6 +99,7 @@ nav:
           - Exporting the log and deleting the account: adr/0025-export-and-deleting-the-account.md
           - Creem's official packages: adr/0026-creems-official-packages.md
           - Pictures in the chat: adr/0027-pictures-in-the-chat.md
+          - Tool results carry what the question needs: adr/0028-short-tool-results.md
 
 theme:
   name: material

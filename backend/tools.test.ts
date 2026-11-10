@@ -158,7 +158,7 @@ test("briefing with nothing recorded tells Claude to ask what the player is play
   expect(next(out)).toMatch(/no game for this player yet/);
 });
 
-test("open_threads: open and blocked quests with their whole log, closed ones left out", async () => {
+test("open_threads: open and blocked quests with their log, closed ones left out", async () => {
   const out = await run("open_threads", s.a, { game: "Lies of P" });
   expect(out.reveal).toBe("none");
   const quests = out.quests as { id: string; entries: { kind: string; text: string; on: string }[] }[];
@@ -169,6 +169,33 @@ test("open_threads: open and blocked quests with their whole log, closed ones le
   ]);
   expect(quests.map((q) => q.id)).not.toContain(s.polendina);
   expect(next(out)).toMatch(/Name only what is listed here/);
+});
+
+test("open_threads lists a long log's last five entries and every earlier decision, counts the rest, and gives the whole log for one quest", async () => {
+  await run("record", s.a, {
+    playthroughId: s.liesOfP,
+    summary: "x",
+    transcript: "A long evening on Venigni's quest.",
+    quests: [
+      {
+        id: s.venigni,
+        name: "Venigni's Workers",
+        entries: [
+          { kind: "decision", text: "Told Venigni the truth" },
+          ...Array.from({ length: 7 }, (_, i) => ({ kind: "log" as const, text: `Step ${i + 1}` })),
+        ],
+      },
+    ],
+  });
+  const out = await run("open_threads", s.a, { game: "Lies of P" });
+  const venigni = (out.quests as { id: string; earlier: number; entries: { text: string }[] }[]).find((q) => q.id === s.venigni)!;
+  expect(venigni.entries.map((e) => e.text)).toEqual(["Told Venigni the truth", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7"]);
+  expect(venigni.earlier).toBe(4);
+  expect(next(out)).toMatch(/Older log entries are left out \(Venigni.*: 4\).*open_threads with quest/);
+  const whole = await run("open_threads", s.a, { game: "Lies of P", quest: s.venigni });
+  expect((whole.quests as { entries: unknown[]; earlier: number }[]).map((q) => [q.entries.length, q.earlier])).toEqual([[10, 0]]);
+  const none = await run("open_threads", s.a, { game: "Lies of P", quest: "Nothing like this" });
+  expect(next(none)).toMatch(/No open quest of Lies of P matches Nothing like this/);
 });
 
 test("open_threads with no open quest says not to suggest any", async () => {
@@ -194,6 +221,37 @@ test("item finds the player's items by part of their name, in either language, w
   expect(next(out)).toMatch(/Compare with the build/);
   const all = await run("item", s.a, {});
   expect((all.items as { name: string }[]).map((i) => i.name)).toEqual(["Puppet Saber", "Wintry Rapier"]);
+});
+
+test("item and codex without a name list many rows in short, without links; by name they come whole; reads carry the short playthrough", async () => {
+  const names = ["Acid Canister", "Electric Coil", "Fire Abrasive", "Throwing Cell", "Ergo Fragment", "Gold Coin Fruit"];
+  await run("record", s.a, {
+    playthroughId: s.liesOfP,
+    summary: "x",
+    transcript: "Picked up six things.",
+    items: names.map((name) => ({ name, kind: "consumable", description: `What ${name} is` })),
+    codex: names.map((name) => ({ name: `${name} Golem`, kind: "enemy", strategy: "Dodge left" })),
+  });
+  const list = await run("item", s.a, {});
+  expect(list.detail).toBe(false);
+  const rows = list.items as Record<string, unknown>[];
+  expect(rows.length).toBeGreaterThan(5);
+  for (const r of rows) {
+    expect(Object.keys(r)).not.toContain("url");
+    expect(Object.keys(r)).not.toContain("description");
+  }
+  expect(next(list)).toMatch(/This is the short list.*call item with its name/);
+  const one = await run("item", s.a, { name: "Acid Canister" });
+  expect(one.detail).toBe(true);
+  expect(one.items).toEqual([expect.objectContaining({ name: "Acid Canister", description: "What Acid Canister is", url: expect.any(String) })]);
+  const enemies = await run("codex", s.a, { kind: "enemy" });
+  expect(enemies.detail).toBe(false);
+  expect(enemies.entries).toEqual(expect.arrayContaining([expect.not.objectContaining({ strategy: expect.anything() })]));
+  // The game's references and inventory groups come with briefing only.
+  expect(Object.keys(list.playthrough as object).sort()).toEqual(["character", "game", "id", "label", "language", "settings", "status", "url"]);
+  expect(Object.keys((list.playthrough as { game: object }).game).sort()).toEqual(["id", "title"]);
+  const b = await run("briefing", s.a, { playthroughId: s.liesOfP });
+  expect(Object.keys((b.playthrough as { game: object }).game)).toEqual(expect.arrayContaining(["references", "itemKinds"]));
 });
 
 test("item with a name the player hasn't filed says to file it, and not to describe it from knowledge", async () => {

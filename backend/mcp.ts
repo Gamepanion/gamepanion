@@ -12,6 +12,7 @@ import { logger } from "./log";
 import { TOOLS } from "./tools";
 import type { Player } from "./types";
 import { absoluteUrls, jwksUrl, mcpResource } from "./urls";
+import { withoutEmpty } from "./compact";
 
 const log = logger("mcp");
 
@@ -21,13 +22,14 @@ Each playthrough has two settings the player chose, and you follow them without 
 File only what the player said happened, and ask when you aren't sure: which quest they mean, whether they finished something or only started it, which choice they made. A screenshot they share reaches you but no tool: write what it shows (stats, an item's numbers) into the transcript and the fields of record.
 Gamepanion never searches the web: when the player wants to know more about something they found, you look it up with your own tools, on the sites they keep as the game's references (the more trusted one wins when pages disagree), and file the facts with the link (next says where).
 Keep the game's own names: a German stat or quest name goes into localName next to the English one.
-Every tool result carries next: what to do now, worked out from what the call did. Follow it before you answer. Every playthrough, session, quest and item comes with a url in the web app; give the player the link when they may want to look.`;
+Every tool result carries next: what to do now, worked out from what the call did. Follow it before you answer. Every playthrough, session, quest and item comes with a url in the web app (a long list of items or codex entries comes in short, without them: look one up by name for its link); give the player the link when they may want to look. Fields with nothing in them are left out.`;
 
-// A tool result: the body as structured content and, for clients that only read text, as JSON text. The body goes through the tool's
-// output schema first, which drops every field the schema doesn't name. Its links are made absolute against the public URL.
+// A tool result: the body as structured content and, for clients that only read text (Claude among them), as JSON text without its empty
+// fields (compact.ts). The body goes through the tool's output schema first, which drops every field the schema doesn't name. Its links
+// are made absolute against the public URL.
 function result<S extends z.ZodType>(schema: S, body: unknown) {
   const out = absoluteUrls(config.publicUrl(), schema.parse(body)) as Record<string, unknown>;
-  return { structuredContent: out, content: [{ type: "text" as const, text: JSON.stringify(out) }] };
+  return { structuredContent: out, content: [{ type: "text" as const, text: JSON.stringify(withoutEmpty(out)) }] };
 }
 
 // GamepanionErrors are refusals the model can read. Any other throw would carry its message to the client (a database error could name a

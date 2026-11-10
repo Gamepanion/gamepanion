@@ -5,6 +5,7 @@
 // means. Claude is behind ChatModel, so tests stand in for it. Modelled on freundebuch's chat (its ADR 0006).
 import Anthropic from "@anthropic-ai/sdk";
 import { absoluteUrls } from "./urls";
+import { withoutEmpty } from "./compact";
 import * as z from "zod";
 import { buildOf } from "./builds";
 import { codexOf } from "./codex";
@@ -271,8 +272,8 @@ export async function chat(
           filed = true;
           for (const l of linksOf(out)) links.set(l.url, l);
         }
-        // Claude reads the result as Claude over MCP would: links (in next too) absolute; the chips keep the paths.
-        results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify(absoluteUrls(config.publicUrl(), out)) });
+        // Claude reads the result as Claude over MCP would: links (in next too) absolute, empty fields left out; the chips keep the paths.
+        results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify(withoutEmpty(absoluteUrls(config.publicUrl(), out))) });
       } catch (e) {
         if (!(e instanceof GamepanionError)) log.error({ err: e, tool: use.name }, "tool failed");
         results.push({ type: "tool_result", tool_use_id: use.id, content: e instanceof GamepanionError ? e.message : "internal error", is_error: true });

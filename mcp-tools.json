@@ -910,17 +910,6 @@
                   "null"
                 ]
               },
-              "lastPlayedOn": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "character": {
                 "anyOf": [
                   {
@@ -959,13 +948,6 @@
                 ],
                 "description": "Who the player plays in this run; null until filed"
               },
-              "notes": {
-                "description": "The player's own notes on this run",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
               "settings": {
                 "type": "object",
                 "properties": {
@@ -996,6 +978,10 @@
                 "additionalProperties": false,
                 "description": "The player's settings for this run (ADR 0016)"
               },
+              "url": {
+                "type": "string",
+                "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+              },
               "game": {
                 "type": "object",
                 "properties": {
@@ -1004,124 +990,13 @@
                   },
                   "title": {
                     "type": "string"
-                  },
-                  "platform": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "description": {
-                    "description": "What it is, as the game describes it",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "notes": {
-                    "description": "The player's own notes",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "references": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "url": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "facts": {
-                          "description": "What the site is good for",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "on": {
-                          "anyOf": [
-                            {
-                              "type": "string",
-                              "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ],
-                          "description": "When it was added"
-                        },
-                        "trust": {
-                          "type": "string",
-                          "enum": [
-                            "high",
-                            "medium",
-                            "low"
-                          ],
-                          "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                        }
-                      },
-                      "required": [
-                        "url",
-                        "title",
-                        "facts",
-                        "on",
-                        "trust"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                  },
-                  "itemKinds": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "key": {
-                          "type": "string",
-                          "description": "What an item's kind holds"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "localName": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "key",
-                        "name",
-                        "localName"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                   }
                 },
                 "required": [
                   "id",
-                  "title",
-                  "platform",
-                  "description",
-                  "notes",
-                  "references",
-                  "itemKinds"
+                  "title"
                 ],
                 "additionalProperties": false
-              },
-              "url": {
-                "type": "string",
-                "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
               }
             },
             "required": [
@@ -1129,12 +1004,10 @@
               "label",
               "status",
               "language",
-              "lastPlayedOn",
               "character",
-              "notes",
               "settings",
-              "game",
-              "url"
+              "url",
+              "game"
             ],
             "additionalProperties": false
           },
@@ -3054,17 +2927,6 @@
                     "null"
                   ]
                 },
-                "lastPlayedOn": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "character": {
                   "anyOf": [
                     {
@@ -3103,13 +2965,6 @@
                   ],
                   "description": "Who the player plays in this run; null until filed"
                 },
-                "notes": {
-                  "description": "The player's own notes on this run",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
                 "settings": {
                   "type": "object",
                   "properties": {
@@ -3140,6 +2995,10 @@
                   "additionalProperties": false,
                   "description": "The player's settings for this run (ADR 0016)"
                 },
+                "url": {
+                  "type": "string",
+                  "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                },
                 "game": {
                   "type": "object",
                   "properties": {
@@ -3148,124 +3007,13 @@
                     },
                     "title": {
                       "type": "string"
-                    },
-                    "platform": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "description": {
-                      "description": "What it is, as the game describes it",
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "notes": {
-                      "description": "The player's own notes",
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "references": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "url": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "facts": {
-                            "description": "What the site is good for",
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "on": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "description": "When it was added"
-                          },
-                          "trust": {
-                            "type": "string",
-                            "enum": [
-                              "high",
-                              "medium",
-                              "low"
-                            ],
-                            "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                          }
-                        },
-                        "required": [
-                          "url",
-                          "title",
-                          "facts",
-                          "on",
-                          "trust"
-                        ],
-                        "additionalProperties": false
-                      },
-                      "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                    },
-                    "itemKinds": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "type": "string",
-                            "description": "What an item's kind holds"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "localName": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "key",
-                          "name",
-                          "localName"
-                        ],
-                        "additionalProperties": false
-                      },
-                      "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                     }
                   },
                   "required": [
                     "id",
-                    "title",
-                    "platform",
-                    "description",
-                    "notes",
-                    "references",
-                    "itemKinds"
+                    "title"
                   ],
                   "additionalProperties": false
-                },
-                "url": {
-                  "type": "string",
-                  "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                 }
               },
               "required": [
@@ -3273,12 +3021,10 @@
                 "label",
                 "status",
                 "language",
-                "lastPlayedOn",
                 "character",
-                "notes",
                 "settings",
-                "game",
-                "url"
+                "url",
+                "game"
               ],
               "additionalProperties": false
             },
@@ -3334,7 +3080,7 @@
     },
     {
       "name": "open_threads",
-      "description": "The quests the player started and hasn't finished, with their whole log: what they did, the next steps and the choices made, and their open to-dos. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
+      "description": "The quests the player started and hasn't finished, with their log: the latest steps and every choice made (with quest, one quest's whole log), and their open to-dos. Call it for \"what is still open?\" or before the player goes back to an area. It shows as much as the player's spoiler setting; reveal goes higher only when the player asked just now.",
       "annotations": {
         "readOnlyHint": true
       },
@@ -3348,6 +3094,10 @@
           },
           "game": {
             "description": "A game's title: its playthrough played most recently",
+            "type": "string"
+          },
+          "quest": {
+            "description": "One quest, by id or (part of) its name: its whole log",
             "type": "string"
           },
           "reveal": {
@@ -3392,17 +3142,6 @@
                       "null"
                     ]
                   },
-                  "lastPlayedOn": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "character": {
                     "anyOf": [
                       {
@@ -3441,13 +3180,6 @@
                     ],
                     "description": "Who the player plays in this run; null until filed"
                   },
-                  "notes": {
-                    "description": "The player's own notes on this run",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
                   "settings": {
                     "type": "object",
                     "properties": {
@@ -3478,6 +3210,10 @@
                     "additionalProperties": false,
                     "description": "The player's settings for this run (ADR 0016)"
                   },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                  },
                   "game": {
                     "type": "object",
                     "properties": {
@@ -3486,124 +3222,13 @@
                       },
                       "title": {
                         "type": "string"
-                      },
-                      "platform": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "description": {
-                        "description": "What it is, as the game describes it",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "notes": {
-                        "description": "The player's own notes",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "references": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "url": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "facts": {
-                              "description": "What the site is good for",
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "on": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "When it was added"
-                            },
-                            "trust": {
-                              "type": "string",
-                              "enum": [
-                                "high",
-                                "medium",
-                                "low"
-                              ],
-                              "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                            }
-                          },
-                          "required": [
-                            "url",
-                            "title",
-                            "facts",
-                            "on",
-                            "trust"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                      },
-                      "itemKinds": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string",
-                              "description": "What an item's kind holds"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "localName": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "name",
-                            "localName"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                       }
                     },
                     "required": [
                       "id",
-                      "title",
-                      "platform",
-                      "description",
-                      "notes",
-                      "references",
-                      "itemKinds"
+                      "title"
                     ],
                     "additionalProperties": false
-                  },
-                  "url": {
-                    "type": "string",
-                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                   }
                 },
                 "required": [
@@ -3611,12 +3236,10 @@
                   "label",
                   "status",
                   "language",
-                  "lastPlayedOn",
                   "character",
-                  "notes",
                   "settings",
-                  "game",
-                  "url"
+                  "url",
+                  "game"
                 ],
                 "additionalProperties": false
               },
@@ -3839,7 +3462,11 @@
                     ],
                     "additionalProperties": false
                   },
-                  "description": "Oldest first"
+                  "description": "Oldest first: without quest, the last few and every earlier decision; with quest, the whole log"
+                },
+                "earlier": {
+                  "type": "number",
+                  "description": "Older entries left out here; open_threads with quest gives them"
                 }
               },
               "required": [
@@ -3855,7 +3482,8 @@
                 "background",
                 "todos",
                 "url",
-                "entries"
+                "entries",
+                "earlier"
               ],
               "additionalProperties": false
             },
@@ -4048,7 +3676,7 @@
     },
     {
       "name": "item",
-      "description": "Look up the player's items: one by name (part of it is enough, in English or the game's language), or all of them without a name, with the build plan, the latest stats and what is equipped, to compare a new find with. Call it when the player asks about an item they have or whether a new one fits their build.",
+      "description": "Look up the player's items: one by name (part of it is enough, in English or the game's language), or all of them without a name (more than five come as a short list: name, kind, count, verdict; ask by name for the rest), with the build plan, the latest stats and what is equipped, to compare a new find with. Call it when the player asks about an item they have or whether a new one fits their build.",
       "annotations": {
         "readOnlyHint": true
       },
@@ -4114,17 +3742,6 @@
                       "null"
                     ]
                   },
-                  "lastPlayedOn": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "character": {
                     "anyOf": [
                       {
@@ -4163,13 +3780,6 @@
                     ],
                     "description": "Who the player plays in this run; null until filed"
                   },
-                  "notes": {
-                    "description": "The player's own notes on this run",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
                   "settings": {
                     "type": "object",
                     "properties": {
@@ -4200,6 +3810,10 @@
                     "additionalProperties": false,
                     "description": "The player's settings for this run (ADR 0016)"
                   },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                  },
                   "game": {
                     "type": "object",
                     "properties": {
@@ -4208,124 +3822,13 @@
                       },
                       "title": {
                         "type": "string"
-                      },
-                      "platform": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "description": {
-                        "description": "What it is, as the game describes it",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "notes": {
-                        "description": "The player's own notes",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "references": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "url": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "facts": {
-                              "description": "What the site is good for",
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "on": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "When it was added"
-                            },
-                            "trust": {
-                              "type": "string",
-                              "enum": [
-                                "high",
-                                "medium",
-                                "low"
-                              ],
-                              "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                            }
-                          },
-                          "required": [
-                            "url",
-                            "title",
-                            "facts",
-                            "on",
-                            "trust"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                      },
-                      "itemKinds": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string",
-                              "description": "What an item's kind holds"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "localName": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "name",
-                            "localName"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                       }
                     },
                     "required": [
                       "id",
-                      "title",
-                      "platform",
-                      "description",
-                      "notes",
-                      "references",
-                      "itemKinds"
+                      "title"
                     ],
                     "additionalProperties": false
-                  },
-                  "url": {
-                    "type": "string",
-                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                   }
                 },
                 "required": [
@@ -4333,12 +3836,10 @@
                   "label",
                   "status",
                   "language",
-                  "lastPlayedOn",
                   "character",
-                  "notes",
                   "settings",
-                  "game",
-                  "url"
+                  "url",
+                  "game"
                 ],
                 "additionalProperties": false
               },
@@ -4356,310 +3857,372 @@
             ],
             "description": "What this call was allowed to show"
           },
+          "detail": {
+            "type": "boolean",
+            "description": "Whether items are whole; false: a short list, call again with a name for one item"
+          },
           "items": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "localName": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "description": {
-                  "description": "What it is, as the game describes it",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "notes": {
-                  "description": "The player's own notes",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "kind": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "verdict": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "quantity": {
-                  "description": "How many the player has; null when it isn't counted",
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                },
-                "attributes": {
+              "anyOf": [
+                {
                   "type": "object",
-                  "propertyNames": {
-                    "type": "string"
-                  },
-                  "additionalProperties": {
-                    "type": [
-                      "string",
-                      "number"
-                    ]
-                  },
-                  "description": "Its numbers, by the game's names"
-                },
-                "against": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "codex": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "localName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": {
+                      "description": "What it is, as the game describes it",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "notes": {
+                      "description": "The player's own notes",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "verdict": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "quantity": {
+                      "description": "How many the player has; null when it isn't counted",
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": [
+                          "string",
+                          "number"
+                        ]
+                      },
+                      "description": "Its numbers, by the game's names"
+                    },
+                    "against": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "codex": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "boss",
+                                  "enemy",
+                                  "npc",
+                                  "place"
+                                ]
+                              },
+                              "url": {
+                                "type": "string",
+                                "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "kind",
+                              "url"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "effect": {
+                            "type": "string",
+                            "enum": [
+                              "very good",
+                              "good",
+                              "neutral",
+                              "bad",
+                              "very bad"
+                            ],
+                            "description": "very good: its weak spot; good: use it; neutral: no better or worse; bad: they resist it; very bad: they heal from it or it backfires"
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "codex",
+                          "effect",
+                          "note"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Codex entries it works on, best first, from very good to very bad"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "facts": {
+                            "description": "What was taken from the page",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When it was added"
+                          }
+                        },
+                        "required": [
+                          "url",
+                          "title",
+                          "facts",
+                          "on"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Where its facts come from"
+                    },
+                    "background": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
                         "properties": {
                           "id": {
+                            "type": "string",
+                            "description": "For correct (background)"
+                          },
+                          "text": {
                             "type": "string"
                           },
-                          "name": {
-                            "type": "string"
-                          },
-                          "kind": {
+                          "spoiler": {
                             "type": "string",
                             "enum": [
-                              "boss",
-                              "enemy",
-                              "npc",
-                              "place"
-                            ]
+                              "none",
+                              "hint",
+                              "full"
+                            ],
+                            "description": "Each line has its own; only lines this read may show are here"
                           },
-                          "url": {
-                            "type": "string",
-                            "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                          "source": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "url": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "url",
+                                  "title"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The page it comes from; null for Claude's own knowledge"
                           }
                         },
                         "required": [
                           "id",
-                          "name",
-                          "kind",
-                          "url"
+                          "text",
+                          "spoiler",
+                          "source"
                         ],
                         "additionalProperties": false
                       },
-                      "effect": {
-                        "type": "string",
-                        "enum": [
-                          "very good",
-                          "good",
-                          "neutral",
-                          "bad",
-                          "very bad"
-                        ],
-                        "description": "very good: its weak spot; good: use it; neutral: no better or worse; bad: they resist it; very bad: they heal from it or it backfires"
-                      },
-                      "note": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
+                      "description": "Background Claude added (ADR 0016), oldest first"
                     },
-                    "required": [
-                      "codex",
-                      "effect",
-                      "note"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "Codex entries it works on, best first, from very good to very bad"
-                },
-                "sources": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "url": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "facts": {
-                        "description": "What was taken from the page",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "on": {
-                        "anyOf": [
-                          {
+                    "todos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
                             "type": "string",
-                            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                            "description": "For record (todos with id) or correct"
                           },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "When it was added"
-                      }
-                    },
-                    "required": [
-                      "url",
-                      "title",
-                      "facts",
-                      "on"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "Where its facts come from"
-                },
-                "background": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "For correct (background)"
-                      },
-                      "text": {
-                        "type": "string"
-                      },
-                      "spoiler": {
-                        "type": "string",
-                        "enum": [
-                          "none",
-                          "hint",
-                          "full"
-                        ],
-                        "description": "Each line has its own; only lines this read may show are here"
-                      },
-                      "source": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "url": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "url",
-                              "title"
-                            ],
-                            "additionalProperties": false
+                          "text": {
+                            "type": "string"
                           },
-                          {
-                            "type": "null"
+                          "localText": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "suggested": {
+                            "type": "boolean"
                           }
+                        },
+                        "required": [
+                          "id",
+                          "text",
+                          "localText",
+                          "suggested"
                         ],
-                        "description": "The page it comes from; null for Claude's own knowledge"
-                      }
+                        "additionalProperties": false
+                      },
+                      "description": "The open to-dos about it; suggested ones are yours, not the player's yet"
                     },
-                    "required": [
-                      "id",
-                      "text",
-                      "spoiler",
-                      "source"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "Background Claude added (ADR 0016), oldest first"
-                },
-                "todos": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "For record (todos with id) or correct"
-                      },
-                      "text": {
-                        "type": "string"
-                      },
-                      "localText": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "suggested": {
-                        "type": "boolean"
-                      }
+                    "url": {
+                      "type": "string",
+                      "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                     },
-                    "required": [
-                      "id",
-                      "text",
-                      "localText",
-                      "suggested"
-                    ],
-                    "additionalProperties": false
+                    "location": {
+                      "description": "Where it was found",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "equipped": {
+                      "type": "boolean"
+                    },
+                    "spoiler": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "hint",
+                        "full"
+                      ],
+                      "description": "none for what the player found; hint or full only when this call asked for them"
+                    }
                   },
-                  "description": "The open to-dos about it; suggested ones are yours, not the player's yet"
-                },
-                "url": {
-                  "type": "string",
-                  "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
-                },
-                "location": {
-                  "description": "Where it was found",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "equipped": {
-                  "type": "boolean"
-                },
-                "spoiler": {
-                  "type": "string",
-                  "enum": [
-                    "none",
-                    "hint",
-                    "full"
+                  "required": [
+                    "id",
+                    "name",
+                    "localName",
+                    "description",
+                    "notes",
+                    "kind",
+                    "verdict",
+                    "quantity",
+                    "attributes",
+                    "against",
+                    "sources",
+                    "background",
+                    "todos",
+                    "url",
+                    "location",
+                    "equipped",
+                    "spoiler"
                   ],
-                  "description": "none for what the player found; hint or full only when this call asked for them"
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "localName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "quantity": {
+                      "description": "How many the player has; null when it isn't counted",
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "verdict": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "spoiler": {
+                      "description": "Only for a row above none, shown because this call asked for it",
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "hint",
+                        "full"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "localName",
+                    "kind",
+                    "quantity",
+                    "verdict"
+                  ],
+                  "additionalProperties": false
                 }
-              },
-              "required": [
-                "id",
-                "name",
-                "localName",
-                "description",
-                "notes",
-                "kind",
-                "verdict",
-                "quantity",
-                "attributes",
-                "against",
-                "sources",
-                "background",
-                "todos",
-                "url",
-                "location",
-                "equipped",
-                "spoiler"
-              ],
-              "additionalProperties": false
+              ]
             },
-            "description": "The player's items whose name contains the one asked for (all of them without a name), equipped first"
+            "description": "The player's items whose name contains the one asked for (all of them without a name), equipped first; in short when there are many"
           },
           "tags": {
             "type": "array",
@@ -5297,6 +4860,7 @@
         "required": [
           "playthrough",
           "reveal",
+          "detail",
           "items",
           "tags",
           "build",
@@ -5309,7 +4873,7 @@
     },
     {
       "name": "codex",
-      "description": "The bosses, enemies, NPCs and places the player met in a playthrough: one by name (part of it is enough), or all of one kind, with weaknesses, resistances, the strategy, and the player's own items that are good or bad against it, with how many they have. Call it for \"how do I beat this boss?\", \"what is this enemy weak to?\", \"what did that NPC want?\".",
+      "description": "The bosses, enemies, NPCs and places the player met in a playthrough: one by name (part of it is enough), or all of one kind (more than five come as a short list with their weaknesses and resistances; ask by name for the rest), with weaknesses, resistances, the strategy, and the player's own items that are good or bad against it, with how many they have. Call it for \"how do I beat this boss?\", \"what is this enemy weak to?\", \"what did that NPC want?\".",
       "annotations": {
         "readOnlyHint": true
       },
@@ -5385,17 +4949,6 @@
                       "null"
                     ]
                   },
-                  "lastPlayedOn": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "character": {
                     "anyOf": [
                       {
@@ -5434,13 +4987,6 @@
                     ],
                     "description": "Who the player plays in this run; null until filed"
                   },
-                  "notes": {
-                    "description": "The player's own notes on this run",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
                   "settings": {
                     "type": "object",
                     "properties": {
@@ -5471,6 +5017,10 @@
                     "additionalProperties": false,
                     "description": "The player's settings for this run (ADR 0016)"
                   },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                  },
                   "game": {
                     "type": "object",
                     "properties": {
@@ -5479,124 +5029,13 @@
                       },
                       "title": {
                         "type": "string"
-                      },
-                      "platform": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "description": {
-                        "description": "What it is, as the game describes it",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "notes": {
-                        "description": "The player's own notes",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "references": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "url": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "facts": {
-                              "description": "What the site is good for",
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "on": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "When it was added"
-                            },
-                            "trust": {
-                              "type": "string",
-                              "enum": [
-                                "high",
-                                "medium",
-                                "low"
-                              ],
-                              "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                            }
-                          },
-                          "required": [
-                            "url",
-                            "title",
-                            "facts",
-                            "on",
-                            "trust"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                      },
-                      "itemKinds": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string",
-                              "description": "What an item's kind holds"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "localName": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "name",
-                            "localName"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                       }
                     },
                     "required": [
                       "id",
-                      "title",
-                      "platform",
-                      "description",
-                      "notes",
-                      "references",
-                      "itemKinds"
+                      "title"
                     ],
                     "additionalProperties": false
-                  },
-                  "url": {
-                    "type": "string",
-                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                   }
                 },
                 "required": [
@@ -5604,12 +5043,10 @@
                   "label",
                   "status",
                   "language",
-                  "lastPlayedOn",
                   "character",
-                  "notes",
                   "settings",
-                  "game",
-                  "url"
+                  "url",
+                  "game"
                 ],
                 "additionalProperties": false
               },
@@ -5627,334 +5064,428 @@
             ],
             "description": "What this call was allowed to show"
           },
+          "detail": {
+            "type": "boolean",
+            "description": "Whether entries are whole; false: a short list, call again with a name for one entry"
+          },
           "entries": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "For record (codex with id) or correct"
-                },
-                "kind": {
-                  "type": "string",
-                  "enum": [
-                    "boss",
-                    "enemy",
-                    "npc",
-                    "place"
-                  ]
-                },
-                "name": {
-                  "type": "string"
-                },
-                "localName": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "description": {
-                  "description": "What it is, as the game describes it",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "location": {
-                  "description": "Where the player met it",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "met",
-                    "beaten",
-                    "gone"
-                  ]
-                },
-                "attempts": {
-                  "description": "A boss: the player's tries so far",
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                },
-                "beatenOn": {
-                  "anyOf": [
-                    {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
                       "type": "string",
-                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                      "description": "For record (codex with id) or correct"
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "weaknesses": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "resistances": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "strategy": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "notes": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "spoiler": {
-                  "type": "string",
-                  "enum": [
-                    "none",
-                    "hint",
-                    "full"
-                  ],
-                  "description": "none for what the player met; hint or full only when this call asked for them"
-                },
-                "sources": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "url": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "boss",
+                        "enemy",
+                        "npc",
+                        "place"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "localName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": {
+                      "description": "What it is, as the game describes it",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "location": {
+                      "description": "Where the player met it",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "met",
+                        "beaten",
+                        "gone"
+                      ]
+                    },
+                    "attempts": {
+                      "description": "A boss: the player's tries so far",
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "beatenOn": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "weaknesses": {
+                      "type": "array",
+                      "items": {
                         "type": "string"
-                      },
-                      "title": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "facts": {
-                        "description": "What was taken from the page",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "on": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "When it was added"
                       }
                     },
-                    "required": [
-                      "url",
-                      "title",
-                      "facts",
-                      "on"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "Where its weaknesses and strategy come from"
-                },
-                "counters": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "item": {
+                    "resistances": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "strategy": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "notes": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "spoiler": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "hint",
+                        "full"
+                      ],
+                      "description": "none for what the player met; hint or full only when this call asked for them"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
+                          "url": {
                             "type": "string"
                           },
-                          "name": {
-                            "type": "string"
-                          },
-                          "kind": {
+                          "title": {
                             "type": [
                               "string",
                               "null"
                             ]
                           },
-                          "quantity": {
+                          "facts": {
+                            "description": "What was taken from the page",
                             "type": [
-                              "number",
+                              "string",
                               "null"
                             ]
                           },
-                          "url": {
+                          "on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "When it was added"
+                          }
+                        },
+                        "required": [
+                          "url",
+                          "title",
+                          "facts",
+                          "on"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Where its weaknesses and strategy come from"
+                    },
+                    "counters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "item": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "quantity": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ]
+                              },
+                              "url": {
+                                "type": "string",
+                                "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "kind",
+                              "quantity",
+                              "url"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "effect": {
                             "type": "string",
-                            "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                            "enum": [
+                              "very good",
+                              "good",
+                              "neutral",
+                              "bad",
+                              "very bad"
+                            ],
+                            "description": "very good: its weak spot; good: use it; neutral: no better or worse; bad: they resist it; very bad: they heal from it or it backfires"
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "item",
+                          "effect",
+                          "note"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "The player's items rated against it, best first, from very good to very bad, with how many they have"
+                    },
+                    "background": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "For correct (background)"
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "spoiler": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "hint",
+                              "full"
+                            ],
+                            "description": "Each line has its own; only lines this read may show are here"
+                          },
+                          "source": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "url": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "url",
+                                  "title"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "The page it comes from; null for Claude's own knowledge"
                           }
                         },
                         "required": [
                           "id",
-                          "name",
-                          "kind",
-                          "quantity",
-                          "url"
+                          "text",
+                          "spoiler",
+                          "source"
                         ],
                         "additionalProperties": false
                       },
-                      "effect": {
-                        "type": "string",
-                        "enum": [
-                          "very good",
-                          "good",
-                          "neutral",
-                          "bad",
-                          "very bad"
-                        ],
-                        "description": "very good: its weak spot; good: use it; neutral: no better or worse; bad: they resist it; very bad: they heal from it or it backfires"
-                      },
-                      "note": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
+                      "description": "Background Claude added (ADR 0016), oldest first"
                     },
-                    "required": [
-                      "item",
-                      "effect",
-                      "note"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "The player's items rated against it, best first, from very good to very bad, with how many they have"
-                },
-                "background": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "For correct (background)"
-                      },
-                      "text": {
-                        "type": "string"
-                      },
-                      "spoiler": {
-                        "type": "string",
-                        "enum": [
-                          "none",
-                          "hint",
-                          "full"
-                        ],
-                        "description": "Each line has its own; only lines this read may show are here"
-                      },
-                      "source": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "url": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "url",
-                              "title"
-                            ],
-                            "additionalProperties": false
+                    "todos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "For record (todos with id) or correct"
                           },
-                          {
-                            "type": "null"
+                          "text": {
+                            "type": "string"
+                          },
+                          "localText": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "suggested": {
+                            "type": "boolean"
                           }
+                        },
+                        "required": [
+                          "id",
+                          "text",
+                          "localText",
+                          "suggested"
                         ],
-                        "description": "The page it comes from; null for Claude's own knowledge"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "text",
-                      "spoiler",
-                      "source"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "description": "Background Claude added (ADR 0016), oldest first"
-                },
-                "todos": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "For record (todos with id) or correct"
+                        "additionalProperties": false
                       },
-                      "text": {
+                      "description": "The open to-dos about it (\"what's left to do here?\"); suggested ones are yours, not the player's yet"
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "name",
+                    "localName",
+                    "description",
+                    "location",
+                    "status",
+                    "attempts",
+                    "beatenOn",
+                    "weaknesses",
+                    "resistances",
+                    "strategy",
+                    "notes",
+                    "spoiler",
+                    "sources",
+                    "counters",
+                    "background",
+                    "todos",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "For record (codex with id) or correct"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "boss",
+                        "enemy",
+                        "npc",
+                        "place"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "localName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "location": {
+                      "description": "Where the player met it",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "met",
+                        "beaten",
+                        "gone"
+                      ]
+                    },
+                    "beatenOn": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "weaknesses": {
+                      "type": "array",
+                      "items": {
                         "type": "string"
-                      },
-                      "localText": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "suggested": {
-                        "type": "boolean"
                       }
                     },
-                    "required": [
-                      "id",
-                      "text",
-                      "localText",
-                      "suggested"
-                    ],
-                    "additionalProperties": false
+                    "resistances": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "spoiler": {
+                      "description": "Only for a row above none, shown because this call asked for it",
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "hint",
+                        "full"
+                      ]
+                    }
                   },
-                  "description": "The open to-dos about it (\"what's left to do here?\"); suggested ones are yours, not the player's yet"
-                },
-                "url": {
-                  "type": "string",
-                  "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                  "required": [
+                    "id",
+                    "kind",
+                    "name",
+                    "localName",
+                    "location",
+                    "status",
+                    "beatenOn",
+                    "weaknesses",
+                    "resistances"
+                  ],
+                  "additionalProperties": false
                 }
-              },
-              "required": [
-                "id",
-                "kind",
-                "name",
-                "localName",
-                "description",
-                "location",
-                "status",
-                "attempts",
-                "beatenOn",
-                "weaknesses",
-                "resistances",
-                "strategy",
-                "notes",
-                "spoiler",
-                "sources",
-                "counters",
-                "background",
-                "todos",
-                "url"
-              ],
-              "additionalProperties": false
+              ]
             },
-            "description": "Bosses, then enemies, NPCs and places; what is still in the way first"
+            "description": "Bosses, then enemies, NPCs and places; what is still in the way first; in short when there are many"
           },
           "tags": {
             "type": "array",
@@ -6460,6 +5991,7 @@
         "required": [
           "playthrough",
           "reveal",
+          "detail",
           "entries",
           "tags",
           "build",
@@ -7222,17 +6754,6 @@
                       "null"
                     ]
                   },
-                  "lastPlayedOn": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "character": {
                     "anyOf": [
                       {
@@ -7271,13 +6792,6 @@
                     ],
                     "description": "Who the player plays in this run; null until filed"
                   },
-                  "notes": {
-                    "description": "The player's own notes on this run",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
                   "settings": {
                     "type": "object",
                     "properties": {
@@ -7308,6 +6822,10 @@
                     "additionalProperties": false,
                     "description": "The player's settings for this run (ADR 0016)"
                   },
+                  "url": {
+                    "type": "string",
+                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
+                  },
                   "game": {
                     "type": "object",
                     "properties": {
@@ -7316,124 +6834,13 @@
                       },
                       "title": {
                         "type": "string"
-                      },
-                      "platform": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "description": {
-                        "description": "What it is, as the game describes it",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "notes": {
-                        "description": "The player's own notes",
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "references": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "url": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "facts": {
-                              "description": "What the site is good for",
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "on": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "When it was added"
-                            },
-                            "trust": {
-                              "type": "string",
-                              "enum": [
-                                "high",
-                                "medium",
-                                "low"
-                              ],
-                              "description": "high (official guides, wikis), medium (guide sites), low (forums, Steam discussions, single comments): weigh what you find there by it"
-                            }
-                          },
-                          "required": [
-                            "url",
-                            "title",
-                            "facts",
-                            "on",
-                            "trust"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The sites kept for this game, by trust, high first: where you look things up when the player asks"
-                      },
-                      "itemKinds": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string",
-                              "description": "What an item's kind holds"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "localName": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "name",
-                            "localName"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "description": "The game's inventory groups, in the player's order: file an item's kind with one of these keys"
                       }
                     },
                     "required": [
                       "id",
-                      "title",
-                      "platform",
-                      "description",
-                      "notes",
-                      "references",
-                      "itemKinds"
+                      "title"
                     ],
                     "additionalProperties": false
-                  },
-                  "url": {
-                    "type": "string",
-                    "description": "Its page in the web app, as an absolute URL: give it to the player when they may want to look"
                   }
                 },
                 "required": [
@@ -7441,12 +6848,10 @@
                   "label",
                   "status",
                   "language",
-                  "lastPlayedOn",
                   "character",
-                  "notes",
                   "settings",
-                  "game",
-                  "url"
+                  "url",
+                  "game"
                 ],
                 "additionalProperties": false
               },
