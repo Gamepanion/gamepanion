@@ -1,5 +1,5 @@
-// The footer (#48): the operator's imprint, privacy policy and terms, each only when its file is set, the third-party licenses, a page
-// of the docs. It sits at the bottom of a short page (mt-auto in a flex column).
+// The footer (#48): the pricing page where something is sold, the operator's imprint, privacy policy and terms, each only when its file
+// is set, the third-party licenses, a page of the docs. It sits at the bottom of a short page (mt-auto in a flex column).
 import Link from "next/link";
 import { licensesUrl, operatorLinks } from "@/backend";
 import { serverCopy, serverLocale } from "./copy/server";

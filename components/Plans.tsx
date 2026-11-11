@@ -5,8 +5,10 @@
 // one before with more ticked. The cards share their rows through a subgrid (what it is, the price, the list, the button), so the
 // rows line up. A button opens the provider's checkout, as an overlay on this page where the provider has one (Creem's embed, #107).
 // The overlay is only the screen: the webhook alone makes the player a subscriber, and this page, reloaded with the checkout's id,
-// says so.
+// says so. On the public pricing page nobody is signed in: there a button is a link, to the sign-in for the free plan and to the
+// subscribe page (through the sign-in) for the others.
 import { Check, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { checkoutAction } from "@/app/(app)/subscribe/actions";
@@ -47,12 +49,15 @@ export function Plans({
   saving,
   overlay,
   free,
+  signedOut = false,
 }: {
   plans: Shown[];
   saving: Record<Tier, number | null>;
   overlay: boolean;
   /** The free plan's price as the others are written (€0), while the player is on it; null when they subscribe. */
   free: string | null;
+  /** The public pricing page: links to the sign-in and the subscribe page in place of the checkout. */
+  signedOut?: boolean;
 }) {
   const copy = useCopy();
   const locale = useLocale();
@@ -102,7 +107,15 @@ export function Plans({
               <span className="text-2xl font-bold">{free}</span>
             </p>
             <Benefits plan="free" />
-            <p className="self-end text-sm font-semibold text-muted">{copy.yourPlan}</p>
+            {signedOut ? (
+              <div className="self-start pt-2">
+                <Link href="/login" className="button-secondary block w-full text-center">
+                  {copy.startFree}
+                </Link>
+              </div>
+            ) : (
+              <p className="self-end text-sm font-semibold text-muted">{copy.yourPlan}</p>
+            )}
           </li>
         )}
         {tiers.map((tier) => {
@@ -123,10 +136,16 @@ export function Plans({
                 {saved > 0 && <span className="ml-2 text-sm font-semibold text-accent">{copy.savesShort(saved)}</span>}
               </p>
               <Benefits plan={tier} />
-              <div className="space-y-2 self-end pt-2">
-                <button type="button" className="button-primary w-full" disabled={pending} onClick={() => checkout(shown.period, tier)}>
-                  {copy.subscribeNow}
-                </button>
+              <div className="space-y-2 self-start pt-2">
+                {signedOut ? (
+                  <Link href="/subscribe" className="button-primary block w-full text-center">
+                    {copy.subscribeNow}
+                  </Link>
+                ) : (
+                  <button type="button" className="button-primary w-full" disabled={pending} onClick={() => checkout(shown.period, tier)}>
+                    {copy.subscribeNow}
+                  </button>
+                )}
                 <p className="text-xs text-muted">{tier === "hostedAi" ? copy.allowanceNote : copy.cancelNote}</p>
               </div>
             </li>

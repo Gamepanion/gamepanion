@@ -29,6 +29,8 @@ export const accountExportPath = () => "/account/export";
 export const accountDataPath = () => "/account#data";
 /** Where a player subscribes (#48). */
 export const subscribePath = () => "/subscribe";
+/** The plans and prices, for anyone, where something is sold. */
+export const pricingPath = () => "/pricing";
 /** The operator's pages (#48). */
 export const aboutPath = (page: "imprint" | "privacy" | "terms") => `/${page}`;
 /** The third-party licenses: a page of the docs, generated from third-party-licenses.json (docs_hooks/licenses.py). */
