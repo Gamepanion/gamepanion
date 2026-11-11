@@ -78,6 +78,9 @@ export async function paymentsWebhookRoute(req: Request): Promise<Response> {
   }
 }
 
+/** Whether this instance sells anything: the pricing page exists only then. */
+export const sells = (): boolean => paymentProvider() !== null;
+
 /** Whether the checkout opens as an overlay on the subscribe page. */
 export const checkoutOverlay = (): boolean => paymentProvider()?.overlay ?? false;
 
@@ -89,7 +92,7 @@ export async function portalFor(p: Player): Promise<string | null> {
   return ref ? provider.portalUrl(ref) : null;
 }
 
-/** The plans for the subscribe page, by tier, yearly first, and what a yearly one saves against twelve months, in percent. */
+/** The plans for the pricing and subscribe pages, by tier, yearly first, and what a yearly one saves against twelve months, in percent. */
 export async function pricingPlans(): Promise<{ plans: Plan[]; yearlySavingPercent: number | null; hostedAiSavingPercent: number | null }> {
   const plans = (await paymentProvider()?.plans()) ?? [];
   const order = (x: Plan) => (x.tier === "standard" ? 0 : 2) + (x.period === "year" ? 0 : 1);

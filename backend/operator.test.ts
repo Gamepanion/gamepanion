@@ -29,6 +29,13 @@ test("{lang} picks the locale's file and falls back to en", async () => {
   expect((await operatorLinks("de")).map((l) => l.href)).toEqual(["/imprint", "/privacy"]);
 });
 
+test("the pricing page is linked first, and only where something is sold", async () => {
+  vi.stubEnv("GAMEPANION_TERMS_FILE", put("terms.md", "# Terms"));
+  expect((await operatorLinks("en")).map((l) => l.href)).toEqual(["/terms"]);
+  vi.stubEnv("GAMEPANION_PAYMENT_PROVIDER", "fake");
+  expect((await operatorLinks("en")).map((l) => l.href)).toEqual(["/pricing", "/terms"]);
+});
+
 test("a file above 256 KiB is no page", async () => {
   vi.stubEnv("GAMEPANION_TERMS_FILE", put("terms.md", "x".repeat(MAX_OPERATOR_BYTES + 1)));
   expect(await readOperatorPage("terms", "en")).toBeNull();

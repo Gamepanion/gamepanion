@@ -1,9 +1,11 @@
 // The operator's pages (#48, convention "Operator pages"): the imprint, privacy policy, terms and the pricing page's words, as Markdown
 // files of the operator's own, named by GAMEPANION_IMPRINT_FILE, _PRIVACY_FILE, _TERMS_FILE and _PRICING_FILE. A value may hold `{lang}`,
 // replaced by the page's language and falling back to English. Gamepanion ships none of the texts: no file, no page and no footer link.
+// The pricing page (/pricing, public) is the exception: it exists wherever something is sold, the operator's words above the plans.
 // Where the instance sells through Creem, all four must be there, or /health says what is missing.
 import { readFile, stat } from "node:fs/promises";
 import { config } from "./config";
+import { pricingPath } from "./urls";
 
 export type OperatorPage = "imprint" | "privacy" | "terms" | "pricing";
 export const LEGAL_PAGES = ["imprint", "privacy", "terms"] as const;
@@ -44,9 +46,10 @@ export async function readOperatorPage(page: OperatorPage, locale: string): Prom
   }
 }
 
-/** The footer's links: only the pages that exist. */
-export async function operatorLinks(locale: string): Promise<{ page: (typeof LEGAL_PAGES)[number]; href: string }[]> {
-  const out = [];
+/** The footer's links: only the pages that exist. The pricing page exists where something is sold, with or without the operator's words. */
+export async function operatorLinks(locale: string): Promise<{ page: OperatorPage; href: string }[]> {
+  const out: { page: OperatorPage; href: string }[] = [];
+  if (config.paymentProvider()) out.push({ page: "pricing", href: pricingPath() });
   for (const page of LEGAL_PAGES) if (await fileFor(page, locale)) out.push({ page, href: `/${page}` });
   return out;
 }

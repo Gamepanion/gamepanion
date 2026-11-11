@@ -25,6 +25,7 @@ export const de: Copy = {
   privacy: "Datenschutz",
   terms: "AGB",
   licenses: "Lizenzen",
+  pricing: "Preise",
   footerLabel: "Über diese Instanz",
   reportProblem: "Problem melden",
   reportIntro:
@@ -79,6 +80,7 @@ export const de: Copy = {
   freeTitle: "Kostenlos",
   freeLead: "Ein Spiel, mit all seinen Durchläufen.",
   yourPlan: "Dein Tarif",
+  startFree: "Kostenlos loslegen",
   monthly: "Monatlich",
   yearly: "Jährlich",
   billing: "Abrechnung",
